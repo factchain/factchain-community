@@ -14,7 +14,7 @@ const config = (env, argv) =>
       rateNotes: PATHS.src + '/pages/rateNotes.js',
       mintXNote: PATHS.src + '/pages/mintXNote.js',
       mintFactchainNote: PATHS.src + '/pages/mintFactchainNote.js',
-      components: PATHS.src + '/pages/components.js',
+      components: PATHS.src + '/pages/components/index.js',
       defaultContentScript: PATHS.src + '/defaultContentScript.js',
       statusContentScript: PATHS.src + '/statusContentScript.js',
       subscribeContentScript: PATHS.src + '/subscribeContentScript.js',
