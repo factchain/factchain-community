@@ -6,6 +6,8 @@ body {
   font-family: 'Space Mono';
   background-color: #222831;
   color: #eeeeee;
+  /* prevent layout jump when scrollbar appear */
+  @apply overflow-y-scroll;
 }
 
 .btn {

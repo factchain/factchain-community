@@ -7,6 +7,11 @@ export function FCLoader() {
   );
 }
 
+// don't want to break existing stuff, adding a new Loader component
+export function FCLoaderClean() {
+  return <span className="loader w-[30px] h-[30px]" />;
+}
+
 export function FCHero() {
   return (
     <div className="flex justify-center items-center py-2 h-[105px]">
