@@ -5,6 +5,8 @@ import { makeOpenseaUrl, makeTransactionUrl } from '../utils/constants';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { FCHero, FCLoader } from './components';
 
+import './style.css';
+
 export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
   const [xNoteId, setXNoteId] = createSignal(null);
   const [transaction, setTransaction] = createSignal(null);

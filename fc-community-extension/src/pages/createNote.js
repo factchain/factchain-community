@@ -5,6 +5,8 @@ import { logger } from '../utils/logging';
 import { cutText, makeTransactionUrl } from '../utils/constants';
 import { FCHero, FCLoader } from './components';
 
+import './style.css';
+
 export function FCCreateNote({ postUrl, createNote }) {
   const [transaction, setTransaction] = createSignal(null);
   const [submitting, setSubmitting] = createSignal(false);

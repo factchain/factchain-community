@@ -4,6 +4,8 @@ import { makeOpenseaUrl, makeTransactionUrl } from '../utils/constants';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { FCHero, FCLoader } from './components';
 
+import './style.css';
+
 export function FCMintFactchainNote({
   postUrl,
   creatorAddress,

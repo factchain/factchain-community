@@ -5,6 +5,8 @@ import { FCHero, FCLoader } from './components';
 import { createSignal } from 'solid-js';
 import { makeTransactionUrl } from '../utils/constants';
 
+import './style.css';
+
 function FCRateNote({ note, rateNote }) {
   const [transaction, setTransaction] = createSignal(null);
   const [submitting, setSubmitting] = createSignal(false);

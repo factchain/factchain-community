@@ -18,7 +18,12 @@
     "css-loader": "^6.8.1",
     "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^2.7.6",
+    "postcss": "^8.4.35",
+    "postcss-loader": "^8.1.0",
+    "postcss-preset-env": "^9.3.0",
     "prettier": "^2.8.8",
+    "style-loader": "^3.3.4",
+    "tailwindcss": "^3.4.1",
     "webpack": "^5.89.0",
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.9.0"
