@@ -4,7 +4,12 @@ const FCNote = (props) => {
   // assuming `postUrl` looks like: https://x.com/foo/status/<id>
   const postId = props.postUrl.split('/').slice(-1)[0];
   return (
-    <div className="bg-fcGrey/70 rounded-md p-2 text-xs space-y-2 shadow">
+    <a
+      href={props.postUrl}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="bg-fcGrey/70 rounded-md p-2 text-xs space-y-2 shadow block hover:bg-fcGrey/90"
+    >
       <div className="flex items-center gap-2">
         <div className="shrink-0 w-[24px] h-[24px] rounded-full bg-pink-400/30"></div>
         <div className="truncate">
@@ -30,7 +35,7 @@ const FCNote = (props) => {
           </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 };
 
