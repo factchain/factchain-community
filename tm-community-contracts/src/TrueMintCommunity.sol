@@ -4,8 +4,10 @@ pragma solidity >=0.8.19;
 import "./utils/Ownable.sol";
 
 interface ITrueMintCommunityEvents {
+    /// @dev This emits when a User stakes funds into the contract
+    event UserHasStaked(address indexed staker, uint256 amount);
     /// @dev This emits when a new Note is created
-    event NoteCreated(bytes indexed postUrl, address indexed creator);
+    event NoteCreated(string indexed postUrl, address indexed creator);
 }
 
 interface ITrueMintCommunity is ITrueMintCommunityEvents {
@@ -15,16 +17,16 @@ interface ITrueMintCommunity is ITrueMintCommunityEvents {
     /// @param creator Address of the Note's creator
     /// @param finalRating Final rating attributed by TrueMint
     struct Note {
-        bytes postUrl;
-        bytes content;
+        string postUrl;
+        string content;
         address creator;
         int8 finalRating;
     }
 
     /// Errors
     error UserHasNoStake();
-    error PostUrlTooLong();
-    error ContentTooLong();
+    error PostUrlInvalid();
+    error ContentInvalid();
     error NoteAlreadyExists();
     error FinalRatingInvalid();
 }
@@ -39,10 +41,10 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
 
     /// @notice Tracks balances staked by each user
-    mapping(address => uint32) public stakedBalances;
+    mapping(address => uint256) public stakedBalances;
 
     /// @notice Map of community notes
-    mapping(bytes => Note) public communityNotes;
+    mapping(string => mapping(address => Note)) public communityNotes;
 
     /// @notice Instantiate a new contract and set its owner
     /// @param _owner Owner of the contract
@@ -61,25 +63,33 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     }
 
     function validatePostUrl(bytes memory _postUrl) internal pure {
-        if (_postUrl.length == 0 || _postUrl.length > POST_URL_MAX_LENGTH) revert PostUrlTooLong();
+        if (_postUrl.length == 0 || _postUrl.length > POST_URL_MAX_LENGTH) revert PostUrlInvalid();
     }
 
     function validateContent(bytes memory _content) internal pure {
-        if (_content.length == 0 || _content.length > CONTENT_MAX_LENGTH) revert ContentTooLong();
+        if (_content.length == 0 || _content.length > CONTENT_MAX_LENGTH) revert ContentInvalid();
+    }
+
+    function noteExists(string memory postUrl, address creator) internal view returns (bool) {
+        return bytes(communityNotes[postUrl][creator].postUrl).length > 0;
     }
 
     ////////////////////////////////////////////////////////////////////////
     /// User actions
     ////////////////////////////////////////////////////////////////////////
 
-    /// @notice Create a new note
-    function submitNote(bytes memory _postUrl, bytes memory _content) external onlyStaker {
-        validatePostUrl(_postUrl);
-        validateContent(_content);
+    receive() external payable {
+        stakedBalances[msg.sender] += msg.value;
+        emit UserHasStaked(msg.sender, msg.value);
+    }
 
-        // TODO noteId should be the concatenation of _postUrl and msg.sender
-        if (communityNotes[_postUrl].postUrl.length <= 0) revert NoteAlreadyExists();
-        communityNotes[_postUrl] = Note({
+    /// @notice Create a new note
+    function submitNote(string memory _postUrl, string memory _content) external onlyStaker {
+        validatePostUrl(bytes(_postUrl));
+        validateContent(bytes(_content));
+
+        if (noteExists(_postUrl, msg.sender)) revert NoteAlreadyExists();
+        communityNotes[_postUrl][msg.sender] = Note({
             postUrl: _postUrl,
             content: _content,
             creator: msg.sender,
