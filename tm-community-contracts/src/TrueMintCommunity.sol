@@ -48,6 +48,8 @@ interface ITrueMintCommunity is ITrueMintCommunityEvents {
     error NoteAlreadyFinalised();
     error RatingAlreadyExists();
     error CantRateOwnNote();
+    error CantWithdrawReserve();
+    error FailedToWithdrawStake();
 }
 
 /// @title TrueMint Community
@@ -188,6 +190,20 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
             stakedBalances[msg.sender] += msg.value;
             emit UserHasStaked(msg.sender, msg.value);
         }
+    }
+
+    /// @notice Allow Users to withdraw their staked funds.
+    function withdraw(uint256 amount) external {
+        // The amount held by RESERVE_ADDRESS cannot be withdrawn.
+        if (msg.sender == RESERVE_ADDRESS) revert CantWithdrawReserve();
+
+        // If the caller does not have enough stake, this will revert.
+        // We update this value before sending back the funds to avoid re-entrancy attacks
+        stakedBalances[msg.sender] -= amount;
+        (bool result,) = payable(msg.sender).call{value: amount}("");
+
+        // TODO is this the right way to fail in this case?
+        if (!result) revert FailedToWithdrawStake();
     }
 
     /// @notice Create a new note

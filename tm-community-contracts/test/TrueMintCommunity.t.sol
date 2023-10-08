@@ -471,5 +471,27 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
     }
 
+    function test_withdraw_RevertIf_reserve() public {
+        vm.prank(0x0000000000000000000000000000000000000000);
+
+        vm.expectRevert(ITrueMintCommunity.CantWithdrawReserve.selector);
+        tmCommunity.withdraw(1);
+    }
+
+    function test_withdraw_RevertIf_notEnoughStakes() public {
+        vm.prank(staker1);
+
+        vm.expectRevert(stdError.arithmeticError);
+        tmCommunity.withdraw(1000);
+    }
+
+    function test_withdraw() public {
+        vm.prank(staker1);
+
+        uint256 beforeBalance = staker1.balance;
+        tmCommunity.withdraw(100);
+        assertEq(staker1.balance, beforeBalance + 100);
+    }
+
     // TODO test on tearDown that contract balance == sum(stakedBalances)
 }
