@@ -9,6 +9,8 @@ interface ITrueMintCommunityEvents {
     event ReserveFunded(uint256 amount);
     /// @dev This emits when a User stakes funds into the contract
     event UserHasStaked(address indexed staker, uint256 amount);
+    /// @dev This emits when a User withdraws funds from the contract
+    event UserHasWithdrawn(address indexed staker, uint256 amount);
     /// @dev This emits when a new Note is created
     event NoteCreated(string indexed postUrl, address indexed creator);
     /// @dev This emits when a Note was rated
@@ -113,6 +115,10 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
         return communityNotes[_postUrl][_creator].finalRating > 0;
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    /// Balance updates
+    ////////////////////////////////////////////////////////////////////////
+
     function updateCreatorBalance(string memory _postUrl, address _creator) internal {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
 
@@ -193,17 +199,20 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     }
 
     /// @notice Allow Users to withdraw their staked funds.
-    function withdraw(uint256 amount) external {
+    function withdraw(uint256 _amount) external {
         // The amount held by RESERVE_ADDRESS cannot be withdrawn.
         if (msg.sender == RESERVE_ADDRESS) revert CantWithdrawReserve();
 
         // If the caller does not have enough stake, this will revert.
         // We update this value before sending back the funds to avoid re-entrancy attacks
-        stakedBalances[msg.sender] -= amount;
-        (bool result,) = payable(msg.sender).call{value: amount}("");
-
-        // TODO is this the right way to fail in this case?
+        stakedBalances[msg.sender] -= _amount;
+        (bool result,) = payable(msg.sender).call{value: _amount}("");
         if (!result) revert FailedToWithdrawStake();
+
+        emit UserHasWithdrawn({
+            staker: msg.sender,
+            amount: _amount
+        });
     }
 
     /// @notice Create a new note

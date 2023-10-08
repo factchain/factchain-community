@@ -4,6 +4,32 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import "../src/TrueMintCommunity.sol";
 
+contract ReentrantContract {
+    address payable target;
+    uint16 internal constant WITHDRAW_AMOUNT = 100;
+
+    event Log(string indexed message, uint256 balance);
+
+    constructor(address payable _target) payable {
+        target = _target;
+        (bool result,) = payable(target).call{value: WITHDRAW_AMOUNT}("");
+        require(result);
+    }
+
+    function withdraw() external {
+        emit Log("starting withdraw", target.balance);
+        TrueMintCommunity(target).withdraw(WITHDRAW_AMOUNT);
+    }
+
+    receive() external payable {
+        emit Log("in attacker's receive", target.balance);
+        if (target.balance > 0) {
+            uint256 maxWithdraw = (target.balance >= WITHDRAW_AMOUNT) ? WITHDRAW_AMOUNT : target.balance;
+            TrueMintCommunity(target).withdraw(maxWithdraw);
+        }
+    }
+}
+
 contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     TrueMintCommunity public tmCommunity;
     uint160 lastUintAddress = 0;
@@ -21,6 +47,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     function stake(address staker, uint256 amount) public {
         vm.expectEmit();
         emit UserHasStaked(staker, amount);
+        // hoax = deal eth to address, and set it up with prank
         hoax(staker);
         (bool result,) = payable(tmCommunity).call{value: amount}("");
         assertTrue(result);
@@ -493,5 +520,17 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         assertEq(staker1.balance, beforeBalance + 100);
     }
 
-    // TODO test on tearDown that contract balance == sum(stakedBalances)
+
+    function test_withdraw_RevertIf_reentrantAttack() public {
+        ReentrantContract rc = (new ReentrantContract){value: 100000000000}(payable(tmCommunity));
+
+        uint256 originalTMBalance = address(tmCommunity).balance;
+        uint256 originalRCBalance = address(rc).balance;
+
+        vm.expectRevert(ITrueMintCommunity.FailedToWithdrawStake.selector);
+        rc.withdraw();
+
+        assertEq(address(tmCommunity).balance, originalTMBalance);
+        assertEq(address(rc).balance, originalRCBalance);
+    }
 }
