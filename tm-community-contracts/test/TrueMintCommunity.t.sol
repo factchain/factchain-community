@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import "../src/TrueMintCommunity.sol";
 
-contract TrueMintCommunityTest is Test, ITrueMintCommunity {
+contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     TrueMintCommunity public tmCommunity;
     address public owner = address(1);
     address public notStaker = address(2);
@@ -164,6 +164,29 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity {
         });
     }
 
+    function test_rateNote_RevertIf_noteAlreadyFinalised() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+        
+        vm.prank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
+        });
+
+        vm.prank(staker2);
+        vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
+        tmCommunity.rateNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _rating: 2
+        });
+    }
+
     function test_rateNote() public {
         vm.prank(staker1);
         tmCommunity.createNote({
@@ -200,6 +223,93 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity {
             _postUrl: "https://twitter.com/something",
             _creator: staker1,
             _rating: 2
+        });
+    }
+
+    function test_finaliseNote_RevertIf_notOwner() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.prank(staker1);
+        vm.expectRevert(IOwnable.NotOwner.selector);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
+        });
+    }
+
+    function test_finaliseNote_RevertIf_ratingInvalid() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.startPrank(owner);
+        vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 0
+        });
+        vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 6
+        });
+    }
+
+    function test_finaliseNote_RevertIf_notDoesNotExist() public {
+        vm.prank(owner);
+        vm.expectRevert(ITrueMintCommunity.NoteDoesNotExist.selector);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
+        });
+    }
+
+    function test_finaliseNote() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.expectEmit();
+        emit NoteFinalised("https://twitter.com/something", staker1, 1);
+        vm.prank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
+        });
+    }
+
+    function test_finaliseNote_RevertIf_noteAlreadyFinalised() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.startPrank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
+        });
+
+        vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
         });
     }
 }

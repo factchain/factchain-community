@@ -10,6 +10,8 @@ interface ITrueMintCommunityEvents {
     event NoteCreated(string indexed postUrl, address indexed creator);
     /// @dev This emits when a Note was rated
     event NoteRated(string indexed postUrl, address indexed creator, address indexed rater, uint8 rating);
+    /// @dev This emits when a Note was finalised
+    event NoteFinalised(string indexed postUrl, address indexed creator, uint8 finalRating);
 }
 
 interface ITrueMintCommunity is ITrueMintCommunityEvents {
@@ -137,6 +139,25 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
             creator: _creator,
             rater: msg.sender,
             rating: _rating
+        });
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    /// Owner actions
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Finalise a note
+    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external onlyOwner {
+        if (!isRatingValid(_finalRating)) revert RatingInvalid();
+
+        if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
+        if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
+
+        communityNotes[_postUrl][_creator].finalRating = _finalRating;
+        emit NoteFinalised({
+            postUrl: _postUrl,
+            creator: _creator,
+            finalRating: _finalRating
         });
     }
 }
