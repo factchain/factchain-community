@@ -6,23 +6,39 @@ import "../src/TrueMintCommunity.sol";
 
 contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     TrueMintCommunity public tmCommunity;
-    address public owner = address(1);
-    address public notStaker = address(2);
-    address public staker1 = address(3);
-    address public staker2 = address(4);
+    uint160 lastUintAddress = 0;
 
-    function stake(address staker) public {
+    function nextAddress() public returns (address) {
+        lastUintAddress += 1;
+        return address(lastUintAddress);
+    }
+
+    address public owner = nextAddress();
+    address public notStaker = nextAddress();
+    address public staker1 = nextAddress();
+    address public staker2 = nextAddress();
+
+    function stake(address staker, uint256 amount) public {
         vm.expectEmit();
-        emit UserHasStaked(staker, 1);
+        emit UserHasStaked(staker, amount);
         hoax(staker);
-        (bool result,) = payable(tmCommunity).call{value: 1}("");
+        (bool result,) = payable(tmCommunity).call{value: amount}("");
+        assertTrue(result);
+    }
+
+    function fundReserve() public {
+        vm.expectEmit();
+        emit ReserveFunded(100);
+        hoax(owner);
+        (bool result,) = payable(tmCommunity).call{value: 100}("");
         assertTrue(result);
     }
 
     function setUp() public {
         tmCommunity = new TrueMintCommunity({_owner: owner});
-        stake(staker1);
-        stake(staker2);
+        fundReserve();
+        stake(staker1, 100);
+        stake(staker2, 100);
     }
 
     function test_createNote_RevertIf_userNotStaker() public {
@@ -306,6 +322,55 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 1
+        });
+    }
+
+    function test_rewardRaters() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.prank(staker2);
+        tmCommunity.rateNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _rating: 1
+        });
+
+        address badHighStaker = nextAddress();
+        stake(badHighStaker, 100);
+        vm.prank(badHighStaker);
+        tmCommunity.rateNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _rating: 5
+        });
+
+        // Low stake, bad rating
+        address badLowStaker = nextAddress();
+        stake(badLowStaker, 1);
+        vm.prank(badLowStaker);
+        tmCommunity.rateNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _rating: 5
+        });
+
+        vm.expectEmit();
+        emit UserRewarded("https://twitter.com/something", staker1, staker2, 2);
+        vm.expectEmit();
+        emit UserSlashed("https://twitter.com/something", staker1, badHighStaker, 2);
+        vm.expectEmit();
+        emit UserSlashed("https://twitter.com/something", staker1, badLowStaker, 1);
+        vm.expectEmit();
+        emit NoteFinalised("https://twitter.com/something", staker1, 1);
+        vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
             _creator: staker1,
