@@ -436,6 +436,40 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
     }
 
-    // TODO test revert for insufficient reward
+    function test_RevertIf_insuficientFundForReward() public {
+        uint256 index = 0;
+        while (tmCommunity.stakedBalances(0x0000000000000000000000000000000000000000) > 30) {
+            string memory postUrl1 = string.concat("https://twitter.com/something", vm.toString(index));
+            vm.prank(staker1);
+            tmCommunity.createNote({
+                _postUrl: postUrl1,
+                _content: "Something something something"
+            });
+
+            vm.prank(owner);
+            tmCommunity.finaliseNote({
+                _postUrl: postUrl1,
+                _creator: staker1,
+                _finalRating: 5
+            });
+            index += 1;
+        }
+
+        string memory postUrl2 = string.concat("https://twitter.com/something", vm.toString(index));
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: postUrl2,
+            _content: "Something something something"
+        });
+
+        vm.expectRevert(stdError.arithmeticError);
+        vm.prank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: postUrl2,
+            _creator: staker1,
+            _finalRating: 5
+        });
+    }
+
     // TODO test on tearDown that contract balance == sum(stakedBalances)
 }
