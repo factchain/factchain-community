@@ -161,7 +161,6 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
                     reward: reward
                 });
             } else if (delta > 2) {
-                // TODO maybe allow owner to deactivate slashing of raters?
                 // We slash the rater as much as we can
                 uint256 slash = (delta - 2) > stakedBalances[rater] ? stakedBalances[rater] : (delta - 2);
                 stakedBalances[RESERVE_ADDRESS] += slash;
@@ -192,7 +191,6 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     }
 
     /// @notice Create a new note
-    // TODO make sure the staker has enough staked to create a Note
     function createNote(string memory _postUrl, string memory _content) external onlyStaker {
         if (!isPostUrlValid(bytes(_postUrl))) revert PostUrlInvalid();
         if (!isContentValid(bytes(_content))) revert ContentInvalid();

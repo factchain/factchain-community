@@ -437,4 +437,5 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     }
 
     // TODO test revert for insufficient reward
+    // TODO test on tearDown that contract balance == sum(stakedBalances)
 }
