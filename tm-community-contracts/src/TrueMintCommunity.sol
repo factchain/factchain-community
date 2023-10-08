@@ -13,10 +13,14 @@ interface ITrueMintCommunityEvents {
     event NoteCreated(string indexed postUrl, address indexed creator);
     /// @dev This emits when a Note was rated
     event NoteRated(string indexed postUrl, address indexed creator, address indexed rater, uint8 rating);
-    /// @dev This emits when a User is rewarded
-    event UserRewarded(string indexed postUrl, address indexed creator, address indexed rater, uint256 reward);
-    /// @dev This emits when a User is slashed
-    event UserSlashed(string indexed postUrl, address indexed creator, address indexed rater, uint256 slash);
+    /// @dev This emits when a Rater is rewarded
+    event RaterRewarded(string indexed postUrl, address indexed creator, address indexed rater, uint256 reward);
+    /// @dev This emits when a Rater is slashed
+    event RaterSlashed(string indexed postUrl, address indexed creator, address indexed rater, uint256 slash);
+    /// @dev This emits when a Rater is rewarded
+    event CreatorRewarded(string indexed postUrl, address indexed creator, uint256 reward);
+    /// @dev This emits when a Rater is slashed
+    event CreatorSlashed(string indexed postUrl, address indexed creator, uint256 slash);
     /// @dev This emits when a Note was finalised
     event NoteFinalised(string indexed postUrl, address indexed creator, uint8 finalRating);
 }
@@ -107,17 +111,42 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
         return communityNotes[_postUrl][_creator].finalRating > 0;
     }
 
-    function updateRatersBalance(string memory _postUrl, address _creator) internal {
+    function updateCreatorBalance(string memory _postUrl, address _creator) internal {
+        uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
+
+        if (finalRating >= 3) {
+            uint256 reward = uint256(finalRating - 2) * 10;
+            // If we don't have enough funds in the reserve, this will revert.
+            stakedBalances[RESERVE_ADDRESS] -= reward;
+            stakedBalances[_creator] += reward;
+
+            emit CreatorRewarded({
+                postUrl: _postUrl,
+                creator: _creator,
+                reward: reward
+            });
+        } else if (finalRating < 2) {
+            // We slash the creator as much as we can
+            uint256 slash = (finalRating * 10) > stakedBalances[_creator] ? stakedBalances[_creator] : (finalRating * 10);
+            stakedBalances[RESERVE_ADDRESS] += slash;
+            stakedBalances[_creator] -= slash;
+
+            emit CreatorSlashed({
+                postUrl: _postUrl,
+                creator: _creator,
+                slash: slash
+            });
+        }
+    }
+
+    function updateRaterBalances(string memory _postUrl, address _creator) internal {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
 
         for (uint256 index = 0; index < noteRaters[_postUrl][_creator].length; index++) {
             address rater = noteRaters[_postUrl][_creator][index];
-            // The closer the rater's rating and the final rating are, the higher
-            // the update. If the two ratings are too far appart, the update becomes negative
-            // effectively slashing.
-            int256 update = 2 - int256(stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]));
-            if (update > 0) {
-                uint256 reward = uint256(update);
+            uint256 delta = stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]);
+            if (delta < 2) {
+                uint256 reward = 2 - delta;
                 // If we don't have enough funds in the reserve, this will revert.
                 // This could be improved by first slashing all that need slashing, then rewarding,
                 // thus maximising the chance that we have enough funds. But realistically we just
@@ -125,19 +154,20 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
                 stakedBalances[RESERVE_ADDRESS] -= reward;
                 stakedBalances[rater] += reward;
 
-                emit UserRewarded({
+                emit RaterRewarded({
                     postUrl: _postUrl,
                     creator: _creator,
                     rater: rater,
                     reward: reward
                 });
-            } else if (update < 0) {
-                // We slash the staker as much as we can
-                uint256 slash = stdMath.abs(update) > stakedBalances[rater] ? stakedBalances[rater] : stdMath.abs(update);
+            } else if (delta > 2) {
+                // TODO maybe allow owner to deactivate slashing of raters?
+                // We slash the rater as much as we can
+                uint256 slash = (delta - 2) > stakedBalances[rater] ? stakedBalances[rater] : (delta - 2);
                 stakedBalances[RESERVE_ADDRESS] += slash;
                 stakedBalances[rater] -= slash;
 
-                emit UserSlashed({
+                emit RaterSlashed({
                     postUrl: _postUrl,
                     creator: _creator,
                     rater: rater,
@@ -162,6 +192,7 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     }
 
     /// @notice Create a new note
+    // TODO make sure the staker has enough staked to create a Note
     function createNote(string memory _postUrl, string memory _content) external onlyStaker {
         if (!isPostUrlValid(bytes(_postUrl))) revert PostUrlInvalid();
         if (!isContentValid(bytes(_content))) revert ContentInvalid();
@@ -208,7 +239,8 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
         if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
 
         communityNotes[_postUrl][_creator].finalRating = _finalRating;
-        updateRatersBalance(_postUrl, _creator);
+        updateCreatorBalance(_postUrl, _creator);
+        updateRaterBalances(_postUrl, _creator);
         emit NoteFinalised({
             postUrl: _postUrl,
             creator: _creator,

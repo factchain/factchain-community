@@ -329,7 +329,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
     }
 
-    function test_rewardRaters() public {
+    function test_rewardAndSlashRaters() public {
         vm.prank(staker1);
         tmCommunity.createNote({
             _postUrl: "https://twitter.com/something",
@@ -363,13 +363,11 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         vm.expectEmit();
-        emit UserRewarded("https://twitter.com/something", staker1, staker2, 2);
+        emit RaterRewarded("https://twitter.com/something", staker1, staker2, 2);
         vm.expectEmit();
-        emit UserSlashed("https://twitter.com/something", staker1, badHighStaker, 2);
+        emit RaterSlashed("https://twitter.com/something", staker1, badHighStaker, 2);
         vm.expectEmit();
-        emit UserSlashed("https://twitter.com/something", staker1, badLowStaker, 1);
-        vm.expectEmit();
-        emit NoteFinalised("https://twitter.com/something", staker1, 1);
+        emit RaterSlashed("https://twitter.com/something", staker1, badLowStaker, 1);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
@@ -377,4 +375,66 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
             _finalRating: 1
         });
     }
+
+    function test_rewardCreator() public {
+        vm.prank(staker1);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.expectEmit();
+        emit CreatorRewarded("https://twitter.com/something", staker1, 30);
+        vm.prank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: staker1,
+            _finalRating: 5
+        });
+    }
+
+    function test_slashCreator() public {
+        address badHighStaker = nextAddress();
+        stake(badHighStaker, 100);
+        vm.prank(badHighStaker);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        address badLowStaker = nextAddress();
+        stake(badLowStaker, 5);
+        vm.prank(badLowStaker);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+
+        vm.expectEmit();
+        emit CreatorSlashed("https://twitter.com/something", badHighStaker, 10);
+        vm.prank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: badHighStaker,
+            _finalRating: 1
+        });
+
+        vm.expectEmit();
+        emit CreatorSlashed("https://twitter.com/something", badLowStaker, 5);
+        vm.prank(owner);
+        tmCommunity.finaliseNote({
+            _postUrl: "https://twitter.com/something",
+            _creator: badLowStaker,
+            _finalRating: 1
+        });
+
+        vm.expectRevert(ITrueMintCommunity.UserHasNoStake.selector);
+        vm.prank(badLowStaker);
+        tmCommunity.createNote({
+            _postUrl: "https://twitter.com/something-new",
+            _content: "Something something something"
+        });
+    }
+
+    // TODO test revert for insufficient reward
 }
