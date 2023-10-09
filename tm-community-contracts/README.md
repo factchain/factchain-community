@@ -5,7 +5,10 @@ To get `foundry`, check https://book.getfoundry.sh/getting-started/installation
 Then, in this folder, run:
 
 ```sh
-forge install foundry-rs/forge-std
+# update the deps
+forge install
+# if you want to add a new dep, run
+# `forge install <dep> --no-git --no-commit``
 forge test -vvv
 forge coverage --report lcov && genhtml -o report lcov.info --branch-coverage
 ```
