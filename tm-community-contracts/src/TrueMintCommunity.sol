@@ -6,23 +6,19 @@ import "./utils/Ownable.sol";
 
 interface ITrueMintCommunityEvents {
     /// @dev This emits when a the Owner funds the reserve
-    event ReserveFunded(address indexed funder, uint256 amount);
-    /// @dev This emits when a User stakes funds into the contract
-    event UserHasStaked(address indexed staker, uint256 amount);
-    /// @dev This emits when a User withdraws funds from the contract
-    event UserHasWithdrawn(address indexed staker, uint256 amount);
+    event ReserveFunded(uint256 amount);
     /// @dev This emits when a new Note is created
-    event NoteCreated(string indexed postUrl, address indexed creator);
+    event NoteCreated(string indexed postUrl, address indexed creator, uint256 stake);
     /// @dev This emits when a Note was rated
-    event NoteRated(string indexed postUrl, address indexed creator, address indexed rater, uint8 rating);
+    event NoteRated(string indexed postUrl, address indexed creator, address indexed rater, uint8 rating, uint256 stake);
     /// @dev This emits when a Rater is rewarded
-    event RaterRewarded(string indexed postUrl, address indexed creator, address indexed rater, uint256 reward);
+    event RaterRewarded(string indexed postUrl, address indexed creator, address indexed rater, uint256 reward, uint256 stake);
     /// @dev This emits when a Rater is slashed
-    event RaterSlashed(string indexed postUrl, address indexed creator, address indexed rater, uint256 slash);
+    event RaterSlashed(string indexed postUrl, address indexed creator, address indexed rater, uint256 slash, uint256 stake);
     /// @dev This emits when a Rater is rewarded
-    event CreatorRewarded(string indexed postUrl, address indexed creator, uint256 reward);
+    event CreatorRewarded(string indexed postUrl, address indexed creator, uint256 reward, uint256 stake);
     /// @dev This emits when a Rater is slashed
-    event CreatorSlashed(string indexed postUrl, address indexed creator, uint256 slash);
+    event CreatorSlashed(string indexed postUrl, address indexed creator, uint256 slash, uint256 stake);
     /// @dev This emits when a Note was finalised
     event NoteFinalised(string indexed postUrl, address indexed creator, uint8 finalRating);
 }
@@ -41,7 +37,6 @@ interface ITrueMintCommunity is ITrueMintCommunityEvents {
     }
 
     /// Errors
-    error UserHasNoStake();
     error PostUrlInvalid();
     error ContentInvalid();
     error RatingInvalid();
@@ -50,8 +45,9 @@ interface ITrueMintCommunity is ITrueMintCommunityEvents {
     error NoteAlreadyFinalised();
     error RatingAlreadyExists();
     error CantRateOwnNote();
-    error CantWithdrawReserve();
-    error FailedToWithdrawStake();
+    error FailedToReward();
+    error FailedToSlash();
+    error InsufficientStake();
 }
 
 /// @title TrueMint Community
@@ -62,9 +58,8 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     address internal constant RESERVE_ADDRESS = 0x0000000000000000000000000000000000000000;
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
-
-    /// @notice Tracks balances staked by each user
-    mapping(address => uint256) public stakedBalances;
+    uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
+    uint32 internal constant MINIMUM_STAKE_PER_NOTE = 100_000;
 
     /// @notice Map of community notes
     mapping(string => mapping(address => Note)) public communityNotes;
@@ -84,12 +79,6 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     ////////////////////////////////////////////////////////////////////////
     /// Helper functions
     ////////////////////////////////////////////////////////////////////////
-
-    /// @notice Modifier to only allow Users with stake to take an action
-    modifier onlyStaker {
-        if (stakedBalances[msg.sender] <= 0) revert UserHasNoStake();
-        _;
-    }
 
     function isPostUrlValid(bytes memory _postUrl) internal pure returns (bool) {
         return _postUrl.length > 0 && _postUrl.length <= POST_URL_MAX_LENGTH;
@@ -119,66 +108,66 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     /// Balance updates
     ////////////////////////////////////////////////////////////////////////
 
-    function updateCreatorBalance(string memory _postUrl, address _creator) internal {
+    function rewardOrSlashCreator(string memory _postUrl, address _creator) internal {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
-
         if (finalRating >= 3) {
             uint256 reward = uint256(finalRating - 2) * 10;
-            // If we don't have enough funds in the reserve, this will revert.
-            stakedBalances[RESERVE_ADDRESS] -= reward;
-            stakedBalances[_creator] += reward;
-
+            // This will revert if contract current balance
+            // (address(this).balance) < MINIMUM_STAKE_PER_NOTE + reward
+            (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE + reward}("");
+            if (!result) revert FailedToReward();
             emit CreatorRewarded({
                 postUrl: _postUrl,
                 creator: _creator,
-                reward: reward
+                reward: reward,
+                stake: MINIMUM_STAKE_PER_NOTE
             });
         } else if (finalRating < 2) {
-            // We slash the creator as much as we can
-            uint256 slash = (finalRating * 10) > stakedBalances[_creator] ? stakedBalances[_creator] : (finalRating * 10);
-            stakedBalances[RESERVE_ADDRESS] += slash;
-            stakedBalances[_creator] -= slash;
-
+            uint256 slash = finalRating * 10;
+            // This will revert if contract current balance
+            // (address(this).balance) < MINIMUM_STAKE_PER_NOTE - slash
+            (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE - slash}("");
+            if (!result) revert FailedToSlash();
             emit CreatorSlashed({
                 postUrl: _postUrl,
                 creator: _creator,
-                slash: slash
+                slash: slash,
+                stake: MINIMUM_STAKE_PER_NOTE
             });
         }
     }
 
-    function updateRaterBalances(string memory _postUrl, address _creator) internal {
+    function rewardOrSlashRaters(string memory _postUrl, address _creator) internal {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
-
         for (uint256 index = 0; index < noteRaters[_postUrl][_creator].length; index++) {
             address rater = noteRaters[_postUrl][_creator][index];
             uint256 delta = stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]);
             if (delta < 2) {
                 uint256 reward = 2 - delta;
-                // If we don't have enough funds in the reserve, this will revert.
-                // This could be improved by first slashing all that need slashing, then rewarding,
-                // thus maximising the chance that we have enough funds. But realistically we just
-                // need to have enough funds at any given time in our reserve.
-                stakedBalances[RESERVE_ADDRESS] -= reward;
-                stakedBalances[rater] += reward;
-
+                // This will revert if contract current balance
+                // (address(this).balance) < MINIMUM_STAKE_PER_RATING + reward
+                (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING + reward}("");
+                if (!result) revert FailedToReward();
                 emit RaterRewarded({
                     postUrl: _postUrl,
                     creator: _creator,
                     rater: rater,
-                    reward: reward
+                    reward: reward,
+                    stake: MINIMUM_STAKE_PER_RATING
+
                 });
             } else if (delta > 2) {
-                // We slash the rater as much as we can
-                uint256 slash = (delta - 2) > stakedBalances[rater] ? stakedBalances[rater] : (delta - 2);
-                stakedBalances[RESERVE_ADDRESS] += slash;
-                stakedBalances[rater] -= slash;
-
+                uint256 slash = delta - 2;
+                // This will revert if contract current balance 
+                // (address(this).balance) < MINIMUM_STAKE_PER_RATING - slash
+                (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING - slash}("");
+                if (!result) revert FailedToSlash();
                 emit RaterSlashed({
                     postUrl: _postUrl,
                     creator: _creator,
                     rater: rater,
-                    slash: slash
+                    slash: slash,
+                    stake: MINIMUM_STAKE_PER_RATING
                 });
             }
         }
@@ -188,35 +177,14 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     /// User actions
     ////////////////////////////////////////////////////////////////////////
 
-    receive() external payable {
-        if (msg.sender == owner) {
-            stakedBalances[RESERVE_ADDRESS] += msg.value;
-            emit ReserveFunded(msg.sender, msg.value);
-        } else {
-            stakedBalances[msg.sender] += msg.value;
-            emit UserHasStaked(msg.sender, msg.value);
-        }
+    receive() external payable onlyOwner {
+        emit ReserveFunded(msg.value);
     }
 
-    /// @notice Allow Users to withdraw their staked funds.
-    function withdraw(uint256 _amount) external {
-        // The amount held by RESERVE_ADDRESS cannot be withdrawn.
-        if (msg.sender == RESERVE_ADDRESS) revert CantWithdrawReserve();
-
-        // If the caller does not have enough stake, this will revert.
-        // We update this value before sending back the funds to avoid re-entrancy attacks
-        stakedBalances[msg.sender] -= _amount;
-        (bool result,) = payable(msg.sender).call{value: _amount}("");
-        if (!result) revert FailedToWithdrawStake();
-
-        emit UserHasWithdrawn({
-            staker: msg.sender,
-            amount: _amount
-        });
-    }
 
     /// @notice Create a new note
-    function createNote(string memory _postUrl, string memory _content) external onlyStaker {
+    function createNote(string memory _postUrl, string memory _content) external payable {
+        if (msg.value != MINIMUM_STAKE_PER_NOTE) revert InsufficientStake();
         if (!isPostUrlValid(bytes(_postUrl))) revert PostUrlInvalid();
         if (!isContentValid(bytes(_content))) revert ContentInvalid();
         if (noteExists(_postUrl, msg.sender)) revert NoteAlreadyExists();
@@ -229,12 +197,14 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
         });
         emit NoteCreated({
             postUrl: _postUrl,
-            creator: msg.sender
+            creator: msg.sender,
+            stake: MINIMUM_STAKE_PER_NOTE
         });
     }
 
     /// @notice Rate an existing note
-    function rateNote(string memory _postUrl, address _creator, uint8 _rating) external onlyStaker {
+    function rateNote(string memory _postUrl, address _creator, uint8 _rating) external payable {
+        if (msg.value != MINIMUM_STAKE_PER_RATING) revert InsufficientStake();
         if (!isRatingValid(_rating)) revert RatingInvalid();
         if (_creator == msg.sender) revert CantRateOwnNote();
         if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
@@ -247,7 +217,8 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
             postUrl: _postUrl,
             creator: _creator,
             rater: msg.sender,
-            rating: _rating
+            rating: _rating,
+            stake: MINIMUM_STAKE_PER_RATING
         });
     }
 
@@ -262,8 +233,8 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
         if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
 
         communityNotes[_postUrl][_creator].finalRating = _finalRating;
-        updateCreatorBalance(_postUrl, _creator);
-        updateRaterBalances(_postUrl, _creator);
+        rewardOrSlashCreator(_postUrl, _creator);
+        rewardOrSlashRaters(_postUrl, _creator);
         emit NoteFinalised({
             postUrl: _postUrl,
             creator: _creator,
