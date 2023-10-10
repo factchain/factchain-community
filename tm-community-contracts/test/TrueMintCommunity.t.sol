@@ -54,9 +54,10 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     }
 
     function fundReserve() public {
-        vm.expectEmit();
-        emit ReserveFunded(100);
         hoax(owner);
+
+        vm.expectEmit();
+        emit ReserveFunded(owner, 100);
         (bool result,) = payable(tmCommunity).call{value: 100}("");
         assertTrue(result);
     }
