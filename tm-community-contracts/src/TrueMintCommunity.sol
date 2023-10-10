@@ -6,7 +6,7 @@ import "./utils/Ownable.sol";
 
 interface ITrueMintCommunityEvents {
     /// @dev This emits when a the Owner funds the reserve
-    event ReserveFunded(uint256 amount);
+    event ReserveFunded(address indexed funder, uint256 amount);
     /// @dev This emits when a User stakes funds into the contract
     event UserHasStaked(address indexed staker, uint256 amount);
     /// @dev This emits when a User withdraws funds from the contract
@@ -191,7 +191,7 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     receive() external payable {
         if (msg.sender == owner) {
             stakedBalances[RESERVE_ADDRESS] += msg.value;
-            emit ReserveFunded(msg.value);
+            emit ReserveFunded(msg.sender, msg.value);
         } else {
             stakedBalances[msg.sender] += msg.value;
             emit UserHasStaked(msg.sender, msg.value);
