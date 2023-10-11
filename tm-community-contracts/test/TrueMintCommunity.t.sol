@@ -4,35 +4,12 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import "../src/TrueMintCommunity.sol";
 
-contract ReentrantContract {
-    address payable target;
-    uint16 internal constant WITHDRAW_AMOUNT = 100;
-
-    event Log(string indexed message, uint256 balance);
-
-    constructor(address payable _target) payable {
-        target = _target;
-        (bool result,) = payable(target).call{value: WITHDRAW_AMOUNT}("");
-        require(result);
-    }
-
-    function withdraw() external {
-        emit Log("starting withdraw", target.balance);
-        TrueMintCommunity(target).withdraw(WITHDRAW_AMOUNT);
-    }
-
-    receive() external payable {
-        emit Log("in attacker's receive", target.balance);
-        if (target.balance > 0) {
-            uint256 maxWithdraw = (target.balance >= WITHDRAW_AMOUNT) ? WITHDRAW_AMOUNT : target.balance;
-            TrueMintCommunity(target).withdraw(maxWithdraw);
-        }
-    }
-}
 
 contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     TrueMintCommunity public tmCommunity;
     uint160 lastUintAddress = 0;
+    uint32 internal constant MINIMUM_STAKE_PER_NOTE = 100_000;
+    uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
 
     function nextAddress() public returns (address) {
         lastUintAddress += 1;
@@ -40,24 +17,15 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     }
 
     address public owner = nextAddress();
-    address public notStaker = nextAddress();
-    address public staker1 = nextAddress();
-    address public staker2 = nextAddress();
-
-    function stake(address staker, uint256 amount) public {
-        vm.expectEmit();
-        emit UserHasStaked(staker, amount);
-        // hoax = deal eth to address, and set it up with prank
-        hoax(staker);
-        (bool result,) = payable(tmCommunity).call{value: amount}("");
-        assertTrue(result);
-    }
+    address public player1 = nextAddress();
+    address public player2 = nextAddress();
+    address public rater1 = nextAddress();
+    address public rater2 = nextAddress();
 
     function fundReserve() public {
         hoax(owner);
-
         vm.expectEmit();
-        emit ReserveFunded(owner, 100);
+        emit ReserveFunded(100);
         (bool result,) = payable(tmCommunity).call{value: 100}("");
         assertTrue(result);
     }
@@ -65,152 +33,139 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     function setUp() public {
         tmCommunity = new TrueMintCommunity({_owner: owner});
         fundReserve();
-        stake(staker1, 100);
-        stake(staker2, 100);
     }
 
-    function test_createNote_RevertIf_userNotStaker() public {
-        vm.startPrank(notStaker);
-
-        vm.expectRevert(ITrueMintCommunity.UserHasNoStake.selector);
-        tmCommunity.createNote({
+    function test_createNote_RevertIf_notEnoughEth() public {
+        hoax(player1);
+        vm.expectRevert(ITrueMintCommunity.InsufficientStake.selector);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE - 1}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
     }
 
     function test_createNote_RevertIf_postUrlInvalid() public {
-        vm.startPrank(staker1);
-
+        hoax(player1);
         vm.expectRevert(ITrueMintCommunity.PostUrlInvalid.selector);
-        tmCommunity.createNote({
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "",
             _content: "Something something something"
         });
-
         vm.expectRevert(ITrueMintCommunity.PostUrlInvalid.selector);
-        tmCommunity.createNote({
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something-something-something-something-something-something-something-something-something-something-something-something-something-something-something",
             _content: "Something something something"
         });
     }
 
     function test_createNote_RevertIf_contentInvalid() public {
-        vm.startPrank(staker1);
-
+        hoax(player1);
         vm.expectRevert(ITrueMintCommunity.ContentInvalid.selector);
-        tmCommunity.createNote({
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: ""
         });
 
         vm.expectRevert(ITrueMintCommunity.ContentInvalid.selector);
-        tmCommunity.createNote({
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something"
         });
     }
 
     function test_createNote() public {
+        hoax(player1);
         vm.expectEmit();
-        emit NoteCreated("https://twitter.com/something", staker1);
-        vm.prank(staker1);
-        tmCommunity.createNote({
-            _postUrl: "https://twitter.com/something",
-            _content: "Something something something"
-        });
-
-        vm.expectEmit();
-        emit NoteCreated("https://twitter.com/something", staker2);
-        vm.prank(staker2);
-        tmCommunity.createNote({
+        emit NoteCreated("https://twitter.com/something", player1, MINIMUM_STAKE_PER_NOTE);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
     }
 
     function test_createNote_RevertIf_alreadyExists() public {
-        vm.startPrank(staker1);
-
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-
+        vm.prank(player1);
         vm.expectRevert(ITrueMintCommunity.NoteAlreadyExists.selector);
-        tmCommunity.createNote({
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
     }
 
-    function test_rateNote_RevertIf_userNotStaker() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
-            _postUrl: "https://twitter.com/something",
-            _content: "Something something something"
-        });
-
-        vm.prank(notStaker);
-        vm.expectRevert(ITrueMintCommunity.UserHasNoStake.selector);
-        tmCommunity.rateNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: staker1,
-            _rating: 1
-        });
-    }
 
     function test_rateNote_RevertIf_ratingInvalid() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
-        vm.startPrank(staker2);
+        hoax(rater1);
         vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
-        tmCommunity.rateNote({
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 0
         });
         vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
-        tmCommunity.rateNote({
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 6
         });
     }
 
+
+    function test_rateNot_RevertIf_notEnoughStake() public {
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
+            _postUrl: "https://twitter.com/something",
+            _content: "Something something something"
+        });
+        hoax(player2);
+        vm.expectRevert(ITrueMintCommunity.InsufficientStake.selector);
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING - 1}({
+            _postUrl: "https://twitter.com/something",
+            _creator: player1,
+            _rating: 4
+        });
+
+    }
+
     function test_rateNote_RevertIf_creatorIsRater() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
-        vm.prank(staker1);
+        vm.prank(player1);
         vm.expectRevert(ITrueMintCommunity.CantRateOwnNote.selector);
-        tmCommunity.rateNote({
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 1
         });
     }
 
     function test_rateNote_RevertIf_noteDoesNotExist() public {
-        vm.prank(staker2);
+        hoax(player2);
         vm.expectRevert(ITrueMintCommunity.NoteDoesNotExist.selector);
-        tmCommunity.rateNote({
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 1
         });
     }
 
     function test_rateNote_RevertIf_noteAlreadyFinalised() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
@@ -218,77 +173,78 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
 
-        vm.prank(staker2);
+        hoax(rater1);
         vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
-        tmCommunity.rateNote({
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 2
         });
     }
 
     function test_rateNote() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
         vm.expectEmit();
-        emit NoteRated("https://twitter.com/something", staker1, staker2, 1);
-        vm.prank(staker2);
-        tmCommunity.rateNote({
+        emit NoteRated("https://twitter.com/something", player1, rater1, 1, MINIMUM_STAKE_PER_RATING);
+        hoax(rater1);
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 1
         });
     }
 
     function test_rateNote_RevertIf_ratingAlreadyExist() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
-        vm.startPrank(staker2);
-        tmCommunity.rateNote({
+        hoax(rater1);
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 1
         });
 
+        hoax(rater1);
         vm.expectRevert(ITrueMintCommunity.RatingAlreadyExists.selector);
-        tmCommunity.rateNote({
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 2
         });
     }
 
     function test_finaliseNote_RevertIf_notOwner() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
-        vm.prank(staker1);
+        vm.startPrank(rater1);
         vm.expectRevert(IOwnable.NotOwner.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
     }
 
     function test_finaliseNote_RevertIf_ratingInvalid() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
@@ -297,13 +253,13 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 0
         });
         vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 6
         });
     }
@@ -313,31 +269,31 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         vm.expectRevert(ITrueMintCommunity.NoteDoesNotExist.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
     }
 
     function test_finaliseNote() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
         vm.expectEmit();
-        emit NoteFinalised("https://twitter.com/something", staker1, 1);
+        emit NoteFinalised("https://twitter.com/something", player1, 1);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
     }
 
     function test_finaliseNote_RevertIf_noteAlreadyFinalised() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
@@ -345,131 +301,102 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         vm.startPrank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
 
         vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
     }
 
     function test_rewardAndSlashRaters() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-
-        vm.prank(staker2);
-        tmCommunity.rateNote({
+        hoax(rater1);
+        uint256 rater1OriginalBalance = rater1.balance;
+        // _rating perfectly matches final rating (1)
+        // rater1 should be reward of 2 WEI
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 1
         });
 
-        address badHighStaker = nextAddress();
-        stake(badHighStaker, 100);
-        vm.prank(badHighStaker);
-        tmCommunity.rateNote({
+        hoax(rater2);
+        uint256 rater2OriginalBalance = rater2.balance;
+        // wrong rating with maximal delta
+        // rater2 should be slashed of 2 WEI
+        tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
-            _rating: 5
-        });
-
-        // Low stake, bad rating
-        address badLowStaker = nextAddress();
-        stake(badLowStaker, 1);
-        vm.prank(badLowStaker);
-        tmCommunity.rateNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _rating: 5
         });
 
         vm.expectEmit();
-        emit RaterRewarded("https://twitter.com/something", staker1, staker2, 2);
+        emit RaterRewarded("https://twitter.com/something", player1, rater1, 2, MINIMUM_STAKE_PER_RATING);
         vm.expectEmit();
-        emit RaterSlashed("https://twitter.com/something", staker1, badHighStaker, 2);
-        vm.expectEmit();
-        emit RaterSlashed("https://twitter.com/something", staker1, badLowStaker, 1);
+        emit RaterSlashed("https://twitter.com/something", player1, rater2, 2, MINIMUM_STAKE_PER_RATING);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 1
         });
+
+        assert(rater1.balance == rater1OriginalBalance + 2);
+        assert(rater2.balance == rater2OriginalBalance - 2);
     }
 
     function test_rewardCreator() public {
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        uint256 player1OriginalBalance = player1.balance;
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
 
         vm.expectEmit();
-        emit CreatorRewarded("https://twitter.com/something", staker1, 30);
+        emit CreatorRewarded("https://twitter.com/something", player1, 30, MINIMUM_STAKE_PER_NOTE);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 5
         });
+        assert(player1.balance == player1OriginalBalance + 30);
     }
 
     function test_slashCreator() public {
-        address badHighStaker = nextAddress();
-        stake(badHighStaker, 100);
-        vm.prank(badHighStaker);
-        tmCommunity.createNote({
+        hoax(player1);
+        uint256 player1OriginalBalance = player1.balance;
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-
-        address badLowStaker = nextAddress();
-        stake(badLowStaker, 5);
-        vm.prank(badLowStaker);
-        tmCommunity.createNote({
-            _postUrl: "https://twitter.com/something",
-            _content: "Something something something"
-        });
-
         vm.expectEmit();
-        emit CreatorSlashed("https://twitter.com/something", badHighStaker, 10);
+        emit CreatorSlashed("https://twitter.com/something", player1, 10, MINIMUM_STAKE_PER_NOTE);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
-            _creator: badHighStaker,
+            _creator: player1,
             _finalRating: 1
         });
-
-        vm.expectEmit();
-        emit CreatorSlashed("https://twitter.com/something", badLowStaker, 5);
-        vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: badLowStaker,
-            _finalRating: 1
-        });
-
-        vm.expectRevert(ITrueMintCommunity.UserHasNoStake.selector);
-        vm.prank(badLowStaker);
-        tmCommunity.createNote({
-            _postUrl: "https://twitter.com/something-new",
-            _content: "Something something something"
-        });
+        assert(player1.balance == player1OriginalBalance - 10);
     }
 
     function test_RevertIf_insuficientFundForReward() public {
         uint256 index = 0;
-        while (tmCommunity.stakedBalances(0x0000000000000000000000000000000000000000) > 30) {
+        while (address(tmCommunity).balance > 30) {
             string memory postUrl1 = string.concat("https://twitter.com/something", vm.toString(index));
-            vm.prank(staker1);
-            tmCommunity.createNote({
+            hoax(player1);
+            tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
                 _postUrl: postUrl1,
                 _content: "Something something something"
             });
@@ -477,61 +404,26 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
             vm.prank(owner);
             tmCommunity.finaliseNote({
                 _postUrl: postUrl1,
-                _creator: staker1,
+                _creator: player1,
                 _finalRating: 5
             });
             index += 1;
         }
 
         string memory postUrl2 = string.concat("https://twitter.com/something", vm.toString(index));
-        vm.prank(staker1);
-        tmCommunity.createNote({
+        hoax(player1);
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: postUrl2,
             _content: "Something something something"
         });
 
-        vm.expectRevert(stdError.arithmeticError);
+        vm.expectRevert(ITrueMintCommunity.FailedToReward.selector);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: postUrl2,
-            _creator: staker1,
+            _creator: player1,
             _finalRating: 5
         });
     }
-
-    function test_withdraw_RevertIf_reserve() public {
-        vm.prank(0x0000000000000000000000000000000000000000);
-
-        vm.expectRevert(ITrueMintCommunity.CantWithdrawReserve.selector);
-        tmCommunity.withdraw(1);
-    }
-
-    function test_withdraw_RevertIf_notEnoughStakes() public {
-        vm.prank(staker1);
-
-        vm.expectRevert(stdError.arithmeticError);
-        tmCommunity.withdraw(1000);
-    }
-
-    function test_withdraw() public {
-        vm.prank(staker1);
-
-        uint256 beforeBalance = staker1.balance;
-        tmCommunity.withdraw(100);
-        assertEq(staker1.balance, beforeBalance + 100);
-    }
-
-
-    function test_withdraw_RevertIf_reentrantAttack() public {
-        ReentrantContract rc = (new ReentrantContract){value: 100000000000}(payable(tmCommunity));
-
-        uint256 originalTMBalance = address(tmCommunity).balance;
-        uint256 originalRCBalance = address(rc).balance;
-
-        vm.expectRevert(ITrueMintCommunity.FailedToWithdrawStake.selector);
-        rc.withdraw();
-
-        assertEq(address(tmCommunity).balance, originalTMBalance);
-        assertEq(address(rc).balance, originalRCBalance);
-    }
 }
+
