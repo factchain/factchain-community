@@ -51,11 +51,10 @@ interface ITrueMintCommunity is ITrueMintCommunityEvents {
 }
 
 /// @title TrueMint Community
-/// @author Yacine B. Badiss
+/// @author Yacine B. Badiss, Pierre HAY
 /// @notice 
 /// @dev 
 contract TrueMintCommunity is Ownable, ITrueMintCommunity {
-    address internal constant RESERVE_ADDRESS = 0x0000000000000000000000000000000000000000;
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
     uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
