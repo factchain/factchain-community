@@ -220,7 +220,7 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
     /// Owner actions
     ////////////////////////////////////////////////////////////////////////
 
-    /// @notice Fund the contract
+    // @notice Fund the contract
     receive() external payable onlyOwner {
         emit ReserveFunded(msg.value);
     }
