@@ -7,6 +7,7 @@ import {
   createNote,
   rateNote,
   finaliseNote,
+  getEligibleNotes,
 } from "./commands";
 
 const { Command } = require("commander");
@@ -40,9 +41,9 @@ program
   .command("create-note <pkey>")
   .description("create a community note")
   .option("-u, --url <url>", "Post url")
-  .option("-c, --content <text>", "Note content")
+  .option("-t, --text <text>", "Note content")
   .action(async (pkey: string, options: any) => {
-    await createNote(pkey, options.url, options.content);
+    await createNote(pkey, options.url, options.text);
   });
 
 program
@@ -63,6 +64,14 @@ program
   .option("-r, --rating <number>", "Note Rating", parseInt, 0)
   .action(async (options: any) => {
     await finaliseNote(options.url, options.creator, options.rating);
+  });
+
+program
+  .command("get-eligible-notes")
+  .description("get notes ready to be finalised")
+  .option("-r, --ratings <number>", "minimum note ratings", 1)
+  .action(async (options: any) => {
+    await getEligibleNotes(options.ratings);
   });
 
 program.parse();

@@ -1,7 +1,15 @@
-import { EventLog, Log, ethers, ErrorDescription } from "ethers";
+import { EventLog, ethers } from "ethers";
 import * as fs from "fs";
 
-const provider = new ethers.JsonRpcProvider(process.env["INFRA_RPC_URL"]);
+import {
+  getEligibleNotesFromRatings,
+  getEligibleRatings,
+  Note,
+} from "./notesSelector";
+
+export const provider = new ethers.JsonRpcProvider(
+  process.env["INFRA_RPC_URL"],
+);
 const factChainContractAddress = process.env["FACTCHAIN_CONTRACT_ADDRESS"]!;
 const ownerPk = process.env["OWNER_PKEY"]!;
 const owner = new ethers.Wallet(ownerPk, provider);
@@ -29,16 +37,21 @@ export const getEvents = async (
   eventType: FactChainEvent,
   fromBlock: number,
   toBlock?: number,
-): Promise<Array<Log | EventLog>> => {
+): Promise<Array<EventLog>> => {
   console.log(
     `getEvents command called with type=${eventType} and option fromBlock=${fromBlock}, toBlock=${toBlock}`,
   );
   const logs = await factChainContract.queryFilter(
     factChainContract.filters[eventType],
     -fromBlock,
+    toBlock,
   );
-  console.log(logs);
-  return logs;
+  const eventLogs = logs
+    .filter((log) => log.hasOwnProperty("args"))
+    .map((e) => <EventLog>e);
+
+  console.log(eventLogs);
+  return eventLogs;
 };
 
 export const getNote = async (
@@ -53,7 +66,7 @@ export const getNote = async (
 export const createNote = async (
   pkey: string,
   url: string,
-  content: string,
+  text: string,
 ): Promise<void> => {
   const user = new ethers.Wallet(pkey, provider);
   const factChainContract = new ethers.Contract(
@@ -61,7 +74,7 @@ export const createNote = async (
     abi,
     user,
   );
-  const transactionResponse = await factChainContract.createNote(url, content, {
+  const transactionResponse = await factChainContract.createNote(url, text, {
     value: MINIMUM_STAKE_PER_NOTE,
   });
   console.log(transactionResponse);
@@ -108,4 +121,16 @@ export const finaliseNote = async (
   );
   console.log(transactionResponse);
   return transactionResponse;
+};
+
+export const getEligibleNotes = async (
+  minimumRatingsPerNote: number,
+): Promise<Array<Note>> => {
+  const oldEnoughRatings = await getEligibleRatings();
+  const eligibleNotes = getEligibleNotesFromRatings(
+    oldEnoughRatings,
+    minimumRatingsPerNote,
+  );
+  console.log(eligibleNotes);
+  return eligibleNotes;
 };

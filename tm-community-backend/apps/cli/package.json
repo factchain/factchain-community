@@ -16,6 +16,7 @@
     "clean": "rm -rf bin/*"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.199",
     "commander": "^11.1.0",
     "ethers": "^6.8.0",
     "figlet": "^1.6.0"
