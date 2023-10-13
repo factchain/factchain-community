@@ -74,7 +74,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
@@ -105,7 +105,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
@@ -136,7 +136,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
@@ -161,7 +161,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
@@ -173,7 +173,7 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint8",
         "name": "finalRating",
         "type": "uint8"
@@ -186,7 +186,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
@@ -204,7 +204,7 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint8",
         "name": "rating",
         "type": "uint8"
@@ -242,7 +242,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
@@ -279,7 +279,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "string",
         "name": "postUrl",
         "type": "string"
