@@ -1,16 +1,28 @@
 #!/usr/bin/env node
 
-import cli from "./factchainCLI";
+import { FactChainEvent, getEvents } from "./commands";
 
+const { Command } = require("commander");
+const figlet = require("figlet");
 
-cli();
-process.on("unhandledRejection", (err) => {
-  // @ts-ignore
-  // eslint-disable-next-line no-console
-  console.log(chalk`{red.bold ERROR} {red ${err.toString()}}`);
-  // @ts-ignore
-  // console.log(chalk`{red ${err.stack}}`);
-});
+const program = new Command();
+
+console.log(figlet.textSync("FactChain"));
+
+program
+  .version("1.0.0")
+  .description("FactChain command line")
+
+program
+  .command('events <eventType>')
+  .description('Get a list of events')
+  .option('-f, --from <number>', 'Start block', parseInt, 0)
+  .option('-t, --to <number>', 'End block', parseInt)
+  .action(async (eventType: FactChainEvent, options: any) => {
+    await getEvents(eventType, options.from, options.to);
+  });
+
+program.parse();
 
 // const QuickNodeUrl =
 //   "https://bitter-wild-market.ethereum-sepolia.quiknode.pro/770b85bd6997c00f7c8a1168965aadc05c48c745";

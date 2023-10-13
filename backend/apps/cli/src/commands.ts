@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { EventLog, Log, ethers } from "ethers";
 import * as fs from "fs";
 
 const provider = new ethers.JsonRpcProvider(process.env["INFRA_RPC_URL"]);
@@ -12,26 +12,6 @@ const factChainContract = new ethers.Contract(
   owner,
 );
 
-const help = [
-  {
-    header: "factchain",
-    content: [
-      "A command line to interact with the factchain contract.",
-      "",
-      "usage: factchain <command> [options]",
-    ],
-  },
-];
-
-const options = [
-  {
-    name: "help",
-    alias: "h",
-    type: Boolean,
-    description: "Show help",
-  },
-];
-
 export type FactChainEvent =
   | "ReserveFunded"
   | "NoteCreated"
@@ -42,33 +22,12 @@ export type FactChainEvent =
   | "CreatorSlashed"
   | "NoteFinalised";
 
-const events = {
-  command: "events",
-  description: "List factchain contract events",
-  help: [
-    {
-      content: "{grey $} factchain events [options]",
-    },
-  ],
-  options: [
-    {
-      name: "until",
-      description: "Look back until last n blocks",
-      type: Number,
-      default: 100,
-    },
-  ],
-  run: async (event: any): Promise<void> => {
-    console.log(event);
-    await factChainContract.queryFilter(
-      factChainContract.filters.NoteRated,
-      -10000,
-    );
-  },
-};
-
-export default {
-  help,
-  options,
-  subCommands: [events],
+export const getEvents = async (eventType: FactChainEvent, fromBlock: number, toBlock?: number): Promise<Array<Log | EventLog>> => {
+  console.log(`getEvents command called with type=${eventType} and option fromBlock=${fromBlock}, toBlock=${toBlock}`);
+  const logs = await factChainContract.queryFilter(
+    factChainContract.filters[eventType],
+    fromBlock,
+  );
+  console.log(logs);
+  return logs;
 };
