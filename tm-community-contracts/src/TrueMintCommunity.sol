@@ -8,19 +8,19 @@ interface ITrueMintCommunityEvents {
     /// @dev This emits when a the Owner funds the reserve
     event ReserveFunded(uint256 amount);
     /// @dev This emits when a new Note is created
-    event NoteCreated(string indexed postUrl, address indexed creator, uint256 stake);
+    event NoteCreated(string postUrl, address indexed creator, uint256 stake);
     /// @dev This emits when a Note was rated
-    event NoteRated(string indexed postUrl, address indexed creator, address indexed rater, uint8 rating, uint256 stake);
+    event NoteRated(string postUrl, address indexed creator, address indexed rater, uint8 indexed rating, uint256 stake);
     /// @dev This emits when a Rater is rewarded
-    event RaterRewarded(string indexed postUrl, address indexed creator, address indexed rater, uint256 reward, uint256 stake);
+    event RaterRewarded(string postUrl, address indexed creator, address indexed rater, uint256 reward, uint256 stake);
     /// @dev This emits when a Rater is slashed
-    event RaterSlashed(string indexed postUrl, address indexed creator, address indexed rater, uint256 slash, uint256 stake);
+    event RaterSlashed(string postUrl, address indexed creator, address indexed rater, uint256 slash, uint256 stake);
     /// @dev This emits when a Rater is rewarded
-    event CreatorRewarded(string indexed postUrl, address indexed creator, uint256 reward, uint256 stake);
+    event CreatorRewarded(string postUrl, address indexed creator, uint256 reward, uint256 stake);
     /// @dev This emits when a Rater is slashed
-    event CreatorSlashed(string indexed postUrl, address indexed creator, uint256 slash, uint256 stake);
+    event CreatorSlashed(string postUrl, address indexed creator, uint256 slash, uint256 stake);
     /// @dev This emits when a Note was finalised
-    event NoteFinalised(string indexed postUrl, address indexed creator, uint8 finalRating);
+    event NoteFinalised(string postUrl, address indexed creator, uint8 indexed finalRating);
 }
 
 interface ITrueMintCommunity is ITrueMintCommunityEvents {
@@ -176,11 +176,6 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     /// User actions
     ////////////////////////////////////////////////////////////////////////
 
-    receive() external payable onlyOwner {
-        emit ReserveFunded(msg.value);
-    }
-
-
     /// @notice Create a new note
     function createNote(string memory _postUrl, string memory _content) external payable {
         if (msg.value != MINIMUM_STAKE_PER_NOTE) revert InsufficientStake();
@@ -224,6 +219,11 @@ contract TrueMintCommunity is Ownable, ITrueMintCommunity {
     ////////////////////////////////////////////////////////////////////////
     /// Owner actions
     ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Fund the contract
+    receive() external payable onlyOwner {
+        emit ReserveFunded(msg.value);
+    }
 
     /// @notice Finalise a note
     function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external onlyOwner {
