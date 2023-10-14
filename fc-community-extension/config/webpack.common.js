@@ -73,6 +73,8 @@ const common = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
+    // Required to support metamask's libs that need polyfills
+    // which are not provided anymore by default in webpack >= 5
     new NodePolyfillPlugin(),
   ],
 };

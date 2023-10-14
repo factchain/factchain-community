@@ -48,26 +48,13 @@ let observer = new MutationObserver(mutations => {
         logger.log("New article");
         alterArticle(article);
       }
+
+      const homeBlock = addedNode.querySelector("div.css-1dbjc4n.r-16y2uox.r-1wbh5a2.r-1pi2tsx.r-1777fci");
+      if (homeBlock && ["Home", "Post"].indexOf(homeBlock.textContent) >= 0) {
+        logger.log("New home block");
+        alterHomeBlock(homeBlock);
+      }
     }
   }
 });
 observer.observe(document, { childList: true, subtree: true });
-
-function docReady(fn) {
-  // see if DOM is already available
-  const homeBlock = document.querySelector("div.css-1dbjc4n.r-16y2uox.r-1wbh5a2.r-1pi2tsx.r-1777fci");
-  if (homeBlock && provider) {
-      logger.log(`ready! (${homeBlock}, ${provider})`);
-      // call on next available tick
-      setTimeout(fn, 1);
-  } else {
-    logger.log(`not yet... (${homeBlock}, ${provider})`);
-    setTimeout(() => docReady(fn), 2000);
-  }
-}
-
-docReady(function() {
-  // DOM is loaded and ready for manipulation here
-  const homeBlock = document.querySelector("div.css-1dbjc4n.r-16y2uox.r-1wbh5a2.r-1pi2tsx.r-1777fci");
-  alterHomeBlock(homeBlock);
-});
