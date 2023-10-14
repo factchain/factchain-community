@@ -16,3 +16,4 @@ out/
 lcov.info
 report/
 
+node_modules
