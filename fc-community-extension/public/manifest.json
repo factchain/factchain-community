@@ -13,9 +13,7 @@
     "default_title": "FactChain",
     "default_popup": "popup.html"
   },
-  "permissions": [
-    "storage"
-  ],
+  "permissions": ["alarms", "notifications", "storage"],
   "content_scripts": [
     {
       "matches": [
@@ -26,6 +24,15 @@
       "js": [
         "contentScript.js"
       ]
+    }
+  ],
+  "background": {
+    "service_worker": "serviceWorker.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "icons/icon_128.png" ],
+      "matches": [ "<all_urls>" ]
     }
   ]
 }
