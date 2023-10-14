@@ -4,7 +4,12 @@ import { logger } from "./logging";
 export function Popup({provider}) {
   return (
     <div>
-      <h1>FactChain</h1>
+      <img
+        src="./factchain.jpeg"
+        width="300"
+        style="height:70px; object-fit:cover;"
+      ></img>
+      
       <FCAddress provider={provider} />
     </div>
   );
