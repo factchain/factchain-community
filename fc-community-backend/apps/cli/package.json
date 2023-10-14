@@ -1,7 +1,7 @@
 {
-  "name": "factchain-backend",
+  "name": "factchain-cli",
   "version": "1.0.0",
-  "description": "A minimalist backend for the factchain community",
+  "description": "A CLI to interact with the factchain contract",
   "repository": "https://github.com/factchain/factchain-community",
   "author": "Pierre HAY, Yacine Badiss",
   "license": "MIT",

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import {
-  FactChainEvent,
   getEvents,
   getNote,
   createNote,
@@ -9,6 +8,8 @@ import {
   finaliseNote,
   getEligibleNotes,
 } from "./commands";
+
+import { FactChainEvent } from "./factchain-core/types";
 
 const { Command } = require("commander");
 const figlet = require("figlet");
@@ -69,9 +70,11 @@ program
 program
   .command("get-eligible-notes")
   .description("get notes ready to be finalised")
-  .option("-r, --ratings <number>", "minimum note ratings", 1)
+  .option("-n, --minimum <number>", "minimum note ratings", 1)
+  .option("-f, --from <number>", "Start date")
+  .option("-t, --to <number>", "End date")
   .action(async (options: any) => {
-    await getEligibleNotes(options.ratings);
+    await getEligibleNotes(options.from, options.to, options.minimum);
   });
 
 program.parse();
