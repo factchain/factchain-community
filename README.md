@@ -1,3 +1,5 @@
+[![Backend Deployment](https://github.com/factchain/factchain-community/actions/workflows/backend-deploy.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/backend-deploy.yml) [![Contracts Deployment](https://github.com/factchain/factchain-community/actions/workflows/contracts-deploy-sepolia.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-deploy-sepolia.yml) [![Contracts Code Checks](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml)
+
 # factchain-community
 
 Decentralized notes, decentralized rewards. A collaborative approach to combating misinformation, block by block.
