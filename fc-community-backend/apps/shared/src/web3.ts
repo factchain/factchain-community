@@ -3,11 +3,11 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { Note, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
-import { time_period_to_block_periods } from "./utils";
+import { timePeriodToBlockPeriods } from "./utils";
 
 const MINIMUM_STAKE_PER_RATING = 10_000;
 const MINIMUM_STAKE_PER_NOTE = 100_000;
-const JSON_ABI = path.join(__dirname, "../../../shared/factchainAbi.json");
+const JSON_ABI = path.join(__dirname, "./factchainAbi.json");
 
 export class FactChainContract implements NoteReader, NoteWriter {
   private _provider: ethers.AbstractProvider;
@@ -44,13 +44,41 @@ export class FactChainContract implements NoteReader, NoteWriter {
     const result = await this._contract.communityNotes(postUrl, creator);
     return {
       url: result[0],
+      content: result[1],
       creator: result[2],
     };
   };
 
+  getNotes = async (postUrl: string): Promise<Array<Note>> => {
+    const currentBlockNumber = await this._provider.getBlockNumber();
+    // TODO: see if 5 days lookback is suitable for the demo 
+    const today = new Date();
+    const lookbackDays = parseInt(process.env["GET_NOTES_LOOKBACK_DAYS"] || "5");
+    const from = new Date(today.getTime() - (lookbackDays * 24 * 60 * 60 * 1000))
+    const block_periods = timePeriodToBlockPeriods(
+      from,
+      today,
+      currentBlockNumber,
+    );
+    let notePromises: Promise<Note>[] = [];
+    for (const period of block_periods) {
+      const events = await this.getEvents("NoteCreated", period[0], period[1]);
+      const relatedEvents = events.filter((e) => e.args[0] == postUrl);
+      if (relatedEvents) {
+        notePromises = notePromises.concat(relatedEvents.map(
+          async (event) => {
+            return await this.getNote(event.args[0], event.args[1]);
+          },
+        ));
+      }
+    }
+    const notes = await Promise.all(notePromises);
+    return notes;
+  };
+
   getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
-    const block_periods = time_period_to_block_periods(
+    const block_periods = timePeriodToBlockPeriods(
       from,
       to,
       currentBlockNumber,
