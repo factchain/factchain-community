@@ -1,4 +1,4 @@
-name: CI
+name: Contracts Code Checks
 on:
   push:
     branches: [ main ]

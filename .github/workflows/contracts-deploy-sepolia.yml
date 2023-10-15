@@ -1,4 +1,4 @@
-name: CI
+name: Contracts Deployment
 on:
   push:
     branches: [ main ]
@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: build_output
+          name: tm-community.abi.json
           path: ./tm-community-contracts/out/TrueMintCommunity.sol/TrueMintCommunity.json
 
       - name: Log detail of deployment
@@ -45,15 +45,3 @@ jobs:
           echo "- Deployer: [${{ fromJson(steps.deploy.outputs.deploymentOutput).deployer }}](${ETHERSCAN_URL}/address/${{ fromJson(steps.deploy.outputs.deploymentOutput).deployer }})" >> $GITHUB_STEP_SUMMARY
           echo "- Deployed to: [${{ fromJson(steps.deploy.outputs.deploymentOutput).deployedTo }}](${ETHERSCAN_URL}/address/${{ fromJson(steps.deploy.outputs.deploymentOutput).deployedTo }})" >> $GITHUB_STEP_SUMMARY
           echo "- Transaction hash: [${{ fromJson(steps.deploy.outputs.deploymentOutput).transactionHash }}](${ETHERSCAN_URL}/tx/${{ fromJson(steps.deploy.outputs.deploymentOutput).transactionHash }})" >> $GITHUB_STEP_SUMMARY
-
-      # - name: Verify contract
-      #   id: verify
-      #   run: |
-      #     abiConstructorArgs=`cast abi-encode "constructor(address)" $OWNER_ADDRESS`
-      #     forge verify-contract \
-      #       --constructor-args $abiConstructorArgs \
-      #       --chain-id $CHAIN_ID \
-      #       --flatten \
-      #       --watch \
-      #       ${{ fromJson(steps.deploy.outputs.createOutput).deployedTo }} \
-      #       $CONTRACT_PATH
