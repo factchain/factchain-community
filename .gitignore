@@ -16,4 +16,11 @@ out/
 lcov.info
 report/
 
+# Node.js
+apps/web/dist/
 node_modules
+build
+dist
+lib
+bin
+yarn-error.log

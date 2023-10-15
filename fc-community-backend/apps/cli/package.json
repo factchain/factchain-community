@@ -1,0 +1,30 @@
+{
+  "name": "factchain-cli",
+  "version": "1.0.0",
+  "description": "A CLI to interact with the factchain contract",
+  "repository": "https://github.com/factchain/factchain-community",
+  "author": "Pierre HAY, Yacine Badiss",
+  "license": "MIT",
+  "bin": {
+    "factchain": "bin/index.js"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "prettier": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc && chmod +x bin/index.js",
+    "clean": "rm -rf bin/*"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.199",
+    "commander": "^11.1.0",
+    "ethers": "^6.8.0",
+    "figlet": "^1.6.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node12": "^12.1.0",
+    "jest": "29.7.0",
+    "prettier": "3.0.3",
+    "typescript": "5.2.2"
+  }
+}
