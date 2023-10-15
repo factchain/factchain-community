@@ -7,6 +7,6 @@ async function bootstrap() {
     if (!process.env[requiredEnvVar]) throw Error(`Env var ${requiredEnvVar} is required but not set`);
   }
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
