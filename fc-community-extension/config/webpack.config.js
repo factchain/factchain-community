@@ -11,6 +11,7 @@ const config = (env, argv) =>
     entry: {
       popup: PATHS.src + '/popup.js',
       createNote: PATHS.src + '/createNote.js',
+      rateNotes: PATHS.src + '/rateNotes.js',
       contentScript: PATHS.src + '/contentScript.js',
       provider: PATHS.src + '/provider.js',
       logging: PATHS.src + '/logging.js',

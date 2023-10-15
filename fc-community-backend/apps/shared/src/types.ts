@@ -7,7 +7,7 @@ export type Rating = {
 };
 
 export type Note = {
-  url: string;
+  postUrl: string;
   creator: string;
   content?: string;
   ratings?: Array<number>;
@@ -15,10 +15,6 @@ export type Note = {
 
 export type NotesResponse = {
   notes: Array<Note>;
-};
-
-export type StatusResponse = {
-  status: string;
 };
 
 export type FactChainEvent =
