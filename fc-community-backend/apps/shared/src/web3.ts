@@ -44,8 +44,36 @@ export class FactChainContract implements NoteReader, NoteWriter {
     const result = await this._contract.communityNotes(postUrl, creator);
     return {
       url: result[0],
+      content: result[1],
       creator: result[2],
     };
+  };
+
+  getNotes = async (postUrl: string): Promise<Array<Note>> => {
+    const currentBlockNumber = await this._provider.getBlockNumber();
+    // TODO: see if 5 days lookback is suitable for the demo 
+    const today = new Date();
+    const fiveDaysbefore = new Date(today.getTime() - (5 * 24 * 60 * 60 * 1000))
+    const block_periods = time_period_to_block_periods(
+      fiveDaysbefore,
+      today,
+      currentBlockNumber,
+    );
+    let notes: Array<Note> = [];
+    for (const period of block_periods) {
+      const events = await this.getEvents("NoteCreated", period[0], period[1]);
+      const relatedEvents = events.filter((e) => e.args[0] == postUrl);
+      if (relatedEvents) {
+        const notePromises: Promise<Note>[] = relatedEvents.map(
+          async (event) => {
+            return await this.getNote(event.args[0], event.args[1]);
+          },
+        );
+        const resolvedNotes = await Promise.all(notePromises);
+        notes = notes.concat(resolvedNotes);
+      }
+    }
+    return notes;
   };
 
   getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {

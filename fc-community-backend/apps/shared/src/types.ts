@@ -9,6 +9,7 @@ export type Rating = {
 export type Note = {
   url: string;
   creator: string;
+  content?: string;
   ratings?: Array<number>;
 };
 
@@ -24,6 +25,7 @@ export type FactChainEvent =
 
 export interface NoteReader {
   getNote: (url: string, creator: string) => Promise<Note>;
+  getNotes: (url: string) => Promise<Array<Note>>;
   getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;
 }
 

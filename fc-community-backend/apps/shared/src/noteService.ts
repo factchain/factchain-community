@@ -9,7 +9,7 @@ export class NoteService {
     this.writer = w;
   }
 
- static getEligibleNotesFromRatings = (
+  static getEligibleNotesFromRatings = (
     oldEnoughRatings: Array<Rating>,
     minimumRatingsPerNote: number,
   ): Array<Note> => {
@@ -44,4 +44,8 @@ export class NoteService {
     return notesToFinalise;
   };
 
+  getNotes = async (postUrl: string): Promise<Array<Note>> => {
+    const notes = await this.reader.getNotes(postUrl);
+    return notes;
+  };
 }
