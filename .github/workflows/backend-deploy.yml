@@ -3,6 +3,7 @@ on:
   push:
     branches: [ main ]
     paths: [ fc-community-backend/apps/api/** ]
+  workflow_dispatch:
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
@@ -17,7 +18,7 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ vars.HEROKU_APP_NAME }}
           appdir: fc-community-backend/apps/api
-          healthcheck: ${{ HEROKY_URL }}
+          healthcheck: ${{ vars.HEROKU_URL }}
           checkstring: "OK"
           delay: 5
           rollbackonhealthcheckfailed: true

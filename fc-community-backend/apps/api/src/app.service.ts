@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { StatusResponse, Note } from './factchain-core/types';
+import { Note } from './factchain-core/types';
 import { FactChainContract } from './factchain-core/web3';
 import { NoteService } from './factchain-core/noteService';
 
 @Injectable()
 export class AppService {
-  getHello(): StatusResponse {
-    return {status: 'OK'};
+  getHello(): string {
+    return 'OK';
   }
 
   async getNotes(postUrl: string): Promise<Array<Note>> {

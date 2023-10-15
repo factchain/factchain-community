@@ -1,13 +1,13 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AppService } from './app.service';
-import { NotesResponse, StatusResponse } from './factchain-core/types';
+import { NotesResponse } from './factchain-core/types';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): StatusResponse {
+  getHello(): string {
     return this.appService.getHello();
   }
 
