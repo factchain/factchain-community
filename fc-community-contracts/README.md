@@ -1,4 +1,4 @@
-# tm-community-contracts
+# fc-community-contracts
 
 To get `foundry`, check https://book.getfoundry.sh/getting-started/installation
 
@@ -17,15 +17,14 @@ forge coverage --report lcov && genhtml -o report lcov.info --branch-coverage
 
 Test accounts available on Sepolia.
 
-### Truemint Owner
+### FactChain Owner
 
-- Address: `${{ vars.TM_SEPOLIA_OWNER_ADDRESS }}`
-- Private Key: `${{ secrets.TM_SEPOLIA_OWNER_PK }}`
+- Address: `${{ vars.OWNER_ADDRESS }}`
 
-### Truemint Deployer
+### FactChain Deployer
 
-- Address: `${{ vars.TM_SEPOLIA_DEPLOYER_ADDRESS }}`
-- Private Key: `${{ secrets.TM_SEPOLIA_DEPLOYER_PK }}`
+- Address: `${{ vars.DEPLOYER_ADDRESS }}`
+- Private Key: `${{ secrets.DEPLOYER_PK }}`
 
 ## Possible improvements
 

@@ -2,11 +2,11 @@
 pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
-import "../src/TrueMintCommunity.sol";
+import "../src/FactChainCommunity.sol";
 
 
-contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
-    TrueMintCommunity public tmCommunity;
+contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
+    FactChainCommunity public tmCommunity;
     uint160 lastUintAddress = 0;
     uint32 internal constant MINIMUM_STAKE_PER_NOTE = 100_000;
     uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
@@ -31,13 +31,13 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
     }
 
     function setUp() public {
-        tmCommunity = new TrueMintCommunity({_owner: owner});
+        tmCommunity = new FactChainCommunity({_owner: owner});
         fundReserve();
     }
 
     function test_createNote_RevertIf_notEnoughEth() public {
         hoax(player1);
-        vm.expectRevert(ITrueMintCommunity.InsufficientStake.selector);
+        vm.expectRevert(IFactChainCommunity.InsufficientStake.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE - 1}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
@@ -46,12 +46,12 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
 
     function test_createNote_RevertIf_postUrlInvalid() public {
         hoax(player1);
-        vm.expectRevert(ITrueMintCommunity.PostUrlInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.PostUrlInvalid.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "",
             _content: "Something something something"
         });
-        vm.expectRevert(ITrueMintCommunity.PostUrlInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.PostUrlInvalid.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something-something-something-something-something-something-something-something-something-something-something-something-something-something-something",
             _content: "Something something something"
@@ -60,13 +60,13 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
 
     function test_createNote_RevertIf_contentInvalid() public {
         hoax(player1);
-        vm.expectRevert(ITrueMintCommunity.ContentInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.ContentInvalid.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: ""
         });
 
-        vm.expectRevert(ITrueMintCommunity.ContentInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.ContentInvalid.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something"
@@ -90,7 +90,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
             _content: "Something something something"
         });
         vm.prank(player1);
-        vm.expectRevert(ITrueMintCommunity.NoteAlreadyExists.selector);
+        vm.expectRevert(IFactChainCommunity.NoteAlreadyExists.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
@@ -106,13 +106,13 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         hoax(rater1);
-        vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.RatingInvalid.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
             _rating: 0
         });
-        vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.RatingInvalid.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -128,7 +128,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
             _content: "Something something something"
         });
         hoax(player2);
-        vm.expectRevert(ITrueMintCommunity.InsufficientStake.selector);
+        vm.expectRevert(IFactChainCommunity.InsufficientStake.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING - 1}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -145,7 +145,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         vm.prank(player1);
-        vm.expectRevert(ITrueMintCommunity.CantRateOwnNote.selector);
+        vm.expectRevert(IFactChainCommunity.CantRateOwnNote.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -155,7 +155,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
 
     function test_rateNote_RevertIf_noteDoesNotExist() public {
         hoax(player2);
-        vm.expectRevert(ITrueMintCommunity.NoteDoesNotExist.selector);
+        vm.expectRevert(IFactChainCommunity.NoteDoesNotExist.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -178,7 +178,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         hoax(rater1);
-        vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
+        vm.expectRevert(IFactChainCommunity.NoteAlreadyFinalised.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -218,7 +218,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         hoax(rater1);
-        vm.expectRevert(ITrueMintCommunity.RatingAlreadyExists.selector);
+        vm.expectRevert(IFactChainCommunity.RatingAlreadyExists.selector);
         tmCommunity.rateNote{value: MINIMUM_STAKE_PER_RATING}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -250,13 +250,13 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
         });
 
         vm.startPrank(owner);
-        vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.RatingInvalid.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
             _finalRating: 0
         });
-        vm.expectRevert(ITrueMintCommunity.RatingInvalid.selector);
+        vm.expectRevert(IFactChainCommunity.RatingInvalid.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -266,7 +266,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
 
     function test_finaliseNote_RevertIf_notDoesNotExist() public {
         vm.prank(owner);
-        vm.expectRevert(ITrueMintCommunity.NoteDoesNotExist.selector);
+        vm.expectRevert(IFactChainCommunity.NoteDoesNotExist.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -305,7 +305,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
             _finalRating: 1
         });
 
-        vm.expectRevert(ITrueMintCommunity.NoteAlreadyFinalised.selector);
+        vm.expectRevert(IFactChainCommunity.NoteAlreadyFinalised.selector);
         tmCommunity.finaliseNote({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -417,7 +417,7 @@ contract TrueMintCommunityTest is Test, ITrueMintCommunity, IOwnable {
             _content: "Something something something"
         });
 
-        vm.expectRevert(ITrueMintCommunity.FailedToReward.selector);
+        vm.expectRevert(IFactChainCommunity.FailedToReward.selector);
         vm.prank(owner);
         tmCommunity.finaliseNote({
             _postUrl: postUrl2,
