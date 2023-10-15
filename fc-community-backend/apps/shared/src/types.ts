@@ -13,6 +13,14 @@ export type Note = {
   ratings?: Array<number>;
 };
 
+export type NotesResponse = {
+  notes: Array<Note>;
+};
+
+export type StatusResponse = {
+  status: string;
+};
+
 export type FactChainEvent =
   | "ReserveFunded"
   | "NoteCreated"

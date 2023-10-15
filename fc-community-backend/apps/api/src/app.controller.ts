@@ -1,19 +1,19 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Note } from './factchain-core/types';
+import { NotesResponse, StatusResponse } from './factchain-core/types';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): any {
+  getHello(): StatusResponse {
     return this.appService.getHello();
   }
 
   @Get('/notes')
-  async getNotes(@Query('postUrl') postUrl): Promise<Array<Note>> {
+  async getNotes(@Query('postUrl') postUrl): Promise<NotesResponse> {
     const notes = await this.appService.getNotes(postUrl);
-    return notes;
+    return { notes };
   }
 }
