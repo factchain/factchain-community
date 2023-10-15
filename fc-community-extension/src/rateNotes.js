@@ -12,6 +12,7 @@ const notes = await chrome.runtime.sendMessage({type: 'fc-get-notes', postUrl});
 logger.log("Notes", notes);
 
 const rateNote = async (postUrl, creator, rating) => {
+  logger.log("Rating note", postUrl, creator, rating);
   return await contract.rateNote(postUrl, creator, rating, {value: 10_000});
 };
 

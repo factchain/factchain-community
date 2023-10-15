@@ -13,7 +13,6 @@
     "default_title": "FactChain",
     "default_popup": "popup.html"
   },
-  "permissions": ["alarms", "notifications", "storage"],
   "content_scripts": [
     {
       "matches": [
@@ -26,6 +25,8 @@
       ]
     }
   ],
+  "permissions": ["alarms", "notifications", "storage"],
+  "host_permissions": ["https://fc-community-backend-15f6c753d352.herokuapp.com/*"],
   "background": {
     "service_worker": "serviceWorker.js"
   },

@@ -13,6 +13,7 @@ export class AppController {
 
   @Get('/notes')
   async getNotes(@Query('postUrl') postUrl): Promise<NotesResponse> {
+    console.log(`Get notes for postUrl=${postUrl}`);
     const notes = await this.appService.getNotes(postUrl);
     return { notes };
   }

@@ -1,5 +1,7 @@
 export const METAMASK_ID = "nkbihfbeogaeaoehlefnkodbefgpgknn";
-export const FC_CONTRACT_ADDRESS = "0x8496863Bd63A611D30020e2825DaDB2FC77DBCe4";
+export const BACKEND_URL = "https://fc-community-backend-15f6c753d352.herokuapp.com";
+// TODO read address from service once
+export const FC_CONTRACT_ADDRESS = "0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428";
 export const FC_CONTRACT_ABI = [
   {
     "inputs": [

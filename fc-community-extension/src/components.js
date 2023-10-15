@@ -18,24 +18,7 @@ export function Popup({provider}) {
 export function FCAddress({provider}) {
   const [address, setAddress] = createSignal(null);
 
-  function handleAccountsChanged(accounts) {
-    if (accounts.length === 0) {
-      logger.log('Please connect to MetaMask.');
-      setAddress("--");
-    } else {
-      logger.log(`address changed to ${accounts[0]}`);
-      setAddress(accounts[0]);
-    }
-  }
-
-  provider.request({
-    method: "eth_requestAccounts",
-  }).then(handleAccountsChanged)
-  .catch((err) => {
-    logger.error(err);
-  });
-
-  provider.on('accountsChanged', handleAccountsChanged);
+  provider.getAddress().then(setAddress);
 
   return (
     <div>

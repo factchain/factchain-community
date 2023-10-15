@@ -1,27 +1,20 @@
+import { BACKEND_URL } from "./constants";
+
 console.log("Initialised");
 
 let targetPostUrl = "";
 
 const getNotes = (postUrl, handler) => {
-  return new Promise(async () => {
-    let notes = [
-      {
-        postUrl,
-        creator: "0x02D45A86b58Ab228ee297f1647A3A647A336eC8d",
-        content: "Something something something."
-      },
-      {
-        postUrl,
-        creator: "0x1E57ABB408C7Fd5d62177b6FE464730bFFc6B430",
-        content: "Push push push."
-      },
-      {
-        postUrl,
-        creator: "0x8496863Bd63A611D30020e2825DaDB2FC77DBCe4",
-        content: "Click click click."
-      }
-    ];
-    handler(notes);
+  const urlParams = new URLSearchParams({postUrl});
+  fetch(`${BACKEND_URL}/notes?${urlParams}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  }).then(res => {
+    return res.json();
+  }).then(res => {
+    handler(res.notes);
   });
 }
 

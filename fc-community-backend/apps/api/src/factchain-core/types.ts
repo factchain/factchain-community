@@ -7,7 +7,7 @@ export type Rating = {
 };
 
 export type Note = {
-  url: string;
+  postUrl: string;
   creator: string;
   content?: string;
   ratings?: Array<number>;

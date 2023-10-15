@@ -576,7 +576,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
   getNote = async (postUrl: string, creator: string): Promise<Note> => {
     const result = await this._contract.communityNotes(postUrl, creator);
     return {
-      url: result[0],
+      postUrl: result[0],
       content: result[1],
       creator: result[2],
     };
@@ -588,6 +588,8 @@ export class FactChainContract implements NoteReader, NoteWriter {
     const today = new Date();
     const lookbackDays = parseInt(process.env["GET_NOTES_LOOKBACK_DAYS"] || "5");
     const from = new Date(today.getTime() - (lookbackDays * 24 * 60 * 60 * 1000))
+    console.log(`Getting notes created on '${postUrl}' between ${from} and ${today}`);
+
     const block_periods = timePeriodToBlockPeriods(
       from,
       today,
@@ -596,6 +598,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
     let notePromises: Promise<Note>[] = [];
     for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
+      console.log(`Notes between blocks ${period[0]} and ${period[1]}`, block_periods);
       const relatedEvents = events.filter((e) => e.args[0] == postUrl);
       if (relatedEvents) {
         notePromises = notePromises.concat(relatedEvents.map(
