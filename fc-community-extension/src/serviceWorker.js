@@ -1,7 +1,4 @@
-import { BACKEND_URL } from "./constants";
-
-console.log("Initialised");
-
+const BACKEND_URL = "https://fc-community-backend-15f6c753d352.herokuapp.com";
 let targetPostUrl = "";
 
 const getNotes = (postUrl, handler) => {
@@ -59,3 +56,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   
   return true;
 });
+
+console.log("Initialised");
