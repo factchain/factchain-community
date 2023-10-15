@@ -18,7 +18,7 @@ export class NoteService {
       const key = `${rating.url}-${rating.creator}`;
       if (!noteRatingsMap[key]) {
         noteRatingsMap[key] = {
-          url: rating.url,
+          postUrl: rating.url,
           creator: rating.creator,
           ratings: [],
         };
