@@ -63,7 +63,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
     let notePromises: Promise<Note>[] = [];
     for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
-      const relatedEvents = events.filter((e) => true || (e.args[0] == postUrl));
+      const relatedEvents = events.filter((e) => e.args[0] == postUrl);
       if (relatedEvents) {
         notePromises = notePromises.concat(relatedEvents.map(
           async (event) => {
