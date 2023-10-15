@@ -1,0 +1,23 @@
+name: Backend Deployment
+on:
+  push:
+    branches: [ main ]
+    paths: [ fc-community-backend/apps/api/** ]
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy on Heroku
+        uses: akhileshns/heroku-deploy@v3.12.14
+        with:
+          team: ${{ vars.HEROKU_TEAM_NAME }}
+          heroku_email: ${{ vars.HEROKU_EMAIL }}
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ vars.HEROKU_APP_NAME }}
+          appdir: fc-community-backend/apps/api
+          healthcheck: ${{ HEROKY_URL }}
+          checkstring: "OK"
+          delay: 5
+          rollbackonhealthcheckfailed: true
