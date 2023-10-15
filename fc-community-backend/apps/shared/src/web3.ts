@@ -7,7 +7,7 @@ import { timePeriodToBlockPeriods } from "./utils";
 
 const MINIMUM_STAKE_PER_RATING = 10_000;
 const MINIMUM_STAKE_PER_NOTE = 100_000;
-const JSON_ABI = path.join(__dirname, "../../../shared/factchainAbi.json");
+const JSON_ABI = path.join(__dirname, "./factchainAbi.json");
 
 export class FactChainContract implements NoteReader, NoteWriter {
   private _provider: ethers.AbstractProvider;

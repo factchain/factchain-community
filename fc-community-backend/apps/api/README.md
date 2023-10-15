@@ -29,6 +29,12 @@ $ yarn run start:prod
 
 and use `curl localhost:3000` to verify it's working.
 
+## Deploy
+
+```shell
+git subtree push --prefix fc-community-backend/apps/api heroku <your_branch>:main
+```
+
 ## Test
 
 ```bash
