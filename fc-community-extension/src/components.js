@@ -15,12 +15,6 @@ export function Popup({provider}) {
   );
 }
 
-export function FCButton() {
-  return (
-    <div class="r-1nao33i">🚀 FACTCHAIN 🚀</div>
-  );
-}
-
 export function FCAddress({provider}) {
   const [address, setAddress] = createSignal(null);
 
@@ -44,6 +38,40 @@ export function FCAddress({provider}) {
   provider.on('accountsChanged', handleAccountsChanged);
 
   return (
-    <div class="r-1nao33i">🚀 Account: {address()} 🚀</div>
+    <div>
+      Account: {address()}
+    </div>
+  );
+}
+
+export function FCCreateNote({postUrl, createNote}) {
+  const [transactionHash, setTransactionHash] = createSignal(null);
+
+  const transactionUrl = () => {
+    return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
+  };
+
+  const submit = async () => {
+    const transaction = await createNote(postUrl, document.getElementById('content').value);
+    logger.log("Transaction sent", transaction);
+    setTransactionHash(transaction.hash);
+  };
+
+  return (
+    <div>
+      <img
+        src="./factchain.jpeg"
+        width="300"
+        style="height:70px; object-fit:cover;"
+      ></img>
+      
+      <h1>Create New Note</h1>
+      <div>
+        <div>Post URL: {postUrl}</div>
+        <div><textarea id="content" disabled={!!transactionHash()} rows="10" cols="60" maxlength="500"></textarea></div>
+        <div><button onclick={submit} disabled={!!transactionHash()}>Submit</button></div>
+      </div>
+      { transactionHash() ? <div>Transaction: <a href={transactionUrl()}>{transactionHash()}</a></div> : <div></div>}
+    </div>
   );
 }
