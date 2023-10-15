@@ -1,39 +1,28 @@
-export function time_period_to_block_periods(
+export function timePeriodToBlockPeriods(
   from: Date,
   to: Date,
   currentBlock: number,
-  dateNowFixed?: Date,
 ): Array<[number, number]> {
-  // Ethereum block production time in seconds
-  const ethAvgBlockTime = 12;
+  // Ethereum block production time in milliseconds
+  const ethAvgBlockTime = 12 * 1_000;
   // https://support.quicknode.com/hc/en-us/articles/10258449939473-Understanding-the-10-000-Block-Range-Limit-for-querying-Logs-and-Events
-  const maxBlockDifference = 10000;
-  // Calculate the number of blocks based on the time difference
-  const timeDeltaToFromSeconds = Math.abs(to.getTime() - from.getTime()) / 1000;
-  const blocksBetweenFromAndTo = Math.ceil(
-    timeDeltaToFromSeconds / ethAvgBlockTime,
-  );
-  const blocksRange = Math.min(blocksBetweenFromAndTo, maxBlockDifference);
+  const maxPeriodLength = 10_000;
 
-  const dateNow = dateNowFixed ? dateNowFixed : new Date();
-  const timeDeltaSeconds = Math.ceil(
-    Math.abs(dateNow.getTime() - to.getTime()) / 1000,
-  );
-  const toBlocksNumber =
-    currentBlock - Math.ceil(timeDeltaSeconds / ethAvgBlockTime);
-  const fromBlocksNumber = toBlocksNumber - blocksBetweenFromAndTo;
-
-  const blockNumbers: Array<[number, number]> = [];
-
-  for (
-    let blocks = fromBlocksNumber;
-    blocks < toBlocksNumber;
-    blocks += blocksRange
-  ) {
-    const startBlock = blocks + 1;
-    const endBlock =
-      startBlock + Math.min(blocksRange, toBlocksNumber - startBlock);
-    blockNumbers.push([startBlock, endBlock]);
+  if (from > to) {
+    const temp = from;
+    from = to;
+    to = temp;
   }
-  return blockNumbers;
+
+  const currentDate = new Date();
+  const fromBlock = currentBlock - Math.floor((currentDate.getTime() - from.getTime()) / ethAvgBlockTime);
+  const toBlock = currentBlock - Math.ceil((currentDate.getTime() - to.getTime()) / ethAvgBlockTime);
+  const numberOfPeriods = Math.ceil((toBlock - fromBlock) / maxPeriodLength);
+
+  return [...Array(numberOfPeriods).keys()].map(i => {
+    return [
+      fromBlock + i * maxPeriodLength,
+      Math.min(fromBlock + (i + 1) * maxPeriodLength, toBlock),
+    ];
+  });
 }

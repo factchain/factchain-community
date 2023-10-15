@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { Note, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
-import { time_period_to_block_periods } from "./utils";
+import { timePeriodToBlockPeriods } from "./utils";
 
 const MINIMUM_STAKE_PER_RATING = 10_000;
 const MINIMUM_STAKE_PER_NOTE = 100_000;
@@ -54,7 +54,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
     // TODO: see if 5 days lookback is suitable for the demo 
     const today = new Date();
     const fiveDaysbefore = new Date(today.getTime() - (5 * 24 * 60 * 60 * 1000))
-    const block_periods = time_period_to_block_periods(
+    const block_periods = timePeriodToBlockPeriods(
       fiveDaysbefore,
       today,
       currentBlockNumber,
@@ -78,7 +78,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
 
   getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
-    const block_periods = time_period_to_block_periods(
+    const block_periods = timePeriodToBlockPeriods(
       from,
       to,
       currentBlockNumber,
