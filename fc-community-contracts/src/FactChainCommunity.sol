@@ -4,7 +4,7 @@ pragma solidity >=0.8.19;
 import { stdMath } from "forge-std/StdMath.sol";
 import "./utils/Ownable.sol";
 
-interface ITrueMintCommunityEvents {
+interface IFactChainCommunityEvents {
     /// @dev This emits when a the Owner funds the reserve
     event ReserveFunded(uint256 amount);
     /// @dev This emits when a new Note is created
@@ -23,12 +23,12 @@ interface ITrueMintCommunityEvents {
     event NoteFinalised(string postUrl, address indexed creator, uint8 indexed finalRating);
 }
 
-interface ITrueMintCommunity is ITrueMintCommunityEvents {
+interface IFactChainCommunity is IFactChainCommunityEvents {
     /// @notice Note structure
     /// @param postUrl URL of the post targeted by this Note
     /// @param content Content of the Note
     /// @param creator Address of the Note's creator
-    /// @param finalRating Final rating attributed by TrueMint
+    /// @param finalRating Final rating attributed by FactChain
     struct Note {
         string postUrl;
         string content;
@@ -50,11 +50,11 @@ interface ITrueMintCommunity is ITrueMintCommunityEvents {
     error InsufficientStake();
 }
 
-/// @title TrueMint Community
+/// @title FactChain Community
 /// @author Yacine B. Badiss, Pierre HAY
 /// @notice 
 /// @dev 
-contract TrueMintCommunity is Ownable, ITrueMintCommunity {
+contract FactChainCommunity is Ownable, IFactChainCommunity {
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
     uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;

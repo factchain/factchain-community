@@ -1,17 +1,17 @@
-name: CI
+name: Contracts Code Checks
 on:
   push:
     branches: [ main ]
-    paths: [ tm-community-contracts/** ]
+    paths: [ fc-community-contracts/** ]
   pull_request:
     branches: [ main ]
-    paths: [ tm-community-contracts/** ]
+    paths: [ fc-community-contracts/** ]
 jobs:
   code-checks:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./tm-community-contracts
+        working-directory: ./fc-community-contracts
     steps:
       - uses: actions/checkout@v3
 

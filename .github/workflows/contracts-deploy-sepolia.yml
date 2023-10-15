@@ -1,24 +1,24 @@
-name: CI
+name: Contracts Deployment
 on:
   push:
     branches: [ main ]
-    paths: [ tm-community-contracts/src/** ]
+    paths: [ fc-community-contracts/src/** ]
 jobs:
   deploy-contract:
     runs-on: ubuntu-latest
     env:
-      CONTRACT_PATH: src/TrueMintCommunity.sol:TrueMintCommunity
+      CONTRACT_PATH: src/FactChainCommunity.sol:FactChainCommunity
       ETH_RPC_NAME: eth-sepolia
       CHAIN_ID: 11155111
       ETH_RPC_URL: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
-      PRIVATE_KEY: ${{ secrets.TM_SEPOLIA_DEPLOYER_PK }}
-      ETHERSCAN_API_KEY: ${{ secrets.TM_ETHERSCAN_SEPOLIA_API_KEY }}
-      OWNER_ADDRESS: ${{ vars.TM_SEPOLIA_OWNER_ADDRESS }}
+      PRIVATE_KEY: ${{ secrets.DEPLOYER_PK }}
+      ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
+      OWNER_ADDRESS: ${{ vars.OWNER_ADDRESS }}
       ETHERSCAN_URL: https://sepolia.etherscan.io
     permissions: write-all
     defaults:
       run:
-        working-directory: ./tm-community-contracts
+        working-directory: ./fc-community-contracts
     steps:
       - uses: actions/checkout@v3
 
@@ -36,8 +36,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: build_output
-          path: ./tm-community-contracts/out/TrueMintCommunity.sol/TrueMintCommunity.json
+          name: fc-community.abi.json
+          path: ./fc-community-contracts/out/FactChainCommunity.sol/FactChainCommunity.json
 
       - name: Log detail of deployment
         run: |
@@ -45,15 +45,3 @@ jobs:
           echo "- Deployer: [${{ fromJson(steps.deploy.outputs.deploymentOutput).deployer }}](${ETHERSCAN_URL}/address/${{ fromJson(steps.deploy.outputs.deploymentOutput).deployer }})" >> $GITHUB_STEP_SUMMARY
           echo "- Deployed to: [${{ fromJson(steps.deploy.outputs.deploymentOutput).deployedTo }}](${ETHERSCAN_URL}/address/${{ fromJson(steps.deploy.outputs.deploymentOutput).deployedTo }})" >> $GITHUB_STEP_SUMMARY
           echo "- Transaction hash: [${{ fromJson(steps.deploy.outputs.deploymentOutput).transactionHash }}](${ETHERSCAN_URL}/tx/${{ fromJson(steps.deploy.outputs.deploymentOutput).transactionHash }})" >> $GITHUB_STEP_SUMMARY
-
-      # - name: Verify contract
-      #   id: verify
-      #   run: |
-      #     abiConstructorArgs=`cast abi-encode "constructor(address)" $OWNER_ADDRESS`
-      #     forge verify-contract \
-      #       --constructor-args $abiConstructorArgs \
-      #       --chain-id $CHAIN_ID \
-      #       --flatten \
-      #       --watch \
-      #       ${{ fromJson(steps.deploy.outputs.createOutput).deployedTo }} \
-      #       $CONTRACT_PATH
