@@ -6,11 +6,11 @@ import { NoteService } from './factchain-core/noteService';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  getHello(): any {
+    return {status: 'OK'};
   }
 
-  async geNotes(postUrl: string): Promise<Array<Note>> {
+  async getNotes(postUrl: string): Promise<Array<Note>> {
     const fc = new FactChainContract(process.env['OWNER_PKEY']!);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotes(postUrl);

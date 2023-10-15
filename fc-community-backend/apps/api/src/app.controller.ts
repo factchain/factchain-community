@@ -7,13 +7,13 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
+  getHello(): any {
     return this.appService.getHello();
   }
 
   @Get('/notes')
   async getNotes(@Query('postUrl') postUrl): Promise<Array<Note>> {
-    const notes = await this.appService.geNotes(postUrl);
+    const notes = await this.appService.getNotes(postUrl);
     return notes;
   }
 }
