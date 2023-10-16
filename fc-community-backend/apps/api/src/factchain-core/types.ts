@@ -1,4 +1,4 @@
-import { TransactionResponse } from "ethers";
+import { ContractTransactionResponse } from "ethers";
 
 export type Rating = {
   postUrl: string;
@@ -34,15 +34,15 @@ export interface NoteReader {
 }
 
 export interface NoteWriter {
-  createNote: (postUrl: string, text: string) => Promise<TransactionResponse>;
+  createNote: (postUrl: string, text: string) => Promise<ContractTransactionResponse>;
   rateNote: (
     postUrl: string,
     creator: string,
     rating: number,
-  ) => Promise<TransactionResponse>;
+  ) => Promise<ContractTransactionResponse>;
   finaliseNote: (
     postUrl: string,
     creator: string,
     rating: number,
-  ) => Promise<TransactionResponse>;
+  ) => Promise<ContractTransactionResponse>;
 }
