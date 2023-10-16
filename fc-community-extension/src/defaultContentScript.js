@@ -32,7 +32,7 @@ const addNoteRatingButton = (dropdown, postUrl) => {
   }, async (notes) => {
     logger.log('received notes', notes);
     const currentAddress = await provider.getAddress();
-    notes = notes.filter(n => n.creator.toLowerCase() !== currentAddress.toLowerCase());
+    notes = (notes || []).filter(n => n.creator.toLowerCase() !== currentAddress.toLowerCase());
     if (notes.length > 0) {
       dropdown.insertAdjacentHTML("beforeend", `<div role="menuitem" tabindex="0" class="css-1dbjc4n r-1loqt21 r-18u37iz r-1ny4l3l r-ymttw5 r-1f1sjgu r-o7ynqc r-6416eg r-13qz1uu" data-testid="fc-note"> \
         <div class="css-1dbjc4n r-1777fci r-j2kj52"> \
@@ -76,10 +76,12 @@ const alterDropdown = (dropdown) => {
 let observer = new MutationObserver(mutations => {
   for(let mutation of mutations) {
     for(let addedNode of mutation.addedNodes) {
-      const dropdown = addedNode.querySelector("div[data-testid='Dropdown']");
-      if (dropdown) {
-        logger.log("New dropdown");
-        alterDropdown(dropdown);
+      if (addedNode && (typeof addedNode.querySelector) === "function") {
+        const dropdown = addedNode.querySelector("div[data-testid='Dropdown']");
+        if (dropdown) {
+          logger.log("New dropdown");
+          alterDropdown(dropdown);
+        }
       }
     }
   }

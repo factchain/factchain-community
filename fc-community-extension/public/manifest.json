@@ -21,7 +21,8 @@
       ],
       "run_at": "document_idle",
       "js": [
-        "defaultContentScript.js"
+        "defaultContentScript.js",
+        "subscribeContentScript.js"
       ]
     },
     {

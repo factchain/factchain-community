@@ -87,12 +87,14 @@ const alterMainArticle = (mainArticle) => {
 let observer = new MutationObserver(mutations => {
   for(let mutation of mutations) {
     for(let addedNode of mutation.addedNodes) {
-      const mainArticle = addedNode.querySelector("article[tabindex='-1']");
-      if (mainArticle) {
-        logger.log("Found main article", mainArticle);
-        observer.disconnect();
-        alterMainArticle(mainArticle);
-        return;
+      if (addedNode && (typeof addedNode.querySelector) === "function") {
+        const mainArticle = addedNode.querySelector("article[tabindex='-1']");
+        if (mainArticle) {
+          logger.log("Found main article", mainArticle);
+          observer.disconnect();
+          alterMainArticle(mainArticle);
+          return;
+        }
       }
     }
   }

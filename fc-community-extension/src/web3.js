@@ -1,6 +1,6 @@
 import { initializeProvider } from '@metamask/providers';
 import PortStream from 'extension-port-stream'
-import { ethers } from "ethers";
+import { ethers, utils } from "ethers";
 import { METAMASK_ID, FC_CONTRACT_ABI, FC_CONTRACT_ADDRESS } from "./constants";
 import abiDecoder from "abi-decoder";
 
@@ -46,7 +46,14 @@ export const createFactCheckProvider = () => {
           FC_CONTRACT_ABI,
           signer,
         );
-      }
+      },
+      onEvents: (topics, callback) => {
+        filter = {
+          address: FC_CONTRACT_ADDRESS,
+          topics: topics.map(utils.id),
+        }
+        provider.on(filter, callback);
+      },
     };
  } catch (e) {
     console.error(`Metamask connect error `, e)

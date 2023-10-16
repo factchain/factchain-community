@@ -4,6 +4,13 @@ let cache = {
   notes: [],
 };
 
+chrome.notifications.onClicked.addListener(async (postUrl) => {
+  console.log(`Clicked on notification`, postUrl);
+  chrome.tabs.create({
+    url: postUrl
+  });
+});
+
 const getNotes = (postUrl, handler) => {
   const urlParams = new URLSearchParams({postUrl});
   const fullUrl = `${BACKEND_URL}/notes?${urlParams}`;
@@ -17,18 +24,6 @@ const getNotes = (postUrl, handler) => {
     return res.json();
   }).then(res => {
     handler(res.notes);
-    // handler([
-    //   {
-    //     postUrl: postUrl,
-    //     content: "Coucou this is a test.",
-    //     creator: "0xabcd",
-    //   },
-    //   {
-    //     postUrl: postUrl,
-    //     content: "Coucou this is a second test.",
-    //     creator: "0xefgh",
-    //   },
-    // ])
   });
 }
 
@@ -66,6 +61,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         height: 600,
         top: 0,
         left: 0,
+    });
+  } else if (message.type === "fc-notify") {
+    console.log(`Creating notification for ${message.postUrl}`);
+    chrome.notifications.create(message.postUrl, {
+      type: 'basic',
+      iconUrl: 'icons/icon_32.png',
+      title: message.title,
+      message: message.content,
+      buttons: [{ title: 'Take me there' }],
+      priority: 2
     });
   } else if (message.type === "fc-get-from-cache") {
     console.log(`Get ${message.target} from cache`);
