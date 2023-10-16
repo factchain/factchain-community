@@ -1,5 +1,6 @@
 import { logger } from "./logging";
 import { createFactCheckProvider } from "./web3";
+import { POST_URL_REGEX } from "./constants";
 
 const provider = createFactCheckProvider();
 
@@ -67,8 +68,7 @@ const addNote = (mainArticle, note, currentAddress) => {
 };
 
 const alterMainArticle = (mainArticle) => {
-  const postRegex = /^(https:\/\/(twitter|x).com\/.+?\/status\/\d+).*$/;
-  const postUrl = document.URL.match(postRegex)[1];
+  const postUrl = document.URL.match(POST_URL_REGEX)[1];
 
   chrome.runtime.sendMessage({
     type: 'fc-get-notes',

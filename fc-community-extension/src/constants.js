@@ -1,4 +1,5 @@
 export const METAMASK_ID = "nkbihfbeogaeaoehlefnkodbefgpgknn";
+export const POST_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/status\/\d+).*$/;
 // TODO read address from service once
 export const FC_CONTRACT_ADDRESS = "0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428";
 export const FC_CONTRACT_ABI = [
