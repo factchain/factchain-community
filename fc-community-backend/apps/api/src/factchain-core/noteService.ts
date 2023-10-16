@@ -15,10 +15,10 @@ export class NoteService {
   ): Array<Note> => {
     const noteRatingsMap: Record<string, Note> = {};
     for (const rating of oldEnoughRatings) {
-      const key = `${rating.url}-${rating.creator}`;
+      const key = `${rating.postUrl}-${rating.creator}`;
       if (!noteRatingsMap[key]) {
         noteRatingsMap[key] = {
-          postUrl: rating.url,
+          postUrl: rating.postUrl,
           creator: rating.creator,
           ratings: [],
         };

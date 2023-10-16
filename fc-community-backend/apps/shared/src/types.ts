@@ -1,7 +1,7 @@
 import { TransactionResponse } from "ethers";
 
 export type Rating = {
-  url: string;
+  postUrl: string;
   creator: string;
   value: number;
 };
@@ -28,20 +28,20 @@ export type FactChainEvent =
   | "NoteFinalised";
 
 export interface NoteReader {
-  getNote: (url: string, creator: string) => Promise<Note>;
-  getNotes: (url: string) => Promise<Array<Note>>;
+  getNote: (postUrl: string, creator: string) => Promise<Note>;
+  getNotes: (postUrl: string) => Promise<Array<Note>>;
   getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;
 }
 
 export interface NoteWriter {
-  createNote: (url: string, text: string) => Promise<TransactionResponse>;
+  createNote: (postUrl: string, text: string) => Promise<TransactionResponse>;
   rateNote: (
-    url: string,
+    postUrl: string,
     creator: string,
     rating: number,
   ) => Promise<TransactionResponse>;
   finaliseNote: (
-    url: string,
+    postUrl: string,
     creator: string,
     rating: number,
   ) => Promise<TransactionResponse>;

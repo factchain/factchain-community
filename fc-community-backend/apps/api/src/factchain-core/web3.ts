@@ -624,7 +624,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
       const events = await this.getEvents("NoteRated", period[0], period[1]);
       ratings = ratings.concat(
         events.map((event) => ({
-          url: event.args[0],
+          postUrl: event.args[0],
           creator: event.args[1],
           value: event.args[3],
         })),
@@ -634,17 +634,17 @@ export class FactChainContract implements NoteReader, NoteWriter {
   };
 
   createNote = async (
-    url: string,
+    postUrl: string,
     text: string,
   ): Promise<ContractTransactionResponse> => {
-    const transactionResponse = await this._contract.createNote(url, text, {
+    const transactionResponse = await this._contract.createNote(postUrl, text, {
       value: MINIMUM_STAKE_PER_NOTE,
     });
     return transactionResponse;
   };
 
   rateNote = async (
-    url: string,
+    postUrl: string,
     creator: string,
     rating: number,
   ): Promise<ContractTransactionResponse> => {
@@ -652,7 +652,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
       throw new Error("Bad rating!");
     }
     const transactionResponse = await this._contract.rateNote(
-      url,
+      postUrl,
       creator,
       rating,
       {
@@ -663,7 +663,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
   };
 
   finaliseNote = async (
-    url: string,
+    postUrl: string,
     creator: string,
     rating: number,
   ): Promise<ContractTransactionResponse> => {
@@ -671,7 +671,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
       throw new Error("Bad rating!");
     }
     const transactionResponse = await this._contract.finaliseNote(
-      url,
+      postUrl,
       creator,
       rating,
     );

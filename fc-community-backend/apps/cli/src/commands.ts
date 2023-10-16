@@ -29,34 +29,34 @@ export const getNote = async (
 
 export const createNote = async (
   pkey: string,
-  url: string,
+  postUrl: string,
   text: string,
 ): Promise<ContractTransactionResponse> => {
   const fc = new FactChainContract(pkey);
-  const transactionResponse = await fc.createNote(url, text);
+  const transactionResponse = await fc.createNote(postUrl, text);
   console.log(transactionResponse);
   return transactionResponse;
 };
 
 export const rateNote = async (
   pkey: string,
-  url: string,
+  postUrl: string,
   creator: string,
   rating: number,
 ): Promise<ContractTransactionResponse> => {
   const fc = new FactChainContract(pkey);
-  const transactionResponse = await fc.rateNote(url, creator, rating);
+  const transactionResponse = await fc.rateNote(postUrl, creator, rating);
   console.log(transactionResponse);
   return transactionResponse;
 };
 
 export const finaliseNote = async (
-  url: string,
+  postUrl: string,
   creator: string,
   rating: number,
 ): Promise<ContractTransactionResponse> => {
   const fc = new FactChainContract(process.env["OWNER_PKEY"]!);
-  const transactionResponse = await fc.finaliseNote(url, creator, rating);
+  const transactionResponse = await fc.finaliseNote(postUrl, creator, rating);
   console.log(transactionResponse);
   return transactionResponse;
 };
