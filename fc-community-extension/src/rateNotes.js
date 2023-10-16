@@ -6,9 +6,9 @@ import { logger } from "./logging";
 const provider = createFactCheckProvider();
 const contract = await provider.getContract();
 
-const postUrl = await chrome.runtime.sendMessage({type: 'fc-get-post-url'});
+const postUrl = await chrome.runtime.sendMessage({type: 'fc-get-from-cache', target: "postUrl"});
 logger.log("Post URL", postUrl);
-const notes = await chrome.runtime.sendMessage({type: 'fc-get-notes', postUrl});
+const notes = await chrome.runtime.sendMessage({type: 'fc-get-from-cache', target: "notes"});
 logger.log("Notes", notes);
 
 const rateNote = async (postUrl, creator, rating) => {

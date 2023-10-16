@@ -1,5 +1,4 @@
 import { createSignal } from "solid-js";
-import { logger } from "./logging";
 
 export function Popup({provider}) {
   return (

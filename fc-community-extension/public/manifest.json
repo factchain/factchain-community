@@ -21,7 +21,17 @@
       ],
       "run_at": "document_idle",
       "js": [
-        "contentScript.js"
+        "defaultContentScript.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://twitter.com/*/status/*",
+        "https://x.com/*/status/*"
+      ],
+      "run_at": "document_idle",
+      "js": [
+        "statusContentScript.js"
       ]
     }
   ],

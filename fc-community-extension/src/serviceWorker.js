@@ -1,9 +1,14 @@
 const BACKEND_URL = "https://fc-community-backend-15f6c753d352.herokuapp.com";
-let targetPostUrl = "";
+let cache = {
+  postUrl: "",
+  notes: [],
+};
 
 const getNotes = (postUrl, handler) => {
   const urlParams = new URLSearchParams({postUrl});
-  fetch(`${BACKEND_URL}/notes?${urlParams}`, {
+  const fullUrl = `${BACKEND_URL}/notes?${urlParams}`;
+  console.log("Getting notes", fullUrl)
+  fetch(fullUrl, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
@@ -12,6 +17,18 @@ const getNotes = (postUrl, handler) => {
     return res.json();
   }).then(res => {
     handler(res.notes);
+    // handler([
+    //   {
+    //     postUrl: postUrl,
+    //     content: "Coucou this is a test.",
+    //     creator: "0xabcd",
+    //   },
+    //   {
+    //     postUrl: postUrl,
+    //     content: "Coucou this is a second test.",
+    //     creator: "0xefgh",
+    //   },
+    // ])
   });
 }
 
@@ -20,7 +37,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "fc-create-note") {
     console.log("Creating a note", message.postUrl);
-    targetPostUrl = message.postUrl;
+    cache.postUrl = message.postUrl;
 
     chrome.windows.create({
         url: "createNote.html",
@@ -31,9 +48,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         top: 0,
         left: 0,
     });
-  } else if (message.type === "fc-get-post-url") {
-    console.log("Get post url");
-    sendResponse(targetPostUrl);
   } else if (message.type === "fc-get-notes") {
     getNotes(message.postUrl, (notes) => {
       console.log("Retrieved notes", notes);
@@ -41,7 +55,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
   } else if (message.type === "fc-rate-notes") {
     console.log("Rating notes", message.notes);
-    targetPostUrl = message.postUrl;
+    cache.postUrl = message.notes[0].postUrl;
+    cache.notes = message.notes;
 
     chrome.windows.create({
         url: "rateNotes.html",
@@ -52,6 +67,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         top: 0,
         left: 0,
     });
+  } else if (message.type === "fc-get-from-cache") {
+    console.log(`Get ${message.target} from cache`);
+    sendResponse(cache[message.target]);
   }
   
   return true;
