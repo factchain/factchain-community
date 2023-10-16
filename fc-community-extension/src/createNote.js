@@ -1,5 +1,5 @@
 import { render } from "solid-js/web";
-import { createFactCheckProvider } from "./provider";
+import { createFactCheckProvider, handleContractCallError } from "./web3";
 import { FCCreateNote } from "./components";
 import { logger } from "./logging";
 
@@ -12,7 +12,16 @@ const postUrl = await chrome.runtime.sendMessage({type: 'fc-get-post-url'});
 logger.log("Post URL", postUrl);
 
 const createNote = async (postUrl, content) => {
-  return await contract.createNote(postUrl, content, {value: 100_000});
+  logger.log("Creating note", postUrl, content);
+  let transaction = null;
+  let error = null;
+  try {
+    transaction = await contract.createNote(postUrl, content, {value: 100_000});
+  } catch (e) {
+    logger.log("Failed to create note", e);
+    error = handleContractCallError(e);
+  }
+  return {transaction, error};
 };
 
 render(() => <FCCreateNote postUrl={postUrl} createNote={createNote} />, document.getElementById("app"));

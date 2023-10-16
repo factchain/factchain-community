@@ -1,12 +1,7 @@
 import { render } from "solid-js/web";
-import { createMetaMaskProvider } from "./provider";
+import { createFactCheckProvider } from "./web3";
 import { Popup } from "./components";
-import { logger } from "./logging";
 
-const provider = createMetaMaskProvider();
-
-provider.on('error', (error) => {
-  logger.error(`Failed to connect to metamask`, error);
-});
+const provider = createFactCheckProvider();
 
 render(() => <Popup provider={provider} />, document.getElementById("app"));

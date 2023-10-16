@@ -13,7 +13,7 @@ const config = (env, argv) =>
       createNote: PATHS.src + '/createNote.js',
       rateNotes: PATHS.src + '/rateNotes.js',
       contentScript: PATHS.src + '/contentScript.js',
-      provider: PATHS.src + '/provider.js',
+      web3: PATHS.src + '/web3.js',
       logging: PATHS.src + '/logging.js',
       components: PATHS.src + '/components.js',
       serviceWorker: PATHS.src + '/serviceWorker.js',

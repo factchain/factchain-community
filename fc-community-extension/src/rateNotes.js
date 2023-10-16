@@ -1,5 +1,5 @@
 import { render } from "solid-js/web";
-import { createFactCheckProvider } from "./provider";
+import { createFactCheckProvider, handleContractCallError } from "./web3";
 import { FCRateNotes } from "./components";
 import { logger } from "./logging";
 
@@ -13,7 +13,15 @@ logger.log("Notes", notes);
 
 const rateNote = async (postUrl, creator, rating) => {
   logger.log("Rating note", postUrl, creator, rating);
-  return await contract.rateNote(postUrl, creator, rating, {value: 10_000});
+  let transaction = null;
+  let error = null;
+  try {
+    transaction = await contract.rateNote(postUrl, creator, rating, {value: 10_000});
+  } catch (e) {
+    logger.log("Failed to rate note", e);
+    error = handleContractCallError(e);
+  }
+  return {transaction, error};
 };
 
 render(() => <FCRateNotes postUrl={postUrl} notes={notes} rateNote={rateNote} />, document.getElementById("app"));

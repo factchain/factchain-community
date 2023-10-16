@@ -2,7 +2,21 @@ import { initializeProvider } from '@metamask/providers';
 import PortStream from 'extension-port-stream'
 import { ethers } from "ethers";
 import { METAMASK_ID, FC_CONTRACT_ABI, FC_CONTRACT_ADDRESS } from "./constants";
+import abiDecoder from "abi-decoder";
 
+abiDecoder.addABI(FC_CONTRACT_ABI);
+
+export const decodeError = (abiError) => {
+  return abiDecoder.decodeMethod(abiError);
+}
+
+export const handleContractCallError = (e) => {
+  if (e.code === "CALL_EXCEPTION") {
+    return abiDecoder.decodeMethod(e.data);
+  } else {
+    return e;
+  }
+}
 
 export const createFactCheckProvider = () => {
   try {
@@ -39,3 +53,4 @@ export const createFactCheckProvider = () => {
     throw e
   }
 }
+

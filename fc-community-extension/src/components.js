@@ -28,16 +28,21 @@ export function FCAddress({provider}) {
 }
 
 export function FCCreateNote({postUrl, createNote}) {
-  const [transactionHash, setTransactionHash] = createSignal(null);
+  const [transaction, setTransaction] = createSignal(null);
+  const [error, setError] = createSignal(null);
+
+  const submit = async () => {
+    const {transaction, error} = await createNote(postUrl, document.getElementById('content').value);
+    setTransaction(transaction);
+    setError(error);
+  };
+
+  const transactionHash = () => {
+    return transaction() ? transaction().hash : null;
+  };
 
   const transactionUrl = () => {
     return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
-  };
-
-  const submit = async () => {
-    const transaction = await createNote(postUrl, document.getElementById('content').value);
-    logger.log("Transaction sent", transaction);
-    setTransactionHash(transaction.hash);
   };
 
   return (
@@ -55,17 +60,23 @@ export function FCCreateNote({postUrl, createNote}) {
         <div><button onclick={submit} disabled={!!transactionHash()}>Submit</button></div>
       </div>
       { transactionHash() ? <div>Transaction: <a href={transactionUrl()}>{transactionHash()}</a></div> : <div></div>}
+      { error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
     </div>
   );
 }
 
 export function FCRateNote({postUrl, creator, content, rateNote}) {
-  const [transactionHash, setTransactionHash] = createSignal(null);
+  const [transaction, setTransaction] = createSignal(null);
+  const [error, setError] = createSignal(null);
 
   const submit = async () => {
-    const transaction = await rateNote(postUrl, creator, document.getElementById('rating').value);
-    logger.log("Transaction sent", transaction);
-    setTransactionHash(transaction.hash);
+    const {transaction, error} = await rateNote(postUrl, creator, document.getElementById('rating').value);
+    setTransaction(transaction);
+    setError(error);
+  };
+
+  const transactionHash = () => {
+    return transaction() ? transaction().hash : null;
   };
 
   const transactionUrl = () => {
@@ -79,6 +90,7 @@ export function FCRateNote({postUrl, creator, content, rateNote}) {
         <div><input id="rating" type="range" min="1" step="1" max="5" disabled={!!transactionHash()}></input></div>
         <div><button onclick={submit} disabled={!!transactionHash()}>Submit</button></div>
         { transactionHash() ? <div>Transaction: <a href={transactionUrl()}>{transactionHash()}</a></div> : <div></div>}
+        { error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
       </div>
     </li>
   );
