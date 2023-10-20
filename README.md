@@ -2,12 +2,14 @@
 
 # factchain-community
 
+See [Pitch Deck](https://docs.google.com/presentation/d/1SVDxzgBY_GsQRAT_anoVA7sfMu26-kKfJJI6M455bC0/edit?usp=sharing)
+
 Decentralized notes, decentralized rewards. A collaborative approach to combating misinformation, block by block.
 
 Contributors to Factchain Community can record notes about any social media post on the blockchain. If enough contributors from different viewpoints rate a note as helpful on the blockchain, the note will be displayed on factchain.tech, and on the Factchain browser extension.
 
 - Notes & votes are permissionless. No central authority to trust.
-- Transparent incentives for note writers & voters. FactChain rewards writers who create helpful notes & voters who identify helpful/misleading notes
+- Transparent incentives for note writers & voters. Factchain rewards writers who create helpful notes & voters who identify helpful/misleading notes
 - Factchain's truth layer works for any social media platform:
   - Factchain's browser extension adds FactChain notes on top of social media posts
   - Anyone can query the Factchain API for notes on social media posts
