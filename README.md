@@ -12,33 +12,42 @@ Contributors to Factchain Community can record notes about any social media post
   - Factchain's browser extension adds FactChain notes on top of social media posts
   - Anyone can query the Factchain API for notes on social media posts
 
-## TODO
+## Links
 
-### TECH
+- [Pitch Deck](https://docs.google.com/presentation/d/1SVDxzgBY_GsQRAT_anoVA7sfMu26-kKfJJI6M455bC0/edit?usp=sharing)
+- [Demo of the PoC](https://drive.google.com/file/d/1tJgjMYLVi_VUSCHalCxqlsctuYiVFX4W/view?usp=share_link).
+- The contract is deployed at https://sepolia.etherscan.io/address/0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428.
 
-- contract
-    - writing the note on chain is not future proof
-    - push to ipfs? like nfts
-    - can the contract be erc1155 compliant?
-    - proxy? makes things a bit simpler for CD
-    - IMPORTANT: available balance following a creation/rate of note
-        - this avoids stake+create+withdraw
-- static page
-    - needed? if yes, as samll as possible
-- link factchain.tech to a cloud
-    - heroku?
-- extension
-    - fetch events on-chain
-    - connect to ethereum provider
-    - needs metamask on the side
-- backend
-    - to run the final rating algo
-    - final rating depends on algo and history of raters
-        - we may want to push the block id at which we stopped to calculate the final rating
-        - + algo version/hash
-        - or something like that to simplify reruns
+## Using Factchain
 
-### PRODUDCT
+### Requirements
 
-- Dany to write down his degen ideas
-- Baptiste to list documents we need to produce + what is needed in them + how we can help
+- Desktop only
+- Google Chrome
+- Metamask
+- Sepolia account some ETH (https://sepoliafaucet.com/ to get some)
+
+### Installation
+
+- Install the [Factchain extension](./fc-community-extension/) by drag-and-dropping [build.crx](./fc-community-extension/build.crx) into `chrome://extensions`.
+- Open the extension so it can connect to your Metamask account
+- Open Twitter which will also connect to your Metamask account
+
+### Create a note
+
+- Select a post you want to create a note on, and click on the 3 dots
+- Click on `Create Factchain Note` and go through the steps
+
+![Create note](./create.gif)
+
+### Rate a note
+
+- Open a post with an existing note you want to rate
+- The note will be visible under the post
+- Click on `Rate it` and go through the steps
+
+![Rate note](./rate.gif)
+
+## Project Architecture
+
+![Architecture Diagram](./factchain_archi.png)
