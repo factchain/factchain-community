@@ -2,7 +2,7 @@
 
 # factchain-community
 
-See [Pitch Deck](https://docs.google.com/presentation/d/1SVDxzgBY_GsQRAT_anoVA7sfMu26-kKfJJI6M455bC0/edit?usp=sharing)
+See [Factchain Pitch Deck](https://docs.google.com/presentation/d/1SVDxzgBY_GsQRAT_anoVA7sfMu26-kKfJJI6M455bC0/edit?usp=sharing)
 
 Decentralized notes, decentralized rewards. A collaborative approach to combating misinformation, block by block.
 
