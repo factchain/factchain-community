@@ -25,7 +25,7 @@ Contributors to Factchain Community can record notes about any social media post
 ### Requirements
 
 - Desktop only
-- Google Chrome
+- Chrome for Testing (https://www.chromium.org/getting-involved/download-chromium/#chrome-for-testing)
 - Metamask
 - Sepolia account some ETH (https://sepoliafaucet.com/ to get some)
 
