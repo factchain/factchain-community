@@ -30,8 +30,8 @@ Contributors to Factchain Community can record notes about any social media post
 - Sepolia account some ETH (https://sepoliafaucet.com/ to get some)
 
 ### Installation
-
-- Install the [Factchain extension](./fc-community-extension/) by drag-and-dropping [build.crx](./fc-community-extension/build.crx) into `chrome://extensions`.
+- Install the [Factchain extension](./fc-community-extension/) by loading the [factchain-extension-build](./fc-community-extension/factchain-extension-build) into `chrome://extensions`.
+You need to activate the Developer mode and click "Load unpacked".
 - Open the extension so it can connect to your Metamask account
 - Open Twitter which will also connect to your Metamask account
 
