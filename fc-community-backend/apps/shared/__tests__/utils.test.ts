@@ -20,7 +20,6 @@ describe("timePeriodToBlockPeriods", () => {
 
     const expectedBlockRanges: Array<[number, number]> = [
       [4483029, 4483929],
-      // ... (more block ranges based on the given totalBlocks and maxBlockDifference)
     ];
 
     const result = timePeriodToBlockPeriods(
