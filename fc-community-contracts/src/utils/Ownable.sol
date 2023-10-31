@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity >=0.8.19;
+pragma solidity ^0.8.20;
 
 interface IOwnableEvents {
     /// @dev This emits when ownership of a contract changes.

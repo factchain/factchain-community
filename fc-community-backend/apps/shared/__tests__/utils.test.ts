@@ -18,15 +18,9 @@ describe("timePeriodToBlockPeriods", () => {
     const fromDate = new Date("2023-10-13T16:00:00Z");
     const toDate = new Date("2023-10-13T19:00:00Z");
 
-    const expectedBlockRanges: Array<[number, number]> = [
-      [4483029, 4483929],
-    ];
+    const expectedBlockRanges: Array<[number, number]> = [[4483029, 4483929]];
 
-    const result = timePeriodToBlockPeriods(
-      fromDate,
-      toDate,
-      currentBlock,
-    );
+    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
     expect(result).toEqual(expectedBlockRanges);
   });
 
@@ -37,11 +31,7 @@ describe("timePeriodToBlockPeriods", () => {
       [4483629, 4483929],
     ];
 
-    const result = timePeriodToBlockPeriods(
-      fromDate,
-      toDate,
-      currentBlock,
-    );
+    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
     expect(result).toEqual(expectedShortBlockRanges);
   });
 
@@ -57,11 +47,7 @@ describe("timePeriodToBlockPeriods", () => {
       [4482029, 4483929], // 1893 ~= 6h
     ];
 
-    const result = timePeriodToBlockPeriods(
-      fromDate,
-      toDate,
-      currentBlock,
-    );
+    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
     expect(result).toEqual(expectedLongBlockRanges);
   });
 
@@ -74,11 +60,7 @@ describe("timePeriodToBlockPeriods", () => {
       [currentBlock, currentBlock + 1],
     ];
 
-    const result = timePeriodToBlockPeriods(
-      fromDate,
-      toDate,
-      currentBlock,
-    );
+    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
     expect(result).toEqual(singleBlockRange);
   });
 });

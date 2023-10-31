@@ -7,7 +7,8 @@ jobs:
   deploy-contract:
     runs-on: ubuntu-latest
     env:
-      CONTRACT_PATH: src/FactChainCommunity.sol:FactChainCommunity
+      FC_COMMUNITY_CONTRACT_PATH: src/FactChainCommunity.sol
+      FC_NFT_CONTRACT_PATH: src/FactChainNFT.sol
       ETH_RPC_NAME: eth-sepolia
       CHAIN_ID: 11155111
       ETH_RPC_URL: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
@@ -28,11 +29,17 @@ jobs:
       - name: Deploy contract
         id: deploy
         run: |
+          contractPaths=()
           forge build
-          createOutput=`forge create $CONTRACT_PATH --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS`
-          echo "forge create output:\n\n$createOutput"
-          deploymentOutput=`echo "${createOutput}" | head -1`
-          echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
+          git diff --quiet $FC_COMMUNITY_CONTRACT_PATH || contractPaths+=("$FC_COMMUNITY_CONTRACT_PATH:FactChainCommunity")
+          git diff --quiet $FC_NFT_CONTRACT_PATH || contractPaths+=("$FC_NFT_CONTRACT_PATH:FactChainNFT")
+          for contractPath in "${contractPaths[@]}"
+          do
+            createOutput=`forge create $contractPath --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS`
+            echo "forge create output:\n\n$createOutput"
+            deploymentOutput=`echo "${createOutput}" | head -1`
+            echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
+          done
 
       - uses: actions/upload-artifact@v3
         with:

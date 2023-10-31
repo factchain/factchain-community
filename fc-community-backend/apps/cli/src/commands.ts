@@ -2,6 +2,7 @@ import { EventLog, ContractTransactionResponse } from "ethers";
 import { FactChainContract } from "./factchain-core/web3";
 import { FactChainEvent, Note } from "./factchain-core/types";
 import { NoteService } from "./factchain-core/noteService";
+import { NFTService } from "./factchain-core/nftService";
 
 export const getEvents = async (
   eventType: FactChainEvent,
@@ -75,4 +76,16 @@ export const getEligibleNotes = async (
   );
   console.log(eligibleNotes);
   return eligibleNotes;
+};
+
+export const generateNoteNFT = async (
+  text: string,
+  postUrl: string,
+  creator: string,
+): Promise<string> => {
+  return NFTService.createNFTDataFromNote({
+    postUrl: postUrl,
+    creator: creator,
+    content: text,
+  });
 };
