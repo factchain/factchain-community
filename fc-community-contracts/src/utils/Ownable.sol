@@ -18,13 +18,9 @@ contract Ownable is IOwnable {
 
     /// @notice Instantiate a new contract and set its owner
     /// @param _owner New owner of the contract
-    constructor(address _owner)
-    {
+    constructor(address _owner) {
         owner = _owner;
-        emit OwnershipTransferred({
-            previousOwner: address(0),
-            newOwner: owner
-        });
+        emit OwnershipTransferred({previousOwner: address(0), newOwner: owner});
     }
 
     /// @notice Query if a contract implements an interface
@@ -36,7 +32,7 @@ contract Ownable is IOwnable {
     }
 
     /// @notice Modifier to enforce ownership control
-    modifier onlyOwner {
+    modifier onlyOwner() {
         if (msg.sender != owner) revert NotOwner();
         _;
     }
@@ -47,9 +43,6 @@ contract Ownable is IOwnable {
     function transferOwnership(address _newOwner) external onlyOwner {
         address previousOwner = owner;
         owner = _newOwner;
-        emit OwnershipTransferred({
-            previousOwner: previousOwner,
-            newOwner: owner
-        });
+        emit OwnershipTransferred({previousOwner: previousOwner, newOwner: owner});
     }
 }

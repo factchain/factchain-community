@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.20;
+pragma solidity >=0.8.19;
 
-import { stdMath } from "forge-std/StdMath.sol";
+import {stdMath} from "forge-std/StdMath.sol";
 import "./utils/Ownable.sol";
 
 interface IFactChainCommunityEvents {
@@ -10,7 +10,9 @@ interface IFactChainCommunityEvents {
     /// @dev This emits when a new Note is created
     event NoteCreated(string postUrl, address indexed creator, uint256 stake);
     /// @dev This emits when a Note was rated
-    event NoteRated(string postUrl, address indexed creator, address indexed rater, uint8 indexed rating, uint256 stake);
+    event NoteRated(
+        string postUrl, address indexed creator, address indexed rater, uint8 indexed rating, uint256 stake
+    );
     /// @dev This emits when a Rater is rewarded
     event RaterRewarded(string postUrl, address indexed creator, address indexed rater, uint256 reward, uint256 stake);
     /// @dev This emits when a Rater is slashed
@@ -52,8 +54,8 @@ interface IFactChainCommunity is IFactChainCommunityEvents {
 
 /// @title FactChain Community
 /// @author Yacine B. Badiss, Pierre HAY
-/// @notice 
-/// @dev 
+/// @notice
+/// @dev
 contract FactChainCommunity is Ownable, IFactChainCommunity {
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
@@ -71,9 +73,7 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
 
     /// @notice Instantiate a new contract and set its owner
     /// @param _owner Owner of the contract
-    constructor(address _owner)
-        Ownable(_owner)
-    {}
+    constructor(address _owner) Ownable(_owner) {}
 
     ////////////////////////////////////////////////////////////////////////
     /// Helper functions
@@ -115,24 +115,14 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
             // (address(this).balance) < MINIMUM_STAKE_PER_NOTE + reward
             (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE + reward}("");
             if (!result) revert FailedToReward();
-            emit CreatorRewarded({
-                postUrl: _postUrl,
-                creator: _creator,
-                reward: reward,
-                stake: MINIMUM_STAKE_PER_NOTE
-            });
+            emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: MINIMUM_STAKE_PER_NOTE});
         } else if (finalRating < 2) {
             uint256 slash = finalRating * 10;
             // This will revert if contract current balance
             // (address(this).balance) < MINIMUM_STAKE_PER_NOTE - slash
             (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE - slash}("");
             if (!result) revert FailedToSlash();
-            emit CreatorSlashed({
-                postUrl: _postUrl,
-                creator: _creator,
-                slash: slash,
-                stake: MINIMUM_STAKE_PER_NOTE
-            });
+            emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: MINIMUM_STAKE_PER_NOTE});
         }
     }
 
@@ -153,11 +143,10 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
                     rater: rater,
                     reward: reward,
                     stake: MINIMUM_STAKE_PER_RATING
-
                 });
             } else if (delta > 2) {
                 uint256 slash = delta - 2;
-                // This will revert if contract current balance 
+                // This will revert if contract current balance
                 // (address(this).balance) < MINIMUM_STAKE_PER_RATING - slash
                 (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING - slash}("");
                 if (!result) revert FailedToSlash();
@@ -182,18 +171,10 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
         if (!isPostUrlValid(bytes(_postUrl))) revert PostUrlInvalid();
         if (!isContentValid(bytes(_content))) revert ContentInvalid();
         if (noteExists(_postUrl, msg.sender)) revert NoteAlreadyExists();
-        
-        communityNotes[_postUrl][msg.sender] = Note({
-            postUrl: _postUrl,
-            content: _content,
-            creator: msg.sender,
-            finalRating: 0
-        });
-        emit NoteCreated({
-            postUrl: _postUrl,
-            creator: msg.sender,
-            stake: MINIMUM_STAKE_PER_NOTE
-        });
+
+        communityNotes[_postUrl][msg.sender] =
+            Note({postUrl: _postUrl, content: _content, creator: msg.sender, finalRating: 0});
+        emit NoteCreated({postUrl: _postUrl, creator: msg.sender, stake: MINIMUM_STAKE_PER_NOTE});
     }
 
     /// @notice Rate an existing note
@@ -234,10 +215,6 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
         communityNotes[_postUrl][_creator].finalRating = _finalRating;
         rewardOrSlashCreator(_postUrl, _creator);
         rewardOrSlashRaters(_postUrl, _creator);
-        emit NoteFinalised({
-            postUrl: _postUrl,
-            creator: _creator,
-            finalRating: _finalRating
-        });
+        emit NoteFinalised({postUrl: _postUrl, creator: _creator, finalRating: _finalRating});
     }
 }

@@ -38,8 +38,8 @@ export class NFTService {
       console.log(`replicate URL: ${replicateUrl}`);
       return replicateUrl;
     } catch (error) {
-      // retry twice if the note generated NSFW image
-      // experimentally, chance of success are close to zero after two failures for NSFW content
+      // retry twice if note generated NSFW image
+      // experimentally, if it fails twice in a row, it will never succeed.
       if (
         error instanceof Error &&
         error.message.includes("NSFW") &&

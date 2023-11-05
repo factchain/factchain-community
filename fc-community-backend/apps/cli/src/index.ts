@@ -8,6 +8,7 @@ import {
   finaliseNote,
   getEligibleNotes,
   generateNoteNFT,
+  mintNote,
 } from "./commands";
 
 import { FactChainEvent } from "./factchain-core/types";
@@ -86,6 +87,16 @@ program
   .option("-c, --creator <address>", "Note creator")
   .action(async (options: any) => {
     await generateNoteNFT(options.text, options.url, options.creator);
+  });
+
+program
+  .command("mint-note <pkey>")
+  .description("generate note nft data and upload to IPFS")
+  .option("-t, --text <text>", "Note content")
+  .option("-u, --url <url>", "Post url")
+  .option("-c, --creator <address>", "Note creator")
+  .action(async (pkey: string, options: any) => {
+    await mintNote(pkey, options.text, options.url, options.creator);
   });
 
 program.parse();

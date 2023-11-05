@@ -29,17 +29,22 @@ jobs:
       - name: Deploy contract
         id: deploy
         run: |
-          contractPaths=()
           forge build
-          git diff --quiet $FC_COMMUNITY_CONTRACT_PATH || contractPaths+=("$FC_COMMUNITY_CONTRACT_PATH:FactChainCommunity")
-          git diff --quiet $FC_NFT_CONTRACT_PATH || contractPaths+=("$FC_NFT_CONTRACT_PATH:FactChainNFT")
-          for contractPath in "${contractPaths[@]}"
-          do
-            createOutput=`forge create $contractPath --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS`
+          if ! git diff --quiet $FC_COMMUNITY_CONTRACT_PATH
+          then
+            createOutput=`forge create "$FC_COMMUNITY_CONTRACT_PATH:FactChainCommunity --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS`
             echo "forge create output:\n\n$createOutput"
             deploymentOutput=`echo "${createOutput}" | head -1`
             echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
-          done
+          fi
+
+          if ! git diff --quiet $FC_NFT_CONTRACT_PATH
+          then
+            createOutput=`forge create "$FC_NFT_CONTRACT_PATH:FactChainNFT --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS "FactChainerNotes" "FCN" "https://gateway.pinata.cloud/ipfs/"`
+            echo "forge create output:\n\n$createOutput"
+            deploymentOutput=`echo "${createOutput}" | head -1`
+            echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
+          fi
 
       - uses: actions/upload-artifact@v3
         with:

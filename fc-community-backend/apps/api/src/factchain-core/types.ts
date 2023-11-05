@@ -10,7 +10,9 @@ export type Note = {
   postUrl: string;
   creator: string;
   content?: string;
+  finalRating?: number;
   ratings?: Array<number>;
+  imageUrl?: string;
 };
 
 export type NotesResponse = {
@@ -34,7 +36,10 @@ export interface NoteReader {
 }
 
 export interface NoteWriter {
-  createNote: (postUrl: string, text: string) => Promise<ContractTransactionResponse>;
+  createNote: (
+    postUrl: string,
+    text: string,
+  ) => Promise<ContractTransactionResponse>;
   rateNote: (
     postUrl: string,
     creator: string,
@@ -45,4 +50,5 @@ export interface NoteWriter {
     creator: string,
     rating: number,
   ) => Promise<ContractTransactionResponse>;
+  mintNote: (note: Note) => Promise<ContractTransactionResponse>;
 }

@@ -1,558 +1,25 @@
 import { EventLog, ethers, ContractTransactionResponse } from "ethers";
 import { Note, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
+import { NFTService } from "./nftService";
 import { timePeriodToBlockPeriods } from "./utils";
+import { FC_COMMUNITY_JSON_ABI, FC_NFT_JSON_ABI, MINIMUM_STAKE_PER_NOTE, MINIMUM_STAKE_PER_RATING } from "./contractsAbi";
 
-const MINIMUM_STAKE_PER_RATING = 10_000;
-const MINIMUM_STAKE_PER_NOTE = 100_000;
-const JSON_ABI = [
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_owner",
-        type: "address",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "constructor",
-  },
-  {
-    inputs: [],
-    name: "CantRateOwnNote",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "ContentInvalid",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "FailedToReward",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "FailedToSlash",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InsufficientStake",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NotOwner",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NoteAlreadyExists",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NoteAlreadyFinalised",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NoteDoesNotExist",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "PostUrlInvalid",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "RatingAlreadyExists",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "RatingInvalid",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "reward",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "stake",
-        type: "uint256",
-      },
-    ],
-    name: "CreatorRewarded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "slash",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "stake",
-        type: "uint256",
-      },
-    ],
-    name: "CreatorSlashed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "stake",
-        type: "uint256",
-      },
-    ],
-    name: "NoteCreated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "uint8",
-        name: "finalRating",
-        type: "uint8",
-      },
-    ],
-    name: "NoteFinalised",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "rater",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "uint8",
-        name: "rating",
-        type: "uint8",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "stake",
-        type: "uint256",
-      },
-    ],
-    name: "NoteRated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousOwner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newOwner",
-        type: "address",
-      },
-    ],
-    name: "OwnershipTransferred",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "rater",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "reward",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "stake",
-        type: "uint256",
-      },
-    ],
-    name: "RaterRewarded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "rater",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "slash",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "stake",
-        type: "uint256",
-      },
-    ],
-    name: "RaterSlashed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "ReserveFunded",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "communityNotes",
-    outputs: [
-      {
-        internalType: "string",
-        name: "postUrl",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "content",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "creator",
-        type: "address",
-      },
-      {
-        internalType: "uint8",
-        name: "finalRating",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    name: "communityRatings",
-    outputs: [
-      {
-        internalType: "uint8",
-        name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_postUrl",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_content",
-        type: "string",
-      },
-    ],
-    name: "createNote",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_postUrl",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "_creator",
-        type: "address",
-      },
-      {
-        internalType: "uint8",
-        name: "_finalRating",
-        type: "uint8",
-      },
-    ],
-    name: "finaliseNote",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "noteRaters",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "owner",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "_postUrl",
-        type: "string",
-      },
-      {
-        internalType: "address",
-        name: "_creator",
-        type: "address",
-      },
-      {
-        internalType: "uint8",
-        name: "_rating",
-        type: "uint8",
-      },
-    ],
-    name: "rateNote",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes4",
-        name: "interfaceId",
-        type: "bytes4",
-      },
-    ],
-    name: "supportsInterface",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_newOwner",
-        type: "address",
-      },
-    ],
-    name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    stateMutability: "payable",
-    type: "receive",
-  },
-];
-
-export class FactChainContract implements NoteReader, NoteWriter {
+export class FactChainContracts implements NoteReader, NoteWriter {
   private _provider: ethers.AbstractProvider;
-  private _contract: ethers.Contract;
+  private _fcCommunity: ethers.Contract;
+  private _fcNFT: ethers.Contract;
 
   constructor(pkey: string) {
     this._provider = new ethers.JsonRpcProvider(process.env["INFRA_RPC_URL"]);
     const user_identity = new ethers.Wallet(pkey, this._provider);
-    this._contract = new ethers.Contract(
+    this._fcCommunity = new ethers.Contract(
       process.env["FACTCHAIN_CONTRACT_ADDRESS"]!,
-      JSON_ABI,
+      FC_COMMUNITY_JSON_ABI,
+      user_identity,
+    );
+    this._fcNFT = new ethers.Contract(
+      process.env["FACTCHAIN_NFT_CONTRACT_ADDRESS"]!,
+      FC_NFT_JSON_ABI,
       user_identity,
     );
   }
@@ -562,8 +29,8 @@ export class FactChainContract implements NoteReader, NoteWriter {
     fromBlock: number,
     toBlock: number,
   ): Promise<Array<EventLog>> => {
-    const logs = await this._contract.queryFilter(
-      this._contract.filters[eventType],
+    const logs = await this._fcCommunity.queryFilter(
+      this._fcCommunity.filters[eventType],
       fromBlock,
       toBlock,
     );
@@ -574,11 +41,12 @@ export class FactChainContract implements NoteReader, NoteWriter {
   };
 
   getNote = async (postUrl: string, creator: string): Promise<Note> => {
-    const result = await this._contract.communityNotes(postUrl, creator);
+    const result = await this._fcCommunity.communityNotes(postUrl, creator);
     return {
       postUrl: result[0],
       content: result[1],
       creator: result[2],
+      finalRating: result[3],
     };
   };
 
@@ -644,7 +112,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
     postUrl: string,
     text: string,
   ): Promise<ContractTransactionResponse> => {
-    const transactionResponse = await this._contract.createNote(postUrl, text, {
+    const transactionResponse = await this._fcCommunity.createNote(postUrl, text, {
       value: MINIMUM_STAKE_PER_NOTE,
     });
     return transactionResponse;
@@ -658,7 +126,7 @@ export class FactChainContract implements NoteReader, NoteWriter {
     if (!(rating > 0 && rating < 6)) {
       throw new Error("Bad rating!");
     }
-    const transactionResponse = await this._contract.rateNote(
+    const transactionResponse = await this._fcCommunity.rateNote(
       postUrl,
       creator,
       rating,
@@ -677,11 +145,16 @@ export class FactChainContract implements NoteReader, NoteWriter {
     if (!(rating > 0 && rating < 6)) {
       throw new Error("Bad rating!");
     }
-    const transactionResponse = await this._contract.finaliseNote(
+    const transactionResponse = await this._fcCommunity.finaliseNote(
       postUrl,
       creator,
       rating,
     );
     return transactionResponse;
   };
+
+  mintNote = async (note: Note): Promise<ContractTransactionResponse> => {
+    const metadataIpfsHash = await NFTService.createNFTDataFromNote(note);
+    return await this._fcNFT.mint(note.creator, metadataIpfsHash);
+  }
 }
