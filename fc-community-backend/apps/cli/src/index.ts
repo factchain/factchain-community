@@ -7,7 +7,6 @@ import {
   rateNote,
   finaliseNote,
   getEligibleNotes,
-  generateNoteNFT,
   mintNote,
 } from "./commands";
 
@@ -80,18 +79,8 @@ program
   });
 
 program
-  .command("generate-note-nft")
-  .description("generate note nft data and upload to IPFS")
-  .option("-t, --text <text>", "Note content")
-  .option("-u, --url <url>", "Post url")
-  .option("-c, --creator <address>", "Note creator")
-  .action(async (options: any) => {
-    await generateNoteNFT(options.text, options.url, options.creator);
-  });
-
-program
   .command("mint-note <pkey>")
-  .description("generate note nft data and upload to IPFS")
+  .description("generate note nft data, upload to IPFS and mint for the creator")
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
