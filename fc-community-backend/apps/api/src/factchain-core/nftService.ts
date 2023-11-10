@@ -4,8 +4,9 @@ import Replicate from "replicate";
 import { Note } from "./types";
 
 export class NFTService {
+
   static generateNoteImage = async (note: Note, count = 0): Promise<string> => {
-    if (note.content == undefined) {
+    if (note.content === undefined) {
       throw new Error("Can't generate image from empty note!");
     }
     const replicate = new Replicate({
@@ -38,8 +39,8 @@ export class NFTService {
       console.log(`replicate URL: ${replicateUrl}`);
       return replicateUrl;
     } catch (error) {
-      // retry twice if note generated NSFW image
-      // experimentally, if it fails twice in a row, it will never succeed.
+      // retry twice if the note generated NSFW image
+      // experimentally, chance of success are close to zero after two failures for NSFW content
       if (
         error instanceof Error &&
         error.message.includes("NSFW") &&
@@ -86,9 +87,6 @@ export class NFTService {
     note: Note,
     CID: string,
   ): Promise<string> => {
-    interface PinataResponse {
-      IpfsHash: string;
-    }
 
     try {
       const noteNFTMetadata = JSON.stringify({
@@ -102,20 +100,19 @@ export class NFTService {
           name: "Factchain Note NFT Metadata",
         },
       });
-      const res = await fetch(
+
+      const res = await axios.post(
         "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        noteNFTMetadata,
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${process.env.PINATA_JWT}`,
           },
-          body: noteNFTMetadata,
-        },
-      );
-      const resData = (await res.json()) as PinataResponse;
-      console.log("Metadata uploaded, CID:", resData);
-      return resData.IpfsHash;
+        }
+      )
+      console.log("Metadata uploaded, CID:", res.data);
+      return res.data["IpfsHash"];
     } catch (error) {
       console.log(error);
       throw new Error("Pinata: fails to pin file metadata to IPFS");

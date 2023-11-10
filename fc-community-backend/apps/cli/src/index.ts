@@ -80,7 +80,9 @@ program
 
 program
   .command("mint-note <pkey>")
-  .description("generate note nft data, upload to IPFS and mint for the creator")
+  .description(
+    "generate note nft data, upload to IPFS and mint for the creator",
+  )
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
