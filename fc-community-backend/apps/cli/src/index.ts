@@ -40,22 +40,22 @@ program
   });
 
 program
-  .command("create-note <pkey>")
+  .command("create-note")
   .description("create a community note")
   .option("-u, --url <url>", "Post url")
   .option("-t, --text <text>", "Note content")
-  .action(async (pkey: string, options: any) => {
-    await createNote(pkey, options.url, options.text);
+  .action(async (options: any) => {
+    await createNote(options.url, options.text);
   });
 
 program
-  .command("rate-note <pkey>")
+  .command("rate-note")
   .description("rate a community note")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
   .option("-r, --rating <number>", "Note Rating", parseInt, 0)
-  .action(async (pkey: string, options: any) => {
-    await rateNote(pkey, options.url, options.creator, options.rating);
+  .action(async (options: any) => {
+    await rateNote(options.url, options.creator, options.rating);
   });
 
 program
@@ -79,15 +79,15 @@ program
   });
 
 program
-  .command("mint-note <pkey>")
+  .command("mint-note")
   .description(
     "generate note nft data, upload to IPFS and mint for the creator",
   )
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
-  .action(async (pkey: string, options: any) => {
-    await mintNote(pkey, options.text, options.url, options.creator);
+  .action(async (options: any) => {
+    await mintNote(options.text, options.url, options.creator);
   });
 
 program.parse();

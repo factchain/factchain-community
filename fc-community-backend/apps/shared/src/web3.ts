@@ -2,23 +2,31 @@ import { EventLog, ethers, ContractTransactionResponse } from "ethers";
 import { Note, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
 import { createNFTDataFromNote } from "./nftService";
 import { timePeriodToBlockPeriods } from "./utils";
-import { FC_COMMUNITY_JSON_ABI, FC_NFT_JSON_ABI, MINIMUM_STAKE_PER_NOTE, MINIMUM_STAKE_PER_RATING } from "./contractsAbi";
+import {
+  FC_COMMUNITY_JSON_ABI,
+  FC_NFT_JSON_ABI,
+  MINIMUM_STAKE_PER_NOTE,
+  MINIMUM_STAKE_PER_RATING,
+} from "./contractsAbi";
+import { Config } from "./types";
 
 export class FactChainContracts implements NoteReader, NoteWriter {
+  private _config: Config;
   private _provider: ethers.AbstractProvider;
   private _fcCommunity: ethers.Contract;
   private _fcNFT: ethers.Contract;
 
-  constructor(pkey: string) {
-    this._provider = new ethers.JsonRpcProvider(process.env["INFRA_RPC_URL"]);
-    const user_identity = new ethers.Wallet(pkey, this._provider);
+  constructor(config: Config) {
+    this._config = config;
+    this._provider = new ethers.JsonRpcProvider(this._config.INFRA_RPC_URL);
+    const user_identity = new ethers.Wallet(config.OWNER_PKEY, this._provider);
     this._fcCommunity = new ethers.Contract(
-      process.env["FACTCHAIN_CONTRACT_ADDRESS"]!,
+      this._config.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,
       user_identity,
     );
     this._fcNFT = new ethers.Contract(
-      process.env["FACTCHAIN_NFT_CONTRACT_ADDRESS"]!,
+      this._config.NFT_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       user_identity,
     );
@@ -52,27 +60,24 @@ export class FactChainContracts implements NoteReader, NoteWriter {
 
   getNotes = async (postUrl: string): Promise<Array<Note>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
-    // TODO: see if 5 days lookback is suitable for the demo
     const today = new Date();
-    const lookbackDays = parseInt(
-      process.env["GET_NOTES_LOOKBACK_DAYS"] || "5",
-    );
+    const lookbackDays = parseInt(this._config.LOOKBACK_DAYS);
     const from = new Date(today.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
     console.log(
       `Getting notes created on '${postUrl}' between ${from} and ${today}`,
     );
 
-    const blockPeriods = timePeriodToBlockPeriods(
+    const block_periods = timePeriodToBlockPeriods(
       from,
       today,
       currentBlockNumber,
     );
     let notePromises: Promise<Note>[] = [];
-    for (const period of blockPeriods) {
+    for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
       console.log(
         `Notes between blocks ${period[0]} and ${period[1]}`,
-        blockPeriods,
+        block_periods,
       );
       const relatedEvents = events.filter((e) => e.args[0] == postUrl);
       if (relatedEvents) {
@@ -83,18 +88,19 @@ export class FactChainContracts implements NoteReader, NoteWriter {
         );
       }
     }
-    return await Promise.all(notePromises);
+    const notes = await Promise.all(notePromises);
+    return notes;
   };
 
   getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
-    const blockPeriods = timePeriodToBlockPeriods(
+    const block_periods = timePeriodToBlockPeriods(
       from,
       to,
       currentBlockNumber,
     );
     var ratings: Array<Rating> = [];
-    for (const period of blockPeriods) {
+    for (const period of block_periods) {
       const events = await this.getEvents("NoteRated", period[0], period[1]);
       ratings = ratings.concat(
         events.map((event) => ({
@@ -111,9 +117,13 @@ export class FactChainContracts implements NoteReader, NoteWriter {
     postUrl: string,
     text: string,
   ): Promise<ContractTransactionResponse> => {
-    const transactionResponse = await this._fcCommunity.createNote(postUrl, text, {
-      value: MINIMUM_STAKE_PER_NOTE,
-    });
+    const transactionResponse = await this._fcCommunity.createNote(
+      postUrl,
+      text,
+      {
+        value: MINIMUM_STAKE_PER_NOTE,
+      },
+    );
     return transactionResponse;
   };
 
@@ -153,7 +163,7 @@ export class FactChainContracts implements NoteReader, NoteWriter {
   };
 
   mintNote = async (note: Note): Promise<ContractTransactionResponse> => {
-    const metadataIpfsHash = await createNFTDataFromNote(note);
+    const metadataIpfsHash = await createNFTDataFromNote(note, this._config.REPLICATE_API_TOKEN, this._config.PINATA_JWT);
     return await this._fcNFT.mint(note.creator, metadataIpfsHash);
-  }
+  };
 }

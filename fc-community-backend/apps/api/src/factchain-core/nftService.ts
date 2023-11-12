@@ -5,9 +5,9 @@ import { Note } from "./types";
 
 import { randomUUID } from "crypto";
 
-const generateNoteImage = async (note: Note, count = 0): Promise<string> => {
+const generateNoteImage = async (note: Note, replicateApiToken: string, count = 0): Promise<string> => {
   const replicate = new Replicate({
-    auth: process.env.REPLICATE_API_TOKEN,
+    auth: replicateApiToken,
   });
 
   try {
@@ -40,7 +40,7 @@ const generateNoteImage = async (note: Note, count = 0): Promise<string> => {
     // retry twice if the note generated NSFW image
     // experimentally, chance of success are close to zero after two failures for NSFW content
     if (error instanceof Error && error.message.includes("NSFW") && count < 3) {
-      return generateNoteImage(note, count + 1);
+      return generateNoteImage(note, replicateApiToken, count + 1);
     } else {
       throw error;
     }
@@ -50,6 +50,7 @@ const generateNoteImage = async (note: Note, count = 0): Promise<string> => {
 const uploadImageToPinata = async (
   replicateUrl: string,
   noteUID: string,
+  pinataJwt: string,
 ): Promise<string> => {
   const imageStream = (
     await axios.get(replicateUrl, { responseType: "stream" })
@@ -66,7 +67,7 @@ const uploadImageToPinata = async (
         maxBodyLength: Infinity,
         headers: {
           "Content-Type": `multipart/form-data; boundary=${data.getBoundary()}`,
-          Authorization: `Bearer ${process.env.PINATA_JWT}`,
+          Authorization: `Bearer ${pinataJwt}`,
         },
       },
     );
@@ -81,6 +82,7 @@ const uploadMetadataToPinata = async (
   note: Note,
   noteUID: string,
   CID: string,
+  pinataJwt: string,
 ): Promise<string> => {
   try {
     const noteNFTMetadata = JSON.stringify({
@@ -101,7 +103,7 @@ const uploadMetadataToPinata = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.PINATA_JWT}`,
+          Authorization: `Bearer ${pinataJwt}`,
         },
       },
     );
@@ -113,18 +115,19 @@ const uploadMetadataToPinata = async (
   }
 };
 
-export const createNFTDataFromNote = async (note: Note): Promise<string> => {
+export const createNFTDataFromNote = async (note: Note, replicateApiToken: string, pinataJwt: string): Promise<string> => {
   if (!note.content) {
     throw new Error("Can't generate image from empty note!");
   }
 
-  const replicateUrl = await generateNoteImage(note);
+  const replicateUrl = await generateNoteImage(note, replicateApiToken);
   const noteUID = randomUUID();
-  const pinataImageCID = await uploadImageToPinata(replicateUrl, noteUID);
+  const pinataImageCID = await uploadImageToPinata(replicateUrl, noteUID, pinataJwt);
   const pinataMetadataCID = await uploadMetadataToPinata(
     note,
     noteUID,
     pinataImageCID,
+    pinataJwt,
   );
   return pinataMetadataCID;
 };

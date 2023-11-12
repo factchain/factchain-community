@@ -1,5 +1,17 @@
 import { ContractTransactionResponse } from "ethers";
 
+export type Config = {
+  LOOKBACK_DAYS: string;
+  // chain vars
+  OWNER_PKEY: string;
+  INFRA_RPC_URL: string;
+  MAIN_CONTRACT_ADDRESS: string;
+  NFT_CONTRACT_ADDRESS: string;
+  // ipfs vars
+  REPLICATE_API_TOKEN: string;
+  PINATA_JWT: string;
+};
+
 export type Rating = {
   postUrl: string;
   creator: string;
@@ -50,7 +62,5 @@ export interface NoteWriter {
     creator: string,
     rating: number,
   ) => Promise<ContractTransactionResponse>;
-  mintNote: (
-    note: Note
-  ) => Promise<ContractTransactionResponse>;
+  mintNote: (note: Note) => Promise<ContractTransactionResponse>;
 }
