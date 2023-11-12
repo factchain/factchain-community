@@ -163,7 +163,11 @@ export class FactChainContracts implements NoteReader, NoteWriter {
   };
 
   mintNote = async (note: Note): Promise<ContractTransactionResponse> => {
-    const metadataIpfsHash = await createNFTDataFromNote(note, this._config.REPLICATE_API_TOKEN, this._config.PINATA_JWT);
+    const metadataIpfsHash = await createNFTDataFromNote(
+      note,
+      this._config.REPLICATE_API_TOKEN,
+      this._config.PINATA_JWT,
+    );
     return await this._fcNFT.mint(note.creator, metadataIpfsHash);
   };
 }

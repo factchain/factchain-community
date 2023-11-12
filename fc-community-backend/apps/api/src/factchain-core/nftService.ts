@@ -5,7 +5,11 @@ import { Note } from "./types";
 
 import { randomUUID } from "crypto";
 
-const generateNoteImage = async (note: Note, replicateApiToken: string, count = 0): Promise<string> => {
+const generateNoteImage = async (
+  note: Note,
+  replicateApiToken: string,
+  count = 0,
+): Promise<string> => {
   const replicate = new Replicate({
     auth: replicateApiToken,
   });
@@ -115,14 +119,22 @@ const uploadMetadataToPinata = async (
   }
 };
 
-export const createNFTDataFromNote = async (note: Note, replicateApiToken: string, pinataJwt: string): Promise<string> => {
+export const createNFTDataFromNote = async (
+  note: Note,
+  replicateApiToken: string,
+  pinataJwt: string,
+): Promise<string> => {
   if (!note.content) {
     throw new Error("Can't generate image from empty note!");
   }
 
   const replicateUrl = await generateNoteImage(note, replicateApiToken);
   const noteUID = randomUUID();
-  const pinataImageCID = await uploadImageToPinata(replicateUrl, noteUID, pinataJwt);
+  const pinataImageCID = await uploadImageToPinata(
+    replicateUrl,
+    noteUID,
+    pinataJwt,
+  );
   const pinataMetadataCID = await uploadMetadataToPinata(
     note,
     noteUID,
