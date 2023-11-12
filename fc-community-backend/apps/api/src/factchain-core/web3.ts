@@ -1,6 +1,6 @@
 import { EventLog, ethers, ContractTransactionResponse } from "ethers";
 import { Note, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
-import { NFTService } from "./nftService";
+import { createNFTDataFromNote } from "./nftService";
 import { timePeriodToBlockPeriods } from "./utils";
 import {
   FC_COMMUNITY_JSON_ABI,
@@ -163,7 +163,7 @@ export class FactChainContracts implements NoteReader, NoteWriter {
   };
 
   mintNote = async (note: Note): Promise<ContractTransactionResponse> => {
-    const metadataIpfsHash = await NFTService.createNFTDataFromNote(note);
+    const metadataIpfsHash = await createNFTDataFromNote(note);
     return await this._fcNFT.mint(note.creator, metadataIpfsHash);
   };
 }
