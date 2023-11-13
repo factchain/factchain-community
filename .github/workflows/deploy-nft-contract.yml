@@ -33,7 +33,7 @@ jobs:
       - name: Deploy contract
         id: deploy
         run: |
-          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}:${{ env.CONTRACT_NAME }} --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS "https://gateway.pinata.cloud/ipfs/"`
+          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}.sol:${{ env.CONTRACT_NAME }}" --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS https://gateway.pinata.cloud/ipfs/`
           echo "forge create output:\n\n$createOutput"
           deploymentOutput=`echo "${createOutput}" | head -1`
           echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT

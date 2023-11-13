@@ -1,4 +1,6 @@
-[![Backend Deployment](https://github.com/factchain/factchain-community/actions/workflows/backend-deploy.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/backend-deploy.yml) [![Contracts Deployment](https://github.com/factchain/factchain-community/actions/workflows/contracts-deploy-sepolia.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-deploy-sepolia.yml) [![Contracts Code Checks](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml)
+[![Backend Deployment](https://github.com/factchain/factchain-community/actions/workflows/backend-deploy.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/backend-deploy.yml) [![Contracts Code Checks](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml)
+
+[![Deploy main contract](https://github.com/factchain/factchain-community/actions/workflows/deploy-main-contract.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/deploy-main-contract.yml) [![Deploy NFT contract](https://github.com/factchain/factchain-community/actions/workflows/deploy-nft-contract.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/deploy-nft-contract.yml)
 
 # factchain-community
 
