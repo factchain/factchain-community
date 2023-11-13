@@ -2,6 +2,10 @@ name: Deploy main contract
 on:
   push:
     branches: [ main ]
+    paths:
+      - fc-community-contracts/src/FactChainCommunity.sol
+      - fc-community-contracts/src/utils/Ownable.sol
+  workflow_dispatch:
 jobs:
   deploy-contract:
     runs-on: ubuntu-latest

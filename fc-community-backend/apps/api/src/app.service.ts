@@ -11,6 +11,10 @@ export class AppService {
     return "OK";
   }
 
+  getVersion(): string {
+    return "0.1.0";
+  }
+
   async getNotes(postUrl: string): Promise<Array<Note>> {
     const fc = new FactChainContracts(config);
     const ns = new NoteService(fc, fc);

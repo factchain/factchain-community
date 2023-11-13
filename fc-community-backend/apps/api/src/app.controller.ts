@@ -11,6 +11,11 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get("/_version")
+  getVersion(): string {
+    return this.appService.getVersion();
+  }
+
   @Get("/notes")
   async getNotes(@Query("postUrl") postUrl): Promise<NotesResponse> {
     console.log(`Get notes for postUrl=${postUrl}`);
