@@ -7,9 +7,11 @@ export type Config = {
   INFRA_RPC_URL: string;
   MAIN_CONTRACT_ADDRESS: string;
   NFT_CONTRACT_ADDRESS: string;
-  // ipfs vars
+  // AI image generation
   REPLICATE_API_TOKEN: string;
+  // ipfs vars
   PINATA_JWT: string;
+  [key: string]: string; // Index signature to allow any string key
 };
 
 export type Rating = {
