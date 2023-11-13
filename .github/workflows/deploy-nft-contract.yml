@@ -2,10 +2,6 @@ name: Deploy NFT contract
 on:
   push:
     branches: [ main ]
-    paths:
-      - fc-community-contracts/src/FactChainNFT.sol
-      - fc-community-contracts/src/utils/Ownable.sol
-      - fc-community-contracts/src/ERC721/**
 jobs:
   deploy-contract:
     runs-on: ubuntu-latest
