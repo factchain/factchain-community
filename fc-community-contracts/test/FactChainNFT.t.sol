@@ -12,7 +12,7 @@ contract FactChainNFTTest is Test {
 
 
     function setUp() public {
-        collection = new FactChainNFT(owner, "FactChainersNotes", "FCN", "https://gateway.pinata.cloud/ipfs/");
+        collection = new FactChainNFT(owner, "https://gateway.pinata.cloud/ipfs/");
     }
 
     function testGetTokenURI() public {
