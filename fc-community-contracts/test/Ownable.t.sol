@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/utils/Ownable.sol";
@@ -10,10 +10,7 @@ contract OwnableTest is Test, IOwnableEvents {
 
     function setUp() public {
         vm.expectEmit();
-        emit OwnershipTransferred({
-            previousOwner: address(0),
-            newOwner: owner
-        });
+        emit OwnershipTransferred({previousOwner: address(0), newOwner: owner});
 
         ownable = new Ownable(owner);
     }
@@ -27,19 +24,13 @@ contract OwnableTest is Test, IOwnableEvents {
         address newOwner = address(2);
 
         vm.expectEmit();
-        emit OwnershipTransferred({
-            previousOwner: owner,
-            newOwner: newOwner
-        });
+        emit OwnershipTransferred({previousOwner: owner, newOwner: newOwner});
         vm.prank(owner);
         ownable.transferOwnership(newOwner);
         assertEq(ownable.owner(), newOwner);
 
         vm.expectEmit();
-        emit OwnershipTransferred({
-            previousOwner: newOwner,
-            newOwner: owner
-        });
+        emit OwnershipTransferred({previousOwner: newOwner, newOwner: owner});
         vm.prank(newOwner);
         ownable.transferOwnership(owner);
         assertEq(ownable.owner(), owner);

@@ -15,11 +15,15 @@ export function timePeriodToBlockPeriods(
   }
 
   const currentDate = new Date();
-  const fromBlock = currentBlock - Math.floor((currentDate.getTime() - from.getTime()) / ethAvgBlockTime);
-  const toBlock = currentBlock - Math.ceil((currentDate.getTime() - to.getTime()) / ethAvgBlockTime);
+  const fromBlock =
+    currentBlock -
+    Math.floor((currentDate.getTime() - from.getTime()) / ethAvgBlockTime);
+  const toBlock =
+    currentBlock -
+    Math.ceil((currentDate.getTime() - to.getTime()) / ethAvgBlockTime);
   const numberOfPeriods = Math.ceil((toBlock - fromBlock) / maxPeriodLength);
 
-  return [...Array(numberOfPeriods).keys()].map(i => {
+  return [...Array(numberOfPeriods).keys()].map((i) => {
     return [
       fromBlock + i * maxPeriodLength,
       Math.min(fromBlock + (i + 1) * maxPeriodLength, toBlock),

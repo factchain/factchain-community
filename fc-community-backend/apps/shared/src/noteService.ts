@@ -48,4 +48,11 @@ export class NoteService {
     const notes = await this.reader.getNotes(postUrl);
     return notes;
   };
+
+  mintNote = async (postUrl: string, creator: string) => {
+    const note = await this.reader.getNote(postUrl, creator);
+    // TODO: init final rating to -1 in the FactChainCommunity contract
+    if (note.finalRating! == 0)
+      throw new Error("mint failed: note isn't finalised!");
+  };
 }

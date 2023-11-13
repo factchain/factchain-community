@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { AppService } from './app.service';
-import { NotesResponse } from './factchain-core/types';
+import { Controller, Get, Query } from "@nestjs/common";
+import { AppService } from "./app.service";
+import { NotesResponse } from "./factchain-core/types";
 
 @Controller()
 export class AppController {
@@ -11,8 +11,8 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('/notes')
-  async getNotes(@Query('postUrl') postUrl): Promise<NotesResponse> {
+  @Get("/notes")
+  async getNotes(@Query("postUrl") postUrl): Promise<NotesResponse> {
     console.log(`Get notes for postUrl=${postUrl}`);
     const notes = await this.appService.getNotes(postUrl);
     return { notes };

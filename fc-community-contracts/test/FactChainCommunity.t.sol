@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../src/FactChainCommunity.sol";
-
 
 contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
     FactChainCommunity public tmCommunity;
@@ -47,10 +46,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
     function test_createNote_RevertIf_postUrlInvalid() public {
         hoax(player1);
         vm.expectRevert(IFactChainCommunity.PostUrlInvalid.selector);
-        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
-            _postUrl: "",
-            _content: "Something something something"
-        });
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({_postUrl: "", _content: "Something something something"});
         vm.expectRevert(IFactChainCommunity.PostUrlInvalid.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
             _postUrl: "https://twitter.com/something-something-something-something-something-something-something-something-something-something-something-something-something-something-something",
@@ -61,10 +57,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
     function test_createNote_RevertIf_contentInvalid() public {
         hoax(player1);
         vm.expectRevert(IFactChainCommunity.ContentInvalid.selector);
-        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
-            _postUrl: "https://twitter.com/something",
-            _content: ""
-        });
+        tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({_postUrl: "https://twitter.com/something", _content: ""});
 
         vm.expectRevert(IFactChainCommunity.ContentInvalid.selector);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
@@ -97,7 +90,6 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         });
     }
 
-
     function test_rateNote_RevertIf_ratingInvalid() public {
         hoax(player1);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
@@ -120,7 +112,6 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         });
     }
 
-
     function test_rateNot_RevertIf_notEnoughStake() public {
         hoax(player1);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
@@ -134,7 +125,6 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
             _creator: player1,
             _rating: 4
         });
-
     }
 
     function test_rateNote_RevertIf_creatorIsRater() public {
@@ -169,13 +159,9 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-        
+
         vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         hoax(rater1);
         vm.expectRevert(IFactChainCommunity.NoteAlreadyFinalised.selector);
@@ -235,11 +221,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
 
         vm.startPrank(rater1);
         vm.expectRevert(IOwnable.NotOwner.selector);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
     function test_finaliseNote_RevertIf_ratingInvalid() public {
@@ -251,27 +233,15 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
 
         vm.startPrank(owner);
         vm.expectRevert(IFactChainCommunity.RatingInvalid.selector);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 0
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 0});
         vm.expectRevert(IFactChainCommunity.RatingInvalid.selector);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 6
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 6});
     }
 
     function test_finaliseNote_RevertIf_notDoesNotExist() public {
         vm.prank(owner);
         vm.expectRevert(IFactChainCommunity.NoteDoesNotExist.selector);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
     function test_finaliseNote() public {
@@ -284,11 +254,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         vm.expectEmit();
         emit NoteFinalised("https://twitter.com/something", player1, 1);
         vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
     function test_finaliseNote_RevertIf_noteAlreadyFinalised() public {
@@ -299,18 +265,10 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         });
 
         vm.startPrank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         vm.expectRevert(IFactChainCommunity.NoteAlreadyFinalised.selector);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
     function test_rewardAndSlashRaters() public {
@@ -344,11 +302,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         vm.expectEmit();
         emit RaterSlashed("https://twitter.com/something", player1, rater2, 2, MINIMUM_STAKE_PER_RATING);
         vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         assert(rater1.balance == rater1OriginalBalance + 2);
         assert(rater2.balance == rater2OriginalBalance - 2);
@@ -365,11 +319,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         vm.expectEmit();
         emit CreatorRewarded("https://twitter.com/something", player1, 30, MINIMUM_STAKE_PER_NOTE);
         vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 5
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
         assert(player1.balance == player1OriginalBalance + 30);
     }
 
@@ -383,11 +333,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         vm.expectEmit();
         emit CreatorSlashed("https://twitter.com/something", player1, 10, MINIMUM_STAKE_PER_NOTE);
         vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: "https://twitter.com/something",
-            _creator: player1,
-            _finalRating: 1
-        });
+        tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
         assert(player1.balance == player1OriginalBalance - 10);
     }
 
@@ -402,11 +348,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
             });
 
             vm.prank(owner);
-            tmCommunity.finaliseNote({
-                _postUrl: postUrl1,
-                _creator: player1,
-                _finalRating: 5
-            });
+            tmCommunity.finaliseNote({_postUrl: postUrl1, _creator: player1, _finalRating: 5});
             index += 1;
         }
 
@@ -419,11 +361,6 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
 
         vm.expectRevert(IFactChainCommunity.FailedToReward.selector);
         vm.prank(owner);
-        tmCommunity.finaliseNote({
-            _postUrl: postUrl2,
-            _creator: player1,
-            _finalRating: 5
-        });
+        tmCommunity.finaliseNote({_postUrl: postUrl2, _creator: player1, _finalRating: 5});
     }
 }
-

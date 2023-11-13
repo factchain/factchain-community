@@ -12,7 +12,10 @@ You'll need to define the following env variables:
 
 - `OWNER_PKEY`
 - `INFRA_RPC_URL`
-- `FACTCHAIN_CONTRACT_ADDRESS`
+- `MAIN_CONTRACT_ADDRESS`
+- `NFT_CONTRACT_ADDRESS`
+- `REPLICATE_API_TOKEN`
+- `PINATA_JWT`
 
 then run
 
