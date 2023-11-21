@@ -1,5 +1,5 @@
 import { logger } from "./logging";
-import { alterDropdown, alterNote } from "./contentModifiers";
+import { alterDropdown, alterTwitterNoteSeparator, alterTwitterNote } from "./contentModifiers";
 
 
 let observer = new MutationObserver(mutations => {
@@ -15,7 +15,13 @@ let observer = new MutationObserver(mutations => {
         const separator = addedNode.querySelector("div.css-175oi2r.r-1p6iasa.r-109y4c4.r-gu4em3");
         if (separator) {
           logger.log("Found separator", separator);
-          alterNote(separator);
+          alterTwitterNoteSeparator(separator);
+        }
+
+        const twitterNote = addedNode.querySelector("div[data-testid='birdwatch-pivot']");
+        if (twitterNote) {
+          logger.log("Found twitter note", twitterNote);
+          alterTwitterNote(twitterNote);
         }
       }
     }

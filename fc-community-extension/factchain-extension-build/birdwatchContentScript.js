@@ -27395,7 +27395,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   alterDropdown: () => (/* binding */ alterDropdown),
 /* harmony export */   alterMainArticle: () => (/* binding */ alterMainArticle),
-/* harmony export */   alterNote: () => (/* binding */ alterNote)
+/* harmony export */   alterTwitterNote: () => (/* binding */ alterTwitterNote),
+/* harmony export */   alterTwitterNoteSeparator: () => (/* binding */ alterTwitterNoteSeparator)
 /* harmony export */ });
 /* harmony import */ var _logging__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./logging */ "./src/logging.js");
 /* harmony import */ var _web3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./web3 */ "./src/web3.js");
@@ -27408,7 +27409,7 @@ __webpack_require__.r(__webpack_exports__);
 /// Birdwatch content modifiers
 /// ---------------------------
 
-const makeMintNoteHtml = () => {
+const makeSeparatorMintNoteHtml = () => {
   return `<div class="css-175oi2r r-g2wdr4 r-nsbfu8">
     <div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep">
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-a023e6 r-rjixqe r-b88u0q" style="color: rgb(231, 233, 234); text-overflow: unset;">
@@ -27428,8 +27429,8 @@ const makeMintNoteHtml = () => {
   <div class="css-175oi2r r-1p6iasa r-109y4c4 r-gu4em3"></div>
   `;
 };
-const alterNote = separator => {
-  separator.insertAdjacentHTML("afterend", makeMintNoteHtml());
+const alterTwitterNoteSeparator = separator => {
+  separator.insertAdjacentHTML("afterend", makeSeparatorMintNoteHtml());
   const noteUrl = (0,_constants__WEBPACK_IMPORTED_MODULE_2__.parseUrl)(document.URL, _constants__WEBPACK_IMPORTED_MODULE_2__.NOTE_URL_REGEX);
   document.querySelector("#mintNoteButton").addEventListener("click", async () => {
     const provider = (0,_web3__WEBPACK_IMPORTED_MODULE_1__.createFactCheckProvider)();
@@ -27441,6 +27442,32 @@ const alterNote = separator => {
       address: currentAddress
     });
   });
+};
+const makeMintNoteHtml = () => {
+  return `<div class="css-175oi2r r-1awozwy r-1roi411 r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu">
+    <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-1b43r93 r-1cwl3u0 r-16dba41" style="color: rgb(231, 233, 234); text-overflow: unset;">
+      <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+    </div>
+    <div role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
+      <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="color: rgb(239, 243, 244); text-overflow: unset;">
+        <span class="css-1qaijid r-dnmrzs r-1udh08x r-3s2u2q r-bcqeeo r-qvutc0 r-poiln3 r-1b43r93 r-1cwl3u0" style="text-overflow: unset;">
+          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Mint it</span>
+        </span>
+      </div>
+    </div>
+  </div>`;
+};
+const alterTwitterNote = twitterNote => {
+  if (twitterNote.classList.contains("factchain-1.0")) {
+    // Add a special class to avoid re-processing the same twitter note multiple times
+    // this seems to happen because we are modifying the twitter note, and the modification
+    // is caught by the observer below.
+    _logging__WEBPACK_IMPORTED_MODULE_0__.logger.log("Twitter note already processed");
+  } else {
+    // First time we see this twitter note let's do something with it
+    twitterNote.classList.add("factchain-1.0");
+    twitterNote.insertAdjacentHTML("beforeend", makeMintNoteHtml());
+  }
 };
 
 /// ---------------------------
@@ -97627,7 +97654,7 @@ let observer = new MutationObserver(mutations => {
         if (separator) {
           _logging__WEBPACK_IMPORTED_MODULE_0__.logger.log("Found separator");
           observer.disconnect();
-          (0,_contentModifiers__WEBPACK_IMPORTED_MODULE_1__.alterNote)(separator);
+          (0,_contentModifiers__WEBPACK_IMPORTED_MODULE_1__.alterTwitterNoteSeparator)(separator);
           return;
         }
       }

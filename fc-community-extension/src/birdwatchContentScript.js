@@ -1,5 +1,5 @@
 import { logger } from "./logging";
-import { alterNote } from "./contentModifiers";
+import { alterTwitterNoteSeparator } from "./contentModifiers";
 
 let observer = new MutationObserver(mutations => {
   for(let mutation of mutations) {
@@ -9,7 +9,7 @@ let observer = new MutationObserver(mutations => {
         if (separator) {
           logger.log("Found separator");
           observer.disconnect();
-          alterNote(separator);
+          alterTwitterNoteSeparator(separator);
           return;
         }
       }
