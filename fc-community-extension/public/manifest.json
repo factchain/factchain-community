@@ -53,7 +53,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [ "icons/icon_128.png" ],
+      "resources": [ "icons/icon_128.png", "factchain.jpeg" ],
       "matches": [ "<all_urls>" ]
     }
   ]
