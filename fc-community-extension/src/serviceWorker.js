@@ -75,6 +75,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === "fc-get-from-cache") {
     console.log(`Get ${message.target} from cache`);
     sendResponse(cache[message.target]);
+  } else if (message.type === "fc-mint-twitter-note") {
+    console.log(`Mint twitter note '${message.noteUrl}' to address ${message.address}`);
   }
   
   return true;

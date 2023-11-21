@@ -8352,7 +8352,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const _tmpl$ = /*#__PURE__*/(0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.template)(`<div><img src=./factchain.jpeg width=300 style=height:70px;object-fit:cover;>`),
-  _tmpl$2 = /*#__PURE__*/(0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.template)(`<div><h1></h1><div>`),
+  _tmpl$2 = /*#__PURE__*/(0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.template)(`<div>Account: `),
   _tmpl$3 = /*#__PURE__*/(0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.template)(`<div><img src=./factchain.jpeg width=300 style=height:70px;object-fit:cover;><h1>Create New Note</h1><div><div>Post URL: </div><div><textarea id=content rows=10 cols=60 maxlength=500></textarea></div><div><button>Submit`),
   _tmpl$4 = /*#__PURE__*/(0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.template)(`<div>Transaction: <a>`),
   _tmpl$5 = /*#__PURE__*/(0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.template)(`<div>`),
@@ -8376,16 +8376,11 @@ function FCAddress({
   provider
 }) {
   const [address, setAddress] = (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createSignal)(null);
-  const name = () => {
-    return address() === "0x1e57abb408c7fd5d62177b6fe464730bffc6b430" ? "Note Rater" : "Note Creator";
-  };
   provider.getAddress().then(setAddress);
   return (() => {
     const _el$3 = _tmpl$2(),
-      _el$4 = _el$3.firstChild,
-      _el$5 = _el$4.nextSibling;
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$4, name);
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$5, address);
+      _el$4 = _el$3.firstChild;
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$3, address, null);
     return _el$3;
   })();
 }
@@ -8410,55 +8405,56 @@ function FCCreateNote({
     return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
   };
   return (() => {
-    const _el$6 = _tmpl$3(),
-      _el$7 = _el$6.firstChild,
+    const _el$5 = _tmpl$3(),
+      _el$6 = _el$5.firstChild,
+      _el$7 = _el$6.nextSibling,
       _el$8 = _el$7.nextSibling,
-      _el$9 = _el$8.nextSibling,
+      _el$9 = _el$8.firstChild,
       _el$10 = _el$9.firstChild,
-      _el$11 = _el$10.firstChild,
-      _el$12 = _el$10.nextSibling,
-      _el$13 = _el$12.firstChild,
-      _el$14 = _el$12.nextSibling,
-      _el$15 = _el$14.firstChild;
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$10, postUrl, null);
-    _el$15.$$click = submit;
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$6, (() => {
+      _el$11 = _el$9.nextSibling,
+      _el$12 = _el$11.firstChild,
+      _el$13 = _el$11.nextSibling,
+      _el$14 = _el$13.firstChild;
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$9, postUrl, null);
+    _el$14.$$click = submit;
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$5, (() => {
       const _c$ = (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createMemo)(() => !!transactionHash());
       return () => _c$() ? (() => {
-        const _el$16 = _tmpl$4(),
-          _el$17 = _el$16.firstChild,
-          _el$18 = _el$17.nextSibling;
-        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$18, transactionHash);
-        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createRenderEffect)(() => (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.setAttribute)(_el$18, "href", transactionUrl()));
-        return _el$16;
+        const _el$15 = _tmpl$4(),
+          _el$16 = _el$15.firstChild,
+          _el$17 = _el$16.nextSibling;
+        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$17, transactionHash);
+        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createRenderEffect)(() => (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.setAttribute)(_el$17, "href", transactionUrl()));
+        return _el$15;
       })() : _tmpl$5();
     })(), null);
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$6, (() => {
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$5, (() => {
       const _c$2 = (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createMemo)(() => !!error());
       return () => _c$2() ? (() => {
-        const _el$20 = _tmpl$6(),
-          _el$21 = _el$20.firstChild;
-        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$20, () => JSON.stringify(error()), null);
-        return _el$20;
+        const _el$19 = _tmpl$6(),
+          _el$20 = _el$19.firstChild;
+        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$19, () => JSON.stringify(error()), null);
+        return _el$19;
       })() : _tmpl$5();
     })(), null);
     (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createRenderEffect)(_p$ => {
       const _v$ = !!transactionHash(),
         _v$2 = !!transactionHash();
-      _v$ !== _p$._v$ && (_el$13.disabled = _p$._v$ = _v$);
-      _v$2 !== _p$._v$2 && (_el$15.disabled = _p$._v$2 = _v$2);
+      _v$ !== _p$._v$ && (_el$12.disabled = _p$._v$ = _v$);
+      _v$2 !== _p$._v$2 && (_el$14.disabled = _p$._v$2 = _v$2);
       return _p$;
     }, {
       _v$: undefined,
       _v$2: undefined
     });
-    return _el$6;
+    return _el$5;
   })();
 }
 function FCRateNote({
   postUrl,
   creator,
   content,
+  currentAddress,
   rateNote
 }) {
   const [transaction, setTransaction] = (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createSignal)(null);
@@ -8477,63 +8473,65 @@ function FCRateNote({
   const transactionUrl = () => {
     return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
   };
+  const isCreator = creator.toLowerCase() === currentAddress.toLowerCase();
   return (() => {
-    const _el$23 = _tmpl$7(),
+    const _el$22 = _tmpl$7(),
+      _el$23 = _el$22.firstChild,
       _el$24 = _el$23.firstChild,
       _el$25 = _el$24.firstChild,
-      _el$26 = _el$25.firstChild,
-      _el$27 = _el$25.nextSibling,
-      _el$28 = _el$27.firstChild,
-      _el$29 = _el$27.nextSibling,
-      _el$30 = _el$29.firstChild;
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$26, content);
-    _el$30.$$click = submit;
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$24, (() => {
+      _el$26 = _el$24.nextSibling,
+      _el$27 = _el$26.firstChild,
+      _el$28 = _el$26.nextSibling,
+      _el$29 = _el$28.firstChild;
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$25, content);
+    _el$29.$$click = submit;
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$23, (() => {
       const _c$3 = (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createMemo)(() => !!transactionHash());
       return () => _c$3() ? (() => {
-        const _el$31 = _tmpl$4(),
-          _el$32 = _el$31.firstChild,
-          _el$33 = _el$32.nextSibling;
-        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$33, transactionHash);
-        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createRenderEffect)(() => (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.setAttribute)(_el$33, "href", transactionUrl()));
-        return _el$31;
+        const _el$30 = _tmpl$4(),
+          _el$31 = _el$30.firstChild,
+          _el$32 = _el$31.nextSibling;
+        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$32, transactionHash);
+        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createRenderEffect)(() => (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.setAttribute)(_el$32, "href", transactionUrl()));
+        return _el$30;
       })() : _tmpl$5();
     })(), null);
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$24, (() => {
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$23, (() => {
       const _c$4 = (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createMemo)(() => !!error());
       return () => _c$4() ? (() => {
-        const _el$35 = _tmpl$6(),
-          _el$36 = _el$35.firstChild;
-        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$35, () => JSON.stringify(error()), null);
-        return _el$35;
+        const _el$34 = _tmpl$6(),
+          _el$35 = _el$34.firstChild;
+        (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$34, () => JSON.stringify(error()), null);
+        return _el$34;
       })() : _tmpl$5();
     })(), null);
     (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createRenderEffect)(_p$ => {
-      const _v$3 = !!transactionHash(),
-        _v$4 = !!transactionHash();
-      _v$3 !== _p$._v$3 && (_el$28.disabled = _p$._v$3 = _v$3);
-      _v$4 !== _p$._v$4 && (_el$30.disabled = _p$._v$4 = _v$4);
+      const _v$3 = isCreator || !!transactionHash(),
+        _v$4 = isCreator || !!transactionHash();
+      _v$3 !== _p$._v$3 && (_el$27.disabled = _p$._v$3 = _v$3);
+      _v$4 !== _p$._v$4 && (_el$29.disabled = _p$._v$4 = _v$4);
       return _p$;
     }, {
       _v$3: undefined,
       _v$4: undefined
     });
-    return _el$23;
+    return _el$22;
   })();
 }
 function FCRateNotes({
   postUrl,
   notes,
-  rateNote
+  rateNote,
+  currentAddress
 }) {
   return (() => {
-    const _el$38 = _tmpl$8(),
-      _el$39 = _el$38.firstChild,
+    const _el$37 = _tmpl$8(),
+      _el$38 = _el$37.firstChild,
+      _el$39 = _el$38.nextSibling,
       _el$40 = _el$39.nextSibling,
-      _el$41 = _el$40.nextSibling,
-      _el$42 = _el$41.firstChild;
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$41, postUrl, null);
-    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$38, (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createComponent)(solid_js_web__WEBPACK_IMPORTED_MODULE_1__.For, {
+      _el$41 = _el$40.firstChild;
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$40, postUrl, null);
+    (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.insert)(_el$37, (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createComponent)(solid_js_web__WEBPACK_IMPORTED_MODULE_1__.For, {
       each: notes,
       children: note => (0,solid_js_web__WEBPACK_IMPORTED_MODULE_1__.createComponent)(FCRateNote, {
         get postUrl() {
@@ -8545,10 +8543,11 @@ function FCRateNotes({
         get content() {
           return note.content;
         },
+        currentAddress: currentAddress,
         rateNote: rateNote
       })
     }), null);
-    return _el$38;
+    return _el$37;
   })();
 }
 (0,solid_js_web__WEBPACK_IMPORTED_MODULE_0__.delegateEvents)(["click"]);

@@ -26948,10 +26948,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   FC_CONTRACT_ABI: () => (/* binding */ FC_CONTRACT_ABI),
 /* harmony export */   FC_CONTRACT_ADDRESS: () => (/* binding */ FC_CONTRACT_ADDRESS),
 /* harmony export */   METAMASK_ID: () => (/* binding */ METAMASK_ID),
-/* harmony export */   POST_URL_REGEX: () => (/* binding */ POST_URL_REGEX)
+/* harmony export */   NOTE_URL_REGEX: () => (/* binding */ NOTE_URL_REGEX),
+/* harmony export */   POST_URL_REGEX: () => (/* binding */ POST_URL_REGEX),
+/* harmony export */   parseUrl: () => (/* binding */ parseUrl)
 /* harmony export */ });
 const METAMASK_ID = "nkbihfbeogaeaoehlefnkodbefgpgknn";
 const POST_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/status\/\d+).*$/;
+const NOTE_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/birdwatch\/n\/\d+).*$/;
+const parseUrl = (url, regex) => url.match(regex)[1].replace("twitter.com", "x.com");
 // TODO read address from service once
 const FC_CONTRACT_ADDRESS = "0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428";
 const FC_CONTRACT_ABI = [{

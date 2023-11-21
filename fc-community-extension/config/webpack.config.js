@@ -15,6 +15,7 @@ const config = (env, argv) =>
       defaultContentScript: PATHS.src + '/defaultContentScript.js',
       statusContentScript: PATHS.src + '/statusContentScript.js',
       subscribeContentScript: PATHS.src + '/subscribeContentScript.js',
+      birdwatchContentScript: PATHS.src + '/birdwatchContentScript.js',
       web3: PATHS.src + '/web3.js',
       logging: PATHS.src + '/logging.js',
       components: PATHS.src + '/components.js',
