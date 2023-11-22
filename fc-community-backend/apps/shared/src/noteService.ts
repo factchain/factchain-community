@@ -54,5 +54,11 @@ export class NoteService {
     // TODO: init final rating to -1 in the FactChainCommunity contract
     if (note.finalRating! == 0)
       throw new Error("mint failed: note isn't finalised!");
+
+    return await this.writer.mintNote721({
+      postUrl: postUrl,
+      creator: creator,
+      content: note.content
+    });
   };
 }
