@@ -1,4 +1,4 @@
-/// For now we deactivate the subscribeContentScript
+/// For now we deactivate notifications and the subscribeContentScript
 /// It is not super useful for users, and it forces the user to
 /// link their web3 provider when the page opens, which is not a
 /// great UX.

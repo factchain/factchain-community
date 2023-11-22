@@ -4,12 +4,14 @@ let cache = {
   notes: [],
 };
 
-chrome.notifications.onClicked.addListener(async (postUrl) => {
-  console.log(`Clicked on notification`, postUrl);
-  chrome.tabs.create({
-    url: postUrl
-  });
-});
+/// For now we deactivate notifications
+///
+// chrome.notifications.onClicked.addListener(async (postUrl) => {
+//   console.log(`Clicked on notification`, postUrl);
+//   chrome.tabs.create({
+//     url: postUrl
+//   });
+// });
 
 const getNotes = (postUrl, handler) => {
   const urlParams = new URLSearchParams({postUrl});
@@ -62,22 +64,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         top: 0,
         left: 0,
     });
-  } else if (message.type === "fc-notify") {
-    console.log(`Creating notification for ${message.postUrl}`);
-    chrome.notifications.create(message.postUrl, {
-      type: 'basic',
-      iconUrl: 'icons/icon_32.png',
-      title: message.title,
-      message: message.content,
-      buttons: [{ title: 'Take me there' }],
-      priority: 2
-    });
   } else if (message.type === "fc-get-from-cache") {
     console.log(`Get ${message.target} from cache`);
     sendResponse(cache[message.target]);
   } else if (message.type === "fc-mint-twitter-note") {
     console.log(`Mint twitter note '${message.noteUrl}' to address ${message.address}`);
   }
+  /// For now we deactivate notifications
+  ///
+  // } else if (message.type === "fc-notify") {
+  // console.log(`Creating notification for ${message.postUrl}`);
+  // chrome.notifications.create(message.postUrl, {
+  //   type: 'basic',
+  //   iconUrl: 'icons/icon_32.png',
+  //   title: message.title,
+  //   message: message.content,
+  //   buttons: [{ title: 'Take me there' }],
+  //   priority: 2
+  // });
   
   return true;
 });
