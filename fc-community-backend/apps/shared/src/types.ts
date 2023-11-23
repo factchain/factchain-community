@@ -44,10 +44,6 @@ export type NotesResponse = {
   notes: Array<Note>;
 };
 
-export type tokenID = {
-  id: number;
-  new: boolean;
-}
 
 export type FactChainEvent =
   | "ReserveFunded"

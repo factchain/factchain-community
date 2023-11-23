@@ -1,7 +1,8 @@
 import axios from "axios";
 import FormData from "form-data";
 import Replicate from "replicate";
-import { Note, XCommunityNote, tokenID } from "./types";
+import { Note, XCommunityNote } from "./types";
+import { S3fileExists, urlToID } from "./utils";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID, createHash } from "crypto";
 
@@ -146,38 +147,33 @@ export const createNFT721DataFromNote = async (
 };
 
 
-const getXCommunityNoteTokenID = async (url: string): Promise<tokenID> => {
-  // TODO: get token id from DB or create a new one (last ID + 1)
-  return { id: 1, new: true };
-}
-
 export const getOrcreateNFT1155DatafromXCommunityNote = async (
   note: XCommunityNote,
   replicateApiToken: string,
   AWSAccessKeyID: string,
   AWSSecretAccessKey: string,
   AWSRegion: string,
-): Promise<tokenID> => {
+): Promise<number> => {
 
-  const noteID = createHash("md5").update(note.url).digest("hex");
-  const tokenID = await getXCommunityNoteTokenID(noteID);
+  const tokenID = urlToID(note.url);
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: AWSAccessKeyID,
+      secretAccessKey: AWSSecretAccessKey,
+    },
+    region: AWSRegion,
+  });
+
   // Do not create NFT data if token already exist!
   // New token means first mint: we must create the token metadata
-  if (tokenID.new) {
-    const client = new S3Client({
-      credentials: {
-        accessKeyId: AWSAccessKeyID,
-        secretAccessKey: AWSSecretAccessKey,
-      },
-      region: AWSRegion,
-    });
+  if (!await S3fileExists(client, `${tokenID}.png`)) {
     const replicateUrl = await generateNoteImage(note.content, replicateApiToken);
     const imageBuffer = (
       await axios.get(replicateUrl, { responseType: "arraybuffer" })
     ).data;
     const params = {
       Bucket: "factchain-community",
-      Key: `${noteID}.png`,
+      Key: `${tokenID}.png`,
       Body: imageBuffer,
       ContentType: "image/png",
     };
@@ -192,9 +188,9 @@ export const getOrcreateNFT1155DatafromXCommunityNote = async (
     const tokenMetadata = JSON.stringify({
       name: note.url,
       description: note.content,
-      image: `https://factchain-community.s3.eu-west-3.amazonaws.com/${noteID}.png`
+      image: `https://factchain-community.s3.eu-west-3.amazonaws.com/${tokenID}.png`,
     });
-    params["Key"] = `${tokenID.id}.json`;
+    params["Key"] = `${tokenID}.json`;
     params["ContentType"] = "application/json";
     params["Body"] = tokenMetadata;
     command = new PutObjectCommand(params);
