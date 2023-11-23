@@ -1,0 +1,3 @@
+[submodule "fc-community-contracts/lib/openzeppelin-contracts"]
+	path = fc-community-contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
