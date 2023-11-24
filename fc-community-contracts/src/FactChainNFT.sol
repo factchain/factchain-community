@@ -13,10 +13,7 @@ contract FactChainNFT is Ownable, ERC721URIStorage {
     uint256 public tokenIdCounter;
     string private baseTokenURI;
 
-    constructor(address _owner, string memory _baseTokenURI)
-        Ownable(_owner)
-        ERC721("FactchainNotes", "FCN")
-    {
+    constructor(address _owner, string memory _baseTokenURI) Ownable(_owner) ERC721("FactchainNotes", "FCN") {
         tokenIdCounter = 0;
         baseTokenURI = _baseTokenURI;
     }
