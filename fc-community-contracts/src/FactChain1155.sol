@@ -4,26 +4,33 @@ pragma solidity ^0.8.20;
 import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import {Ownable} from "./utils/Ownable.sol";
 
+
+interface IFactChain1155Events {
+    // Events
+    event NewToken(uint256 tokenId, uint256 tokenSupply);
+    event MintWithProvidedValue(uint256 tokenId, uint256 value);
+    event MintWithAdjustedValue(uint256 tokenId, uint256 value);
+}
+
+interface IFactChain1155 is IFactChain1155Events {
+    // Errors
+    error SupplyExhausted();
+    error Greed();
+    error NoTokenAssociated();
+    error BadMintPrice();
+}
+
+
 /// @title X Community Note NFTs
 /// @author Pierre HAY
 /// @notice
 /// @dev
-contract FactChain1155 is Ownable, ERC1155 {
+contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
     mapping(uint256 id => uint256) public supply;
 
-    // Errors
-    error SupplyExhausted();
-    error Greed();
-    error NoTokenAssociatedToGivenUrl();
-    error BadMintPrice();
-
-    // Events
-    event NewToken(uint256 tokenId, uint256 tokenSupply);
-    event MintWithProvidedValue(uint256 tokenId, uint256 value);
-    event MintWithAdjustedValue(uint256 tokenId, uint256 value);
 
     constructor(address _owner)
         Ownable(_owner)
@@ -33,6 +40,10 @@ contract FactChain1155 is Ownable, ERC1155 {
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
+    
+    function setTokenSupply(uint256 id, uint256 _supply) public onlyOwner {
+        supply[id] = _supply;
+    }
 
     function getTokenID(string memory url) public view returns (uint256) {
         // the token ID is a 9 to 10 digits number calculated from
@@ -41,7 +52,7 @@ contract FactChain1155 is Ownable, ERC1155 {
         // shift 224 bits to the right
         // effectively taking the first (256 - 224) 32 bits (8 hex characters) of the hash.
         uint256 tokenId = uint256(hash) >> 224;
-        if (supply[tokenId] == 0) revert NoTokenAssociatedToGivenUrl();
+        if (supply[tokenId] == 0) revert NoTokenAssociated();
         return tokenId;
     }
 
@@ -55,8 +66,8 @@ contract FactChain1155 is Ownable, ERC1155 {
             emit NewToken(id, supply[id]);
         }
         if (value > supply[id]) {
-            emit MintWithAdjustedValue(id, value - supply[id]);
-            _mint(msg.sender, id, value - supply[id], data);
+            emit MintWithAdjustedValue(id, supply[id]);
+            _mint(msg.sender, id, supply[id], data);
             supply[id] = SUPPLY_EXHAUSTED;
         } else {
             emit MintWithProvidedValue(id, value);
