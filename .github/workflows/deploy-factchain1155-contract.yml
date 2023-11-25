@@ -10,7 +10,7 @@ jobs:
   deploy-contract:
     runs-on: ubuntu-latest
     env:
-      CONTRACT_NAME: FactChainNFT
+      CONTRACT_NAME: FactChain1155
       CHAIN_ID: 11155111
       ETH_RPC_URL: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
       PRIVATE_KEY: ${{ secrets.DEPLOYER_PK }}

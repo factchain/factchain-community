@@ -40,7 +40,10 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
-    
+
+
+    // useful for testing
+    // TODO: get rid of it
     function setTokenSupply(uint256 id, uint256 _supply) public onlyOwner {
         supply[id] = _supply;
     }
