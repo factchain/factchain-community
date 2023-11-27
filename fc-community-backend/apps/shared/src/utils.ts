@@ -34,8 +34,10 @@ export function timePeriodToBlockPeriods(
   });
 }
 
-export async function S3fileExists(client: S3Client, key: string): Promise<boolean> {
-
+export async function S3fileExists(
+  client: S3Client,
+  key: string,
+): Promise<boolean> {
   const params = {
     Bucket: "factchain-community",
     Key: key,
@@ -57,5 +59,5 @@ export async function S3fileExists(client: S3Client, key: string): Promise<boole
 
 export function urlToID(url: string): number {
   const urlb = new TextEncoder().encode(url);
-  return parseInt(keccak256(urlb).substring(2,10), 16);
+  return parseInt(keccak256(urlb).substring(2, 10), 16);
 }

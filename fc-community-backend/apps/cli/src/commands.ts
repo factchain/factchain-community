@@ -89,16 +89,11 @@ export const mintNote = async (
   });
 };
 
-
-export const mintXCommunityNote = async (
+export const createXCommunityNoteNFTMetadata = async (
   text: string,
-  noteURL: string,
-  claimer: string,
-): Promise<void> => {
+  noteUrl: string,
+): Promise<number> => {
   const fc = new FactChainBackend(config);
-  return await fc.mintNote1155({
-    url: noteURL,
-    content: text,
-    claimer: claimer
-  });
+  const ns = new NoteService(fc, fc);
+  return await ns.createXNoteMetadata(noteUrl, text);
 };

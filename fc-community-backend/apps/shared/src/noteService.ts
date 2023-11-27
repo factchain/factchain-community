@@ -58,7 +58,19 @@ export class NoteService {
     return await this.writer.mintNote721({
       postUrl: postUrl,
       creator: creator,
-      content: note.content
+      content: note.content,
+    });
+  };
+
+  //Throw if doesn't exist
+  getXNoteID = async (noteUrl: string) => {
+    return await this.reader.getXNoteID({ url: noteUrl });
+  };
+
+  createXNoteMetadata = async (noteUrl: string, content: string) => {
+    return await this.writer.createXNoteMetadata({
+      url: noteUrl,
+      content: content,
     });
   };
 }

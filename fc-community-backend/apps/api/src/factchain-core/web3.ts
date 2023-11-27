@@ -1,6 +1,17 @@
 import { EventLog, ethers, ContractTransactionResponse } from "ethers";
-import { Note, XCommunityNote, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
-import { createNFT721DataFromNote, getOrcreateNFT1155DatafromXCommunityNote } from "./nftService";
+import {
+  Note,
+  XCommunityNote,
+  NoteReader,
+  Rating,
+  FactChainEvent,
+  NoteWriter,
+} from "./types";
+import {
+  createNFT721DataFromNote,
+  getNFT1155DatafromXCommunityNote,
+  createNFT1155DatafromXCommunityNote,
+} from "./nftService";
 import { timePeriodToBlockPeriods } from "./utils";
 import {
   FC_COMMUNITY_JSON_ABI,
@@ -171,13 +182,24 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     return await this._fcNFT.mint(note.creator, metadataIpfsHash);
   };
 
-  mintNote1155 = async (note: XCommunityNote): Promise<void> => {
-    const tokenID = await getOrcreateNFT1155DatafromXCommunityNote(
+  getXNoteID = async (note: XCommunityNote): Promise<number> => {
+    const tokenID = await getNFT1155DatafromXCommunityNote(
+      note,
+      this._config.AWS_ACCESS_KEY,
+      this._config.AWS_SECRET_ACCESS_KEY,
+      this._config.AWS_REGION,
+    );
+    return tokenID;
+  };
+
+  createXNoteMetadata = async (note: XCommunityNote): Promise<number> => {
+    const tokenID = await createNFT1155DatafromXCommunityNote(
       note,
       this._config.REPLICATE_API_TOKEN,
       this._config.AWS_ACCESS_KEY,
       this._config.AWS_SECRET_ACCESS_KEY,
       this._config.AWS_REGION,
     );
+    return tokenID;
   };
 }

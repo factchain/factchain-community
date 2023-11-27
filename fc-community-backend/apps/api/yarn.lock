@@ -5242,10 +5242,10 @@ repeat-string@^1.6.1:
   resolved "https://registry.yarnpkg.com/repeat-string/-/repeat-string-1.6.1.tgz#8dcae470e1c88abc2d600fff4a776286da75e637"
   integrity sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==
 
-replicate@^0.20.1:
-  version "0.20.1"
-  resolved "https://registry.yarnpkg.com/replicate/-/replicate-0.20.1.tgz#3f9032eaa6a8469dac9abab914967fc2e6cb1549"
-  integrity sha512-QVyI1rowGsSfNuDrRmumYPdCHa/fN/RkI3NHpcK0i5hSSiWK69URAyheAC/0MIAiS3oUs4kD56PB9zEI4oHENw==
+replicate@^0.22.0:
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/replicate/-/replicate-0.22.0.tgz#d882975158ada1eab6d6191e439c86308a164ca6"
+  integrity sha512-jUfvYCcnnzG0l3NzgNLUBRfv7e5ZcZpBWzxGqx3v8bkvJmY0jK19JRtFtBgJFRBye61ggH1zC9cubGkburF82g==
 
 require-directory@^2.1.1:
   version "2.1.1"

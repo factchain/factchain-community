@@ -8,7 +8,7 @@ import {
   finaliseNote,
   getEligibleNotes,
   mintNote,
-  mintXCommunityNote
+  createXCommunityNoteNFTMetadata,
 } from "./commands";
 
 import { FactChainEvent } from "./factchain-core/types";
@@ -81,9 +81,7 @@ program
 
 program
   .command("mint-note")
-  .description(
-    "generate nft data, upload to IPFS and mint for the creator",
-  )
+  .description("generate nft data, upload to IPFS and mint for the creator")
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
@@ -91,17 +89,13 @@ program
     await mintNote(options.text, options.url, options.creator);
   });
 
-
 program
-  .command("mint-x-community-note")
-  .description(
-    "generate nft data, upload to s3 and mint for the claimer",
-  )
+  .command("create-x-community-note")
+  .description("generate nft data and upload to s3")
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Note url")
-  .option("-c, --claimer <address>", "Note claimer")
   .action(async (options: any) => {
-    await mintXCommunityNote(options.text, options.url, options.claimer);
+    await createXCommunityNoteNFTMetadata(options.text, options.url);
   });
 
 program.parse();

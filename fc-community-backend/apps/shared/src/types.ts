@@ -36,14 +36,16 @@ export type Note = {
 
 export type XCommunityNote = {
   url: string;
-  content: string;
-  claimer: string;
-}
+  content?: string;
+};
 
 export type NotesResponse = {
   notes: Array<Note>;
 };
 
+export type XNoteIDResponse = {
+  id: number;
+};
 
 export type FactChainEvent =
   | "ReserveFunded"
@@ -59,6 +61,7 @@ export interface NoteReader {
   getNote: (postUrl: string, creator: string) => Promise<Note>;
   getNotes: (postUrl: string) => Promise<Array<Note>>;
   getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;
+  getXNoteID: (note: XCommunityNote) => Promise<number>;
 }
 
 export interface NoteWriter {
@@ -77,5 +80,5 @@ export interface NoteWriter {
     rating: number,
   ) => Promise<ContractTransactionResponse>;
   mintNote721: (note: Note) => Promise<ContractTransactionResponse>;
-  mintNote1155: (note: XCommunityNote) => Promise<void>;
+  createXNoteMetadata: (note: XCommunityNote) => Promise<number>;
 }

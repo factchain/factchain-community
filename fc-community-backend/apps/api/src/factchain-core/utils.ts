@@ -1,3 +1,6 @@
+import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { keccak256 } from "ethers";
+
 export function timePeriodToBlockPeriods(
   from: Date,
   to: Date,
@@ -29,4 +32,32 @@ export function timePeriodToBlockPeriods(
       Math.min(fromBlock + (i + 1) * maxPeriodLength, toBlock),
     ];
   });
+}
+
+export async function S3fileExists(
+  client: S3Client,
+  key: string,
+): Promise<boolean> {
+  const params = {
+    Bucket: "factchain-community",
+    Key: key,
+  };
+
+  try {
+    const command = new HeadObjectCommand(params);
+    const response = await client.send(command);
+    return true;
+  } catch (error) {
+    if (error instanceof Error && error.name === "NotFound") {
+      return false;
+    } else {
+      console.error("Error checking file existence in S3:", error);
+      throw error;
+    }
+  }
+}
+
+export function urlToID(url: string): number {
+  const urlb = new TextEncoder().encode(url);
+  return parseInt(keccak256(urlb).substring(2, 10), 16);
 }

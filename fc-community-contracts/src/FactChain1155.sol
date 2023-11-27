@@ -59,7 +59,7 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         return tokenId;
     }
 
-    function mint(uint256 id, uint256 value, bytes memory data) external payable {
+    function mint(uint256 id, uint256 value) external payable {
         if (msg.value != MINT_PRICE) revert BadMintPrice();
         if (value > MAX_TOKEN_SUPPLY) revert Greed();
         if (supply[id] == SUPPLY_EXHAUSTED) revert SupplyExhausted();
@@ -70,11 +70,11 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         }
         if (value > supply[id]) {
             emit MintWithAdjustedValue(id, supply[id]);
-            _mint(msg.sender, id, supply[id], data);
+            _mint(msg.sender, id, supply[id], "");
             supply[id] = SUPPLY_EXHAUSTED;
         } else {
             emit MintWithProvidedValue(id, value);
-            _mint(msg.sender, id, value, data);
+            _mint(msg.sender, id, value, "");
             supply[id] == value ? supply[id] = SUPPLY_EXHAUSTED : supply[id] -= value;
         }
     }

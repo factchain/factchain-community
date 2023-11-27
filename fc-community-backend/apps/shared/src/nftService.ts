@@ -4,14 +4,14 @@ import Replicate from "replicate";
 import { Note, XCommunityNote } from "./types";
 import { S3fileExists, urlToID } from "./utils";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { randomUUID, createHash } from "crypto";
-
+import { randomUUID } from "crypto";
 
 const generateNoteImage = async (
   content: string,
   replicateApiToken: string,
   count = 0,
 ): Promise<string> => {
+  console.log(Replicate);
   const replicate = new Replicate({
     auth: replicateApiToken,
   });
@@ -130,7 +130,10 @@ export const createNFT721DataFromNote = async (
     throw new Error("Can't generate image from empty note!");
   }
 
-  const replicateUrl = await generateNoteImage(note.content!, replicateApiToken);
+  const replicateUrl = await generateNoteImage(
+    note.content!,
+    replicateApiToken,
+  );
   const noteUID = randomUUID();
   const pinataImageCID = await uploadImageToPinata(
     replicateUrl,
@@ -146,15 +149,12 @@ export const createNFT721DataFromNote = async (
   return pinataMetadataCID;
 };
 
-
-export const getOrcreateNFT1155DatafromXCommunityNote = async (
+export const getNFT1155DatafromXCommunityNote = async (
   note: XCommunityNote,
-  replicateApiToken: string,
   AWSAccessKeyID: string,
   AWSSecretAccessKey: string,
   AWSRegion: string,
 ): Promise<number> => {
-
   const tokenID = urlToID(note.url);
   const client = new S3Client({
     credentials: {
@@ -164,43 +164,66 @@ export const getOrcreateNFT1155DatafromXCommunityNote = async (
     region: AWSRegion,
   });
 
-  // Do not create NFT data if token already exist!
-  // New token means first mint: we must create the token metadata
-  if (!await S3fileExists(client, `${tokenID}.png`)) {
-    const replicateUrl = await generateNoteImage(note.content, replicateApiToken);
-    const imageBuffer = (
-      await axios.get(replicateUrl, { responseType: "arraybuffer" })
-    ).data;
-    const params = {
-      Bucket: "factchain-community",
-      Key: `${tokenID}.png`,
-      Body: imageBuffer,
-      ContentType: "image/png",
-    };
-    let command = new PutObjectCommand(params);
-    try {
-      const response = await client.send(command);
-      console.log(`Image uploaded successfully. ETag: ${response.ETag}`);
-    } catch (error) {
-      console.error("Error uploading to S3:", error);
-      throw error;
-    }
-    const tokenMetadata = JSON.stringify({
-      name: note.url,
-      description: note.content,
-      image: `https://factchain-community.s3.eu-west-3.amazonaws.com/${tokenID}.png`,
-    });
-    params["Key"] = `${tokenID}.json`;
-    params["ContentType"] = "application/json";
-    params["Body"] = tokenMetadata;
-    command = new PutObjectCommand(params);
-    try {
-      const response = await client.send(command);
-      console.log(`Metadata uploaded successfully. ETag: ${response.ETag}`);
-    } catch (error) {
-      console.error("Error uploading to S3:", error);
-      throw error;
-    }
+  if (!(await S3fileExists(client, `${tokenID}.png`))) {
+    throw new Error(
+      `Not Found: X Community Note ${note.url} doesn't exist on Factchain!`,
+    );
   }
-  return tokenID
-}
+  return tokenID;
+};
+
+export const createNFT1155DatafromXCommunityNote = async (
+  note: XCommunityNote,
+  replicateApiToken: string,
+  AWSAccessKeyID: string,
+  AWSSecretAccessKey: string,
+  AWSRegion: string,
+): Promise<number> => {
+  const tokenID = urlToID(note.url);
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: AWSAccessKeyID,
+      secretAccessKey: AWSSecretAccessKey,
+    },
+    region: AWSRegion,
+  });
+
+  const replicateUrl = await generateNoteImage(
+    note.content!,
+    replicateApiToken,
+  );
+  const imageBuffer = (
+    await axios.get(replicateUrl, { responseType: "arraybuffer" })
+  ).data;
+  const params = {
+    Bucket: "factchain-community",
+    Key: `${tokenID}.png`,
+    Body: imageBuffer,
+    ContentType: "image/png",
+  };
+  let command = new PutObjectCommand(params);
+  try {
+    const response = await client.send(command);
+    console.log(`Image uploaded successfully. ETag: ${response.ETag}`);
+  } catch (error) {
+    console.error("Error uploading to S3:", error);
+    throw error;
+  }
+  const tokenMetadata = JSON.stringify({
+    name: note.url,
+    description: note.content,
+    image: `https://factchain-community.s3.eu-west-3.amazonaws.com/${tokenID}.png`,
+  });
+  params["Key"] = `${tokenID}.json`;
+  params["ContentType"] = "application/json";
+  params["Body"] = tokenMetadata;
+  command = new PutObjectCommand(params);
+  try {
+    const response = await client.send(command);
+    console.log(`Metadata uploaded successfully. ETag: ${response.ETag}`);
+  } catch (error) {
+    console.error("Error uploading to S3:", error);
+    throw error;
+  }
+  return tokenID;
+};
