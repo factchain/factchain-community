@@ -41,13 +41,6 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         _setURI(newuri);
     }
 
-
-    // useful for testing
-    // TODO: get rid of it
-    function setTokenSupply(uint256 id, uint256 _supply) public onlyOwner {
-        supply[id] = _supply;
-    }
-
     function getTokenID(string memory url) public view returns (uint256) {
         // the token ID is a 9 to 10 digits number calculated from
         // the url hash by converting to decimal its first 8 hex characters.
@@ -89,4 +82,12 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         // We rewrite the Ownbale supportInterface check first to have it included in the call chain.
         return interfaceId == 0x7f5828d0 || super.supportsInterface(interfaceId);
     }
+
+    // function setTokenSupply(uint256 id, uint256 _supply) public onlyOwner {
+    //     // Since the supply is random for any token, `setTokenSupply`
+    //     // is useful for testing but obviously not acceptable in production.
+    //     // Uncomment the following function to activate following tests
+    //     // testMintWithAdjustedValue, testMintWithProvidedValue from test/FactChain1155.sol
+    //     supply[id] = _supply;
+    // }
 }
