@@ -8,6 +8,10 @@ const DEFAULT_CONFIG: Config = {
   NFT_CONTRACT_ADDRESS: "",
   REPLICATE_API_TOKEN: "",
   PINATA_JWT: "",
+  AWS_ACCESS_KEY: "",
+  AWS_SECRET_ACCESS_KEY: "",
+  AWS_REGION: "",
+  AWS_BUCKET: "",
 };
 
 export const config: Config = Object.keys(DEFAULT_CONFIG).reduce((o, key) => {

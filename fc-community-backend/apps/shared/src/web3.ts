@@ -1,6 +1,17 @@
 import { EventLog, ethers, ContractTransactionResponse } from "ethers";
-import { Note, NoteReader, Rating, FactChainEvent, NoteWriter } from "./types";
-import { createNFTDataFromNote } from "./nftService";
+import {
+  Note,
+  XCommunityNote,
+  NoteReader,
+  Rating,
+  FactChainEvent,
+  NoteWriter,
+} from "./types";
+import {
+  createNFT721DataFromNote,
+  getNFT1155DatafromXCommunityNote,
+  createNFT1155DatafromXCommunityNote,
+} from "./nftService";
 import { timePeriodToBlockPeriods } from "./utils";
 import {
   FC_COMMUNITY_JSON_ABI,
@@ -10,7 +21,7 @@ import {
 } from "./contractsAbi";
 import { Config } from "./types";
 
-export class FactChainContracts implements NoteReader, NoteWriter {
+export class FactChainBackend implements NoteReader, NoteWriter {
   private _config: Config;
   private _provider: ethers.AbstractProvider;
   private _fcCommunity: ethers.Contract;
@@ -19,16 +30,16 @@ export class FactChainContracts implements NoteReader, NoteWriter {
   constructor(config: Config) {
     this._config = config;
     this._provider = new ethers.JsonRpcProvider(this._config.INFRA_RPC_URL);
-    const user_identity = new ethers.Wallet(config.OWNER_PKEY, this._provider);
+    const wallet = new ethers.Wallet(config.OWNER_PKEY, this._provider);
     this._fcCommunity = new ethers.Contract(
       this._config.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,
-      user_identity,
+      wallet,
     );
     this._fcNFT = new ethers.Contract(
       this._config.NFT_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
-      user_identity,
+      wallet,
     );
   }
 
@@ -162,12 +173,35 @@ export class FactChainContracts implements NoteReader, NoteWriter {
     return transactionResponse;
   };
 
-  mintNote = async (note: Note): Promise<ContractTransactionResponse> => {
-    const metadataIpfsHash = await createNFTDataFromNote(
+  mintNote721 = async (note: Note): Promise<ContractTransactionResponse> => {
+    const metadataIpfsHash = await createNFT721DataFromNote(
       note,
       this._config.REPLICATE_API_TOKEN,
       this._config.PINATA_JWT,
     );
     return await this._fcNFT.mint(note.creator, metadataIpfsHash);
+  };
+
+  getXNoteID = async (note: XCommunityNote): Promise<number> => {
+    const tokenID = await getNFT1155DatafromXCommunityNote(
+      note,
+      this._config.AWS_ACCESS_KEY,
+      this._config.AWS_SECRET_ACCESS_KEY,
+      this._config.AWS_REGION,
+      this._config.AWS_BUCKET,
+    );
+    return tokenID;
+  };
+
+  createXNoteMetadata = async (note: XCommunityNote): Promise<number> => {
+    const tokenID = await createNFT1155DatafromXCommunityNote(
+      note,
+      this._config.REPLICATE_API_TOKEN,
+      this._config.AWS_ACCESS_KEY,
+      this._config.AWS_SECRET_ACCESS_KEY,
+      this._config.AWS_REGION,
+      this._config.AWS_BUCKET,
+    );
+    return tokenID;
   };
 }

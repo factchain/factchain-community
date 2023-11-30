@@ -16,6 +16,7 @@
     "clean": "rm -rf bin/*"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.456.0",
     "@types/lodash": "^4.14.199",
     "axios": "^1.6.0",
     "commander": "^11.1.0",

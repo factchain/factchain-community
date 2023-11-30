@@ -1,12 +1,13 @@
 import axios from "axios";
 import FormData from "form-data";
 import Replicate from "replicate";
-import { Note } from "./types";
-
+import { Note, XCommunityNote } from "./types";
+import { S3fileExists, makeS3Path, urlToID } from "./utils";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 
 const generateNoteImage = async (
-  note: Note,
+  content: string,
   replicateApiToken: string,
   count = 0,
 ): Promise<string> => {
@@ -22,7 +23,7 @@ const generateNoteImage = async (
         input: {
           width: 768,
           height: 768,
-          prompt: note.content,
+          prompt: content,
           refine: "expert_ensemble_refiner",
           scheduler: "K_EULER",
           lora_scale: 0.6,
@@ -44,7 +45,7 @@ const generateNoteImage = async (
     // retry twice if the note generated NSFW image
     // experimentally, chance of success are close to zero after two failures for NSFW content
     if (error instanceof Error && error.message.includes("NSFW") && count < 3) {
-      return generateNoteImage(note, replicateApiToken, count + 1);
+      return generateNoteImage(content, replicateApiToken, count + 1);
     } else {
       throw error;
     }
@@ -97,7 +98,7 @@ const uploadMetadataToPinata = async (
         image: `ipfs://${CID}`,
       },
       pinataMetadata: {
-        name: `Note-${noteUID}-Metadata`,
+        name: `note-${noteUID}-metadata.json`,
       },
     });
 
@@ -119,7 +120,7 @@ const uploadMetadataToPinata = async (
   }
 };
 
-export const createNFTDataFromNote = async (
+export const createNFT721DataFromNote = async (
   note: Note,
   replicateApiToken: string,
   pinataJwt: string,
@@ -128,7 +129,10 @@ export const createNFTDataFromNote = async (
     throw new Error("Can't generate image from empty note!");
   }
 
-  const replicateUrl = await generateNoteImage(note, replicateApiToken);
+  const replicateUrl = await generateNoteImage(
+    note.content!,
+    replicateApiToken,
+  );
   const noteUID = randomUUID();
   const pinataImageCID = await uploadImageToPinata(
     replicateUrl,
@@ -142,4 +146,88 @@ export const createNFTDataFromNote = async (
     pinataJwt,
   );
   return pinataMetadataCID;
+};
+
+export const getNFT1155DatafromXCommunityNote = async (
+  note: XCommunityNote,
+  AWSAccessKeyID: string,
+  AWSSecretAccessKey: string,
+  AWSRegion: string,
+  AWSBucket: string,
+): Promise<number> => {
+  const tokenID = urlToID(note.url);
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: AWSAccessKeyID,
+      secretAccessKey: AWSSecretAccessKey,
+    },
+    region: AWSRegion,
+  });
+
+  if (!(await S3fileExists(client, AWSBucket, `${tokenID}.png`))) {
+    throw new Error(
+      `Not Found: X Community Note ${note.url} doesn't exist on Factchain!`,
+    );
+  }
+  return tokenID;
+};
+
+export const createNFT1155DatafromXCommunityNote = async (
+  note: XCommunityNote,
+  replicateApiToken: string,
+  AWSAccessKeyID: string,
+  AWSSecretAccessKey: string,
+  AWSRegion: string,
+  AWSBucket: string,
+): Promise<number> => {
+  const tokenID = urlToID(note.url);
+  const client = new S3Client({
+    credentials: {
+      accessKeyId: AWSAccessKeyID,
+      secretAccessKey: AWSSecretAccessKey,
+    },
+    region: AWSRegion,
+  });
+
+  console.log(note.url);
+  console.log(note.content);
+
+  const replicateUrl = await generateNoteImage(
+    note.content!,
+    replicateApiToken,
+  );
+  const imageBuffer = (
+    await axios.get(replicateUrl, { responseType: "arraybuffer" })
+  ).data;
+  const params = {
+    Bucket: "factchain-community",
+    Key: `${tokenID}.png`,
+    Body: imageBuffer,
+    ContentType: "image/png",
+  };
+  let command = new PutObjectCommand(params);
+  try {
+    const response = await client.send(command);
+    console.log(`Image uploaded successfully. ETag: ${response.ETag}`);
+  } catch (error) {
+    console.error("Error uploading to S3:", error);
+    throw error;
+  }
+  const tokenMetadata = JSON.stringify({
+    name: note.url,
+    description: note.content,
+    image: makeS3Path(AWSBucket, AWSRegion, `${tokenID}.png`),
+  });
+  params["Key"] = `${tokenID}.json`;
+  params["ContentType"] = "application/json";
+  params["Body"] = tokenMetadata;
+  command = new PutObjectCommand(params);
+  try {
+    const response = await client.send(command);
+    console.log(`Metadata uploaded successfully. ETag: ${response.ETag}`);
+  } catch (error) {
+    console.error("Error uploading to S3:", error);
+    throw error;
+  }
+  return tokenID;
 };

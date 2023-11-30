@@ -1,16 +1,16 @@
-name: Deploy NFT contract
+name: Deploy FactChain1155 contract
 on:
   push:
     branches: [ main ]
     paths:
-      - fc-community-contracts/src/FactChainNFT.sol
+      - fc-community-contracts/src/FactChain1155.sol
       - fc-community-contracts/src/utils/Ownable.sol
   workflow_dispatch:
 jobs:
   deploy-contract:
     runs-on: ubuntu-latest
     env:
-      CONTRACT_NAME: FactChainNFT
+      CONTRACT_NAME: FactChain1155
       CHAIN_ID: 11155111
       ETH_RPC_URL: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
       PRIVATE_KEY: ${{ secrets.DEPLOYER_PK }}
@@ -33,7 +33,7 @@ jobs:
       - name: Deploy contract
         id: deploy
         run: |
-          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}.sol:${{ env.CONTRACT_NAME }}" --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS https://gateway.pinata.cloud/ipfs/`
+          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}.sol:${{ env.CONTRACT_NAME }}" --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS`
           echo "forge create output:\n\n$createOutput"
           deploymentOutput=`echo "${createOutput}" | head -1`
           echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
