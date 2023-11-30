@@ -1,6 +1,6 @@
 export const METAMASK_ID = "nkbihfbeogaeaoehlefnkodbefgpgknn";
 export const POST_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/status\/\d+).*$/;
-export const NOTE_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/birdwatch\/n\/\d+).*$/;
+export const NOTE_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/birdwatch\/.+?\/\d+).*$/;
 export const parseUrl = (url, regex) => url.match(regex)[1].replace("twitter.com", "x.com");
 // TODO read address from service once
 export const FC_CONTRACT_ADDRESS = "0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428";

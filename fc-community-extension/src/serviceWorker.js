@@ -29,6 +29,48 @@ const getNotes = (postUrl, handler) => {
   });
 }
 
+const getXNoteId = (noteUrl, content, handler) => {
+  const getUrlParams = new URLSearchParams({noteUrl});
+  const getUrl = `${BACKEND_URL}/x/note/id?${getUrlParams}`;
+  console.log("Getting id for note", getUrl);
+  
+  fetch(getUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  }).then(res => {
+    if (!res.ok) {
+      if (res.status === 404) {
+        console.error('Resource not found');
+        // Handle 404 specifically
+        createXNoteId(noteUrl, content, handler);
+      } else {
+        console.error('HTTP error:', res.status);
+        // Handle other HTTP errors
+      }
+      throw new Error('HTTP error: ' + res.status);
+    }
+    return res.json();
+  }).then(res => {
+    handler(res.id);
+  });
+}
+
+const createXNoteId = (noteUrl, content, handler) => {
+  fetch(`${BACKEND_URL}/x/note`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({noteUrl, content})
+  }).then(res => {
+    return res.json();
+  }).then(res => {
+    handler(res.id);
+  })
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Received message", message);
 
@@ -68,7 +110,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log(`Get ${message.target} from cache`);
     sendResponse(cache[message.target]);
   } else if (message.type === "fc-mint-twitter-note") {
-    console.log(`Mint twitter note '${message.noteUrl}' to address ${message.address}`);
+    console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}' to address ${message.address}`);
+
+    getXNoteId(message.noteUrl, message.content, (id) => {
+      console.log(`Got id ${id} for note`);
+    });
+    
   }
   /// For now we deactivate notifications
   ///
