@@ -4,7 +4,7 @@ import { FCRateNotes } from "./components";
 import { logger } from "./logging";
 
 const provider = createFactCheckProvider();
-const contract = await provider.getContract();
+const contract = await provider.getFCContract();
 const currentAddress = await provider.getAddress();
 
 const postUrl = await chrome.runtime.sendMessage({type: 'fc-get-from-cache', target: "postUrl"});

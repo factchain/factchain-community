@@ -114,6 +114,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     getXNoteId(message.noteUrl, message.content, (id) => {
       console.log(`Got id ${id} for note`);
+      sendResponse(id);
     });
     
   }

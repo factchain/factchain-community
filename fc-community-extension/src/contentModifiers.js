@@ -1,11 +1,29 @@
 import { logger } from "./logging";
-import { createFactCheckProvider } from "./web3";
+import { createFactCheckProvider, handleContractCallError } from "./web3";
 import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./constants";
 
 
 /// ---------------------------
 /// Birdwatch content modifiers
 /// ---------------------------
+
+
+// TODO move to a better place
+const mintXNote = async (noteId, value) => {
+  logger.log("Minting X note", noteId, value);
+  const provider = createFactCheckProvider();
+  const contract = await provider.getFC1155Contract();
+  let transaction = null;
+  let error = null;
+  try {
+    // TODO this is not triggering the contract call :(((
+    transaction = await contract.mint(noteId, value, {value: 1_000_000});
+  } catch (e) {
+    logger.log("Failed to mint note", e);
+    error = handleContractCallError(e);
+  }
+  return {transaction, error};
+};
 
 const makeSeparatorMintNoteHtml = () => {
   return `<div class="css-175oi2r r-g2wdr4 r-nsbfu8">
@@ -33,16 +51,21 @@ export const alterTwitterNoteSeparator = (separator) => {
 
   const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
   document.querySelector("#mintNoteButton").addEventListener("click", async () => {
-    const provider = createFactCheckProvider();
-    const currentAddress = await provider.getAddress();
     const contentBlocks = document.querySelectorAll("div.css-1rynq56.r-bcqeeo.r-qvutc0.r-1qd0xha.r-a023e6.r-rjixqe.r-16dba41.r-1udh08x");
     const content = contentBlocks[contentBlocks.length - 1].textContent;
-    logger.log(`Minting twitter note ${noteUrl} to address ${currentAddress}`);
+    logger.log(`Minting twitter note ${noteUrl}`);
     chrome.runtime.sendMessage({
       type: 'fc-mint-twitter-note',
       noteUrl,
-      address: currentAddress,
       content,
+    }, async (noteId) => {
+      logger.log(`Got id ${noteId} for note`);
+      const {transaction, error} = await mintXNote(noteId, 1);
+      if (error) {
+        logger.log(`Failed to mint note: ${error}`);
+      } else {
+        logger.log(`Success! ${transaction}`);
+      }
     });
   });
 };

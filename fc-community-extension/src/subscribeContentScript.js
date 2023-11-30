@@ -7,7 +7,7 @@
 // import { createFactCheckProvider } from "./web3";
 
 // const provider = createFactCheckProvider();
-// const contract = await provider.getContract();
+// const contract = await provider.getFCContract();
 
 
 // const notify = (title, content, postUrl) => {
