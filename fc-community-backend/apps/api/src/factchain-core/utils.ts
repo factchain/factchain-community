@@ -36,10 +36,11 @@ export function timePeriodToBlockPeriods(
 
 export async function S3fileExists(
   client: S3Client,
+  AWSBucket: string,
   key: string,
 ): Promise<boolean> {
   const params = {
-    Bucket: "factchain-community",
+    Bucket: AWSBucket,
     Key: key,
   };
 
@@ -55,6 +56,14 @@ export async function S3fileExists(
       throw error;
     }
   }
+}
+
+export function makeS3Path(
+  AWSBucket: string,
+  AWSRegion: string,
+  key: string,
+): string {
+  return `https://${AWSBucket}.s3.${AWSRegion}.amazonaws.com/${key}`;
 }
 
 export function urlToID(url: string): number {

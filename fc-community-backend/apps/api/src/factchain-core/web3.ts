@@ -188,6 +188,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.AWS_ACCESS_KEY,
       this._config.AWS_SECRET_ACCESS_KEY,
       this._config.AWS_REGION,
+      this._config.AWS_BUCKET,
     );
     return tokenID;
   };
@@ -199,6 +200,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.AWS_ACCESS_KEY,
       this._config.AWS_SECRET_ACCESS_KEY,
       this._config.AWS_REGION,
+      this._config.AWS_BUCKET,
     );
     return tokenID;
   };

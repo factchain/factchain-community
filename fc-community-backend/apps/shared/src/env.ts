@@ -11,6 +11,7 @@ const DEFAULT_CONFIG: Config = {
   AWS_ACCESS_KEY: "",
   AWS_SECRET_ACCESS_KEY: "",
   AWS_REGION: "",
+  AWS_BUCKET: "",
 };
 
 export const config: Config = Object.keys(DEFAULT_CONFIG).reduce((o, key) => {

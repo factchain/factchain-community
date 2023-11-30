@@ -2,7 +2,7 @@ import axios from "axios";
 import FormData from "form-data";
 import Replicate from "replicate";
 import { Note, XCommunityNote } from "./types";
-import { S3fileExists, urlToID } from "./utils";
+import { S3fileExists, makeS3Path, urlToID } from "./utils";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 
@@ -11,7 +11,6 @@ const generateNoteImage = async (
   replicateApiToken: string,
   count = 0,
 ): Promise<string> => {
-  console.log(Replicate);
   const replicate = new Replicate({
     auth: replicateApiToken,
   });
@@ -154,6 +153,7 @@ export const getNFT1155DatafromXCommunityNote = async (
   AWSAccessKeyID: string,
   AWSSecretAccessKey: string,
   AWSRegion: string,
+  AWSBucket: string,
 ): Promise<number> => {
   const tokenID = urlToID(note.url);
   const client = new S3Client({
@@ -164,7 +164,7 @@ export const getNFT1155DatafromXCommunityNote = async (
     region: AWSRegion,
   });
 
-  if (!(await S3fileExists(client, `${tokenID}.png`))) {
+  if (!(await S3fileExists(client, AWSBucket, `${tokenID}.png`))) {
     throw new Error(
       `Not Found: X Community Note ${note.url} doesn't exist on Factchain!`,
     );
@@ -178,6 +178,7 @@ export const createNFT1155DatafromXCommunityNote = async (
   AWSAccessKeyID: string,
   AWSSecretAccessKey: string,
   AWSRegion: string,
+  AWSBucket: string,
 ): Promise<number> => {
   const tokenID = urlToID(note.url);
   const client = new S3Client({
@@ -187,6 +188,9 @@ export const createNFT1155DatafromXCommunityNote = async (
     },
     region: AWSRegion,
   });
+
+  console.log(note.url);
+  console.log(note.content);
 
   const replicateUrl = await generateNoteImage(
     note.content!,
@@ -212,7 +216,7 @@ export const createNFT1155DatafromXCommunityNote = async (
   const tokenMetadata = JSON.stringify({
     name: note.url,
     description: note.content,
-    image: `https://factchain-community.s3.eu-west-3.amazonaws.com/${tokenID}.png`,
+    image: makeS3Path(AWSBucket, AWSRegion, `${tokenID}.png`),
   });
   params["Key"] = `${tokenID}.json`;
   params["ContentType"] = "application/json";

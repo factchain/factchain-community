@@ -15,6 +15,7 @@ export type Config = {
   AWS_ACCESS_KEY: string;
   AWS_SECRET_ACCESS_KEY: string;
   AWS_REGION: string;
+  AWS_BUCKET: string;
   // Index signature to allow any string key
   [key: string]: string;
 };
