@@ -17,6 +17,7 @@ export type Config = {
   AWS_REGION: string;
   AWS_BUCKET: string;
   // Index signature to allow any string key
+  BACKEND: string;
   [key: string]: string;
 };
 
@@ -39,6 +40,13 @@ export type XCommunityNote = {
   url: string;
   content?: string;
 };
+
+export type XNFTResponse = {
+  id: number,
+  hash: string,
+  //preparedHash: string,
+  signature: string
+}
 
 export type NotesResponse = {
   notes: Array<Note>;
@@ -80,5 +88,5 @@ export interface NoteWriter {
     rating: number,
   ) => Promise<ContractTransactionResponse>;
   mintNote721: (note: Note) => Promise<ContractTransactionResponse>;
-  createXNoteMetadata: (note: XCommunityNote) => Promise<number>;
+  createXNoteMetadata: (note: XCommunityNote) => Promise<XNFTResponse>;
 }

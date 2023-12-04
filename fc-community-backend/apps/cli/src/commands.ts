@@ -1,6 +1,6 @@
 import { EventLog, ContractTransactionResponse } from "ethers";
 import { FactChainBackend } from "./factchain-core/web3";
-import { FactChainEvent, Note } from "./factchain-core/types";
+import { FactChainEvent, Note, XNFTResponse } from "./factchain-core/types";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
@@ -92,8 +92,10 @@ export const mintNote = async (
 export const createXCommunityNoteNFTMetadata = async (
   text: string,
   noteUrl: string,
-): Promise<number> => {
+): Promise<XNFTResponse> => {
   const fc = new FactChainBackend(config);
   const ns = new NoteService(fc, fc);
-  return await ns.createXNoteMetadata(noteUrl, text);
+  const res =  await ns.createXNoteMetadata(noteUrl, text);
+  console.log(res);
+  return res;
 };

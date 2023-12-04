@@ -1,5 +1,7 @@
-import { timePeriodToBlockPeriods } from "../src/utils";
+import { timePeriodToBlockPeriods, toEip191 } from "../src/utils";
 import { describe, it, expect, beforeAll, afterAll, jest } from "@jest/globals";
+import { getBytes } from "ethers";
+
 
 describe("timePeriodToBlockPeriods", () => {
   const currentBlock = 4_484_229;
@@ -63,4 +65,12 @@ describe("timePeriodToBlockPeriods", () => {
     const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
     expect(result).toEqual(singleBlockRange);
   });
+
+
+  describe("toEIP191", () => {
+    const res = toEip191(424273286);
+    expect(res.idHash).toEqual("84fac280d097e9c99d8522dd6adb8fcb46d9c1d0798d309b3abfd511d24e43b8");
+    expect(res.preparedMessage).toEqual("fa1acf69350e1a516e6fe636864fa6a5e273836341e49bf6496741068aef68a6");
+    console.log(res);
+  })
 });
