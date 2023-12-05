@@ -43,10 +43,12 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
     address public backend;
     mapping(uint256 id => uint256) public supply;
 
-    constructor(address _owner)
+    constructor(address _owner, address _backend)
         Ownable(_owner)
         ERC1155("https://factchain-community.s3.eu-west-3.amazonaws.com/{id}.json")
-    {}
+    {
+        backend = _backend;
+    }
 
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);

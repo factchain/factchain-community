@@ -20,11 +20,10 @@ contract FactChain1155Test is Test, IFactChain1155 {
     address public backend = address(0x90bfaBa1671799a249fD2EAb12ff67de59a588ce);
 
     function setUp() public {
-        collection = new FactChain1155(owner);
+        collection = new FactChain1155(owner, backend);
         vm.deal(recipient, 100 ether);
         vm.deal(other, 100 ether);
     }
-
 
     function testMintUnkownToken() public {
         // Avoid mint of unknown token
@@ -34,10 +33,6 @@ contract FactChain1155Test is Test, IFactChain1155 {
     }
 
     function testGetTokenID() public {
-        vm.prank(owner);
-        emit NewBackend(backend);
-        collection.setBackend(backend);
-
         vm.prank(recipient);
         collection.mint{value: MINT_PRICE}(
             424273286,
@@ -62,10 +57,6 @@ contract FactChain1155Test is Test, IFactChain1155 {
     }
 
     function testMintBalanceUpdate() public {
-        vm.prank(owner);
-        emit NewBackend(backend);
-        collection.setBackend(backend);
-
         // Mint tokens
         vm.prank(recipient);
         collection.mint{value: MINT_PRICE}(
@@ -84,10 +75,6 @@ contract FactChain1155Test is Test, IFactChain1155 {
     }
 
     function testMintSupplyDecrease() public {
-        vm.prank(owner);
-        emit NewBackend(backend);
-        collection.setBackend(backend);
-
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
@@ -111,10 +98,6 @@ contract FactChain1155Test is Test, IFactChain1155 {
     }
 
     function testMintSupplyExhausted() public {
-        vm.prank(owner);
-        emit NewBackend(backend);
-        collection.setBackend(backend);
-
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
@@ -139,10 +122,9 @@ contract FactChain1155Test is Test, IFactChain1155 {
 
     function testNotAllowed() public {
         vm.prank(owner);
-        vm.expectEmit();
-        emit NewBackend(address(42));
+        // set new backend
+        // following signatures should be wrong!
         collection.setBackend(address(42));
-
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
@@ -164,17 +146,19 @@ contract FactChain1155Test is Test, IFactChain1155 {
         collection.verifyHash("424", hex"4eb414e5f218735a9e5b97a6c7e857d97a6a95052baed384e4cc91216e62d1d1");
     }
 
-    function testVerifySignature() public {
-        vm.prank(owner);
-        vm.expectEmit();
-        emit NewBackend(backend);
-        collection.setBackend(backend);
+    function testVerifySignature() public view {
         collection.verifySignature(
             // keccak("4242")
             hex"4eb414e5f218735a9e5b97a6c7e857d97a6a95052baed384e4cc91216e62d1d1",
             // sign(keccak(bytes(b'\x19Ethereum Signed Message:\n32' + bytes.fromhex('4eb414e5f218735a9e5b97a6c7e857d97a6a95052baed384e4cc91216e62d1d1'))))
             hex"fabeca823a16f8c83bf368c57395d63712809ae8c0e01a3fe40751d0b5ea0ea1663a0746e4fd273cd727e2ea3d0dafc10272d98ae61cdc868521138fa0d3e7621c"
         );
+    }
+
+    function testSetBackend() public {
+        vm.prank(owner);
+        emit NewBackend(backend);
+        collection.setBackend(backend);
     }
 
     // function testMintWithAdjustedValue() public {
