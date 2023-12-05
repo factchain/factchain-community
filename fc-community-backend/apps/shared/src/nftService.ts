@@ -188,10 +188,6 @@ export const createNFT1155DatafromXCommunityNote = async (
     },
     region: AWSRegion,
   });
-
-  console.log(note.url);
-  console.log(note.content);
-
   const replicateUrl = await generateNoteImage(
     note.content!,
     replicateApiToken,
@@ -207,8 +203,7 @@ export const createNFT1155DatafromXCommunityNote = async (
   };
   let command = new PutObjectCommand(params);
   try {
-    const response = await client.send(command);
-    console.log(`Image uploaded successfully. ETag: ${response.ETag}`);
+    await client.send(command);
   } catch (error) {
     console.error("Error uploading to S3:", error);
     throw error;
@@ -223,8 +218,14 @@ export const createNFT1155DatafromXCommunityNote = async (
   params["Body"] = tokenMetadata;
   command = new PutObjectCommand(params);
   try {
-    const response = await client.send(command);
-    console.log(`Metadata uploaded successfully. ETag: ${response.ETag}`);
+    await client.send(command);
+    console.log(
+      `Metadata uploaded successfully. ${makeS3Path(
+        AWSBucket,
+        AWSRegion,
+        `${tokenID}.json`,
+      )}`,
+    );
   } catch (error) {
     console.error("Error uploading to S3:", error);
     throw error;

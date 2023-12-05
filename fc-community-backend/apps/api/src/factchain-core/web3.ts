@@ -1,4 +1,9 @@
-import { EventLog, ethers, ContractTransactionResponse, getBytes, keccak256 } from "ethers";
+import {
+  EventLog,
+  ethers,
+  ContractTransactionResponse,
+  getBytes,
+} from "ethers";
 import {
   Note,
   XCommunityNote,
@@ -19,7 +24,7 @@ import {
   MINIMUM_STAKE_PER_NOTE,
   MINIMUM_STAKE_PER_RATING,
 } from "./contractsAbi";
-import { Config, XNFTResponse } from "./types";
+import { Config, XSignedNoteIDResponse } from "./types";
 
 export class FactChainBackend implements NoteReader, NoteWriter {
   private _config: Config;
@@ -193,7 +198,9 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     return tokenID;
   };
 
-  createXNoteMetadata = async (note: XCommunityNote): Promise<XNFTResponse> => {
+  createXNoteMetadata = async (
+    note: XCommunityNote,
+  ): Promise<XSignedNoteIDResponse> => {
     const tokenID = await createNFT1155DatafromXCommunityNote(
       note,
       this._config.REPLICATE_API_TOKEN,
@@ -204,11 +211,13 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     );
     const signer = new ethers.Wallet(this._config.BACKEND, this._provider);
     const eip191 = toEip191(tokenID);
-    const signature = await signer.signingKey.sign(getBytes(eip191["preparedMessage"])).serialized;
+    const signature = await signer.signingKey.sign(
+      getBytes(eip191["preparedMessage"]),
+    ).serialized;
     return {
       id: tokenID,
       hash: eip191["idHash"],
       signature: signature,
-    }
+    };
   };
 }

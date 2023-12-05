@@ -81,6 +81,6 @@ export function toEip191(id: number) {
   const preparedMessage = keccak256(messageBuffer);
   return {
     idHash,
-    preparedMessage
+    preparedMessage,
   };
 }

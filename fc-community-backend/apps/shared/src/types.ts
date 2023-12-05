@@ -41,12 +41,11 @@ export type XCommunityNote = {
   content?: string;
 };
 
-export type XNFTResponse = {
-  id: number,
-  hash: string,
-  //preparedHash: string,
-  signature: string
-}
+export type XSignedNoteIDResponse = {
+  id: number;
+  hash: string;
+  signature: string;
+};
 
 export type NotesResponse = {
   notes: Array<Note>;
@@ -88,5 +87,5 @@ export interface NoteWriter {
     rating: number,
   ) => Promise<ContractTransactionResponse>;
   mintNote721: (note: Note) => Promise<ContractTransactionResponse>;
-  createXNoteMetadata: (note: XCommunityNote) => Promise<XNFTResponse>;
+  createXNoteMetadata: (note: XCommunityNote) => Promise<XSignedNoteIDResponse>;
 }

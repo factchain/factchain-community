@@ -1,6 +1,10 @@
 import { Controller, Get, Post, Query, Body } from "@nestjs/common";
 import { AppService } from "./app.service";
-import { NotesResponse, XNoteIDResponse } from "./factchain-core/types";
+import {
+  NotesResponse,
+  XNoteIDResponse,
+  XSignedNoteIDResponse,
+} from "./factchain-core/types";
 
 @Controller()
 export class AppController {
@@ -34,8 +38,11 @@ export class AppController {
   async createXNoteMetadata(
     @Body("noteUrl") noteUrl: string,
     @Body("content") content: string,
-  ): Promise<XNoteIDResponse> {
-    const id = await this.appService.createXNoteMetadata(noteUrl, content);
-    return { id: id };
+  ): Promise<XSignedNoteIDResponse> {
+    const res = await this.appService.createXNoteMetadata(noteUrl, content);
+    console.log(
+      `Create metadata for X note URL ${noteUrl}, Factchain ID ${res.id}`,
+    );
+    return res;
   }
 }
