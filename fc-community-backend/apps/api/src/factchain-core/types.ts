@@ -17,7 +17,7 @@ export type Config = {
   AWS_REGION: string;
   AWS_BUCKET: string;
   // Index signature to allow any string key
-  BACKEND: string;
+  BACKEND_PKEY: string;
   [key: string]: string;
 };
 
@@ -47,14 +47,13 @@ export type XSignedNoteIDResponse = {
   signature: string;
 };
 
-export type XNoteIDResponse = {
-  id: number;
-};
-
 export type NotesResponse = {
   notes: Array<Note>;
 };
 
+export type XNoteIDResponse = {
+  id: number;
+};
 export type FactChainEvent =
   | "ReserveFunded"
   | "NoteCreated"

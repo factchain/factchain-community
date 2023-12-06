@@ -209,7 +209,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.AWS_REGION,
       this._config.AWS_BUCKET,
     );
-    const signer = new ethers.Wallet(this._config.BACKEND, this._provider);
+    const signer = new ethers.Wallet(this._config.BACKEND_PKEY, this._provider);
     const eip191 = toEip191(tokenID);
     const signature = await signer.signingKey.sign(
       getBytes(eip191["preparedMessage"]),

@@ -17,7 +17,7 @@ export type Config = {
   AWS_REGION: string;
   AWS_BUCKET: string;
   // Index signature to allow any string key
-  BACKEND: string;
+  BACKEND_PKEY: string;
   [key: string]: string;
 };
 
