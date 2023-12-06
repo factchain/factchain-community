@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
-import {ECDSA} from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
+import {SignatureChecker} from "openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol";
 import {MessageHashUtils} from "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
@@ -26,6 +26,7 @@ interface IFactChain1155 is IFactChain1155Events {
     error BadMintPrice();
     error UnknownToken();
     error NotAllowed();
+    error FailedToRefund();
 }
 
 /// @title X Community Note NFTs
@@ -33,7 +34,6 @@ interface IFactChain1155 is IFactChain1155Events {
 /// @notice
 /// @dev
 contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
-    using ECDSA for bytes32;
 
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
@@ -76,14 +76,16 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         if (supply[id] == SUPPLY_EXHAUSTED) revert SupplyExhausted();
         if (supply[id] == 0) revert UnknownToken();
         if (value > supply[id]) {
-            emit MintWithAdjustedValue(id, supply[id]);
-            _mint(msg.sender, id, supply[id], "");
-            // using transfer because it only provides 2300 gas
-            // protecting the contract from re-entry attacks.
-            uint256 amount = (value - supply[id]) * MINT_PRICE;
-            payable(msg.sender).transfer(amount);
-            emit Refunded(msg.sender, amount);
+            uint256 supplyCache = supply[id];
             supply[id] = SUPPLY_EXHAUSTED;
+            _mint(msg.sender, id, supplyCache, "");
+            uint256 amount = (value - supplyCache) * MINT_PRICE;
+            // use call rather than transfer
+            // to support Smart Contract Wallets.
+            (bool result, ) = payable(msg.sender).call{value: amount}("");
+            if (!result) revert FailedToRefund();
+            emit MintWithAdjustedValue(id, supplyCache);
+            emit Refunded(msg.sender, amount);
         } else {
             emit MintWithProvidedValue(id, value);
             _mint(msg.sender, id, value, "");
@@ -107,8 +109,7 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
 
     function verifySignature(bytes32 _hash, bytes memory signature) public view {
         bytes32 eip191 = MessageHashUtils.toEthSignedMessageHash(_hash);
-        address recoveredSigner = eip191.recover(signature);
-        if (recoveredSigner != backend) revert NotAllowed();
+        if (!SignatureChecker.isValidSignatureNow(backend, eip191, signature)) revert NotAllowed();
     }
 
     function worstRandEver() internal view returns (uint256) {
