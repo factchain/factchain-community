@@ -34,14 +34,14 @@ contract FactChain1155Test is Test, IFactChain1155 {
 
     function testGetTokenID() public {
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE}(
+        collection.mint{value: MINT_PRICE * 3}(
             424273286,
             3,
             hex"84fac280d097e9c99d8522dd6adb8fcb46d9c1d0798d309b3abfd511d24e43b8",
             hex"4d27fe7200c3628938070a426865303178724b6165088e1de049e4c6a94ba0f73b73ea6636c85494ae5b516c0f1094f51d751738ab0d383ba254c5ade08a99fb1b"
         );
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE}(
+        collection.mint{value: MINT_PRICE * 3}(
             2742163345,
             3,
             hex"a683622ff02d5db7693fc088d7382b73f03bf1656a4cc771f2410e30d521bb87", // keccak(bytes("2742163345", "utf-8")).hex()
@@ -59,7 +59,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
     function testMintBalanceUpdate() public {
         // Mint tokens
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE}(
+        collection.mint{value: MINT_PRICE * 3}(
             123,
             3,
             // keccak(bytes("123", "utf-8")).hex()
@@ -71,14 +71,14 @@ contract FactChain1155Test is Test, IFactChain1155 {
         // Check if the balance of the recipient has increased
         uint256 balanceAfterMint = collection.balanceOf(recipient, 123);
         assertEq(balanceAfterMint, 3, "Recipient should have 3 tokens after minting");
-        assertEq(address(collection).balance, MINT_PRICE, "Contract Balance should have been increased by MintPrice");
+        assertEq(address(collection).balance, MINT_PRICE * 3, "Contract Balance should have been increased by MintPrice");
     }
 
     function testMintSupplyDecrease() public {
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE}(
+        collection.mint{value: MINT_PRICE * 3}(
             123,
             3,
             // keccak(bytes("123", "utf-8")).hex()
@@ -91,7 +91,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         vm.startPrank(other);
         // second mint, token already created
         // mint only requires token id and quantity
-        collection.mint{value: MINT_PRICE}(123, 3);
+        collection.mint{value: MINT_PRICE * 3}(123, 3);
         uint256 supplyBeforeMint = collection.supply(123);
         collection.mint{value: MINT_PRICE}(123, 1);
         assertEq(collection.supply(123), supplyBeforeMint - 1, "Supply should have been decreased!");
@@ -101,7 +101,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE}(
+        collection.mint{value: MINT_PRICE * MAX_TOKEN_SUPPLY}(
             123,
             MAX_TOKEN_SUPPLY,
             // keccak(bytes("123", "utf-8")).hex()
@@ -112,12 +112,6 @@ contract FactChain1155Test is Test, IFactChain1155 {
 
         vm.expectRevert(IFactChain1155.SupplyExhausted.selector);
         collection.mint{value: MINT_PRICE}(123, 1);
-    }
-
-    function testAntiGreed() public {
-        // Avoid Greedy users check
-        vm.expectRevert(IFactChain1155.Greed.selector);
-        collection.mint{value: MINT_PRICE}(123, MAX_TOKEN_SUPPLY + 1);
     }
 
     function testNotAllowed() public {
@@ -131,7 +125,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         vm.expectRevert(IFactChain1155.NotAllowed.selector);
         collection.mint{value: MINT_PRICE}(
             123,
-            MAX_TOKEN_SUPPLY,
+            1,
             // keccak(bytes("123", "utf-8")).hex()
             hex"64e604787cbf194841e7b68d7cd28786f6c9a0a3ab9f8b0a0e87cb4387ab0107",
             // sign(bytes(b'\x19Ethereum Signed Message:\n32' + keccak(bytes("123","utf-8")).hex())

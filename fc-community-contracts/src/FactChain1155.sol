@@ -21,7 +21,6 @@ interface IFactChain1155Events {
 interface IFactChain1155 is IFactChain1155Events {
     // Errors
     error SupplyExhausted();
-    error Greed();
     error ValueError();
     error NoTokenAssociated();
     error BadMintPrice();
@@ -48,6 +47,7 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         ERC1155("https://factchain-community.s3.eu-west-3.amazonaws.com/{id}.json")
     {
         backend = _backend;
+        emit NewBackend(backend);
     }
 
     function setURI(string memory newuri) public onlyOwner {
@@ -70,13 +70,11 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         return tokenId;
     }
 
-    function mint(uint256 id, uint256 value) external payable {
-        if (msg.value != MINT_PRICE) revert BadMintPrice();
-        if (value > MAX_TOKEN_SUPPLY) revert Greed();
+    function mint(uint256 id, uint256 value) public payable {
         if (value <= 0) revert ValueError();
+        if (msg.value != MINT_PRICE * value) revert BadMintPrice();
         if (supply[id] == SUPPLY_EXHAUSTED) revert SupplyExhausted();
         if (supply[id] == 0) revert UnknownToken();
-
         if (value > supply[id]) {
             emit MintWithAdjustedValue(id, supply[id]);
             _mint(msg.sender, id, supply[id], "");
@@ -89,27 +87,13 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
     }
 
     function mint(uint256 id, uint256 value, bytes32 _hash, bytes memory signature) external payable {
-        if (msg.value != MINT_PRICE) revert BadMintPrice();
-        if (value > MAX_TOKEN_SUPPLY) revert Greed();
-        if (value <= 0) revert ValueError();
-        if (supply[id] == SUPPLY_EXHAUSTED) revert SupplyExhausted();
-
         if (supply[id] == 0) {
             verifyHash(Strings.toString(id), _hash);
             verifySignature(_hash, signature);
             supply[id] = worstRandEver();
             emit NewToken(id, supply[id]);
         }
-
-        if (value > supply[id]) {
-            emit MintWithAdjustedValue(id, supply[id]);
-            _mint(msg.sender, id, supply[id], "");
-            supply[id] = SUPPLY_EXHAUSTED;
-        } else {
-            emit MintWithProvidedValue(id, value);
-            _mint(msg.sender, id, value, "");
-            supply[id] == value ? supply[id] = SUPPLY_EXHAUSTED : supply[id] -= value;
-        }
+        mint(id, value);
     }
 
     function verifyHash(string memory id, bytes32 _hash) public pure {
