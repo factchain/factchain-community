@@ -14,8 +14,8 @@ interface IFactChain1155Events {
     event NewToken(uint256 tokenId, uint256 tokenSupply);
     event MintWithProvidedValue(uint256 tokenId, uint256 value);
     event MintWithAdjustedValue(uint256 tokenId, uint256 value);
-
     event NewBackend(address backend);
+    event Refunded(address sender, uint256 amount);
 }
 
 interface IFactChain1155 is IFactChain1155Events {
@@ -78,6 +78,11 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         if (value > supply[id]) {
             emit MintWithAdjustedValue(id, supply[id]);
             _mint(msg.sender, id, supply[id], "");
+            // using transfer because it only provides 2300 gas
+            // protecting the contract from re-entry attacks.
+            uint256 amount = (value - supply[id]) * MINT_PRICE;
+            payable(msg.sender).transfer(amount);
+            emit Refunded(msg.sender, amount);
             supply[id] = SUPPLY_EXHAUSTED;
         } else {
             emit MintWithProvidedValue(id, value);

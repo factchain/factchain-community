@@ -26,8 +26,9 @@ contract FactChain1155Test is Test, IFactChain1155 {
     }
 
     function testMintUnkownToken() public {
-        // Avoid mint of unknown token
-        // To mint a token for the first time, provide a token ID signed by the backend
+        // Should not be able to mint unknown tokens
+        // To mint a token for the first time
+        // provide a token ID signed by the backend
         vm.expectRevert(IFactChain1155.UnknownToken.selector);
         collection.mint{value: MINT_PRICE}(123, 1);
     }
@@ -57,7 +58,8 @@ contract FactChain1155Test is Test, IFactChain1155 {
     }
 
     function testMintBalanceUpdate() public {
-        // Mint tokens
+        // Mint 3 tokens of ID 123 for the first time
+        // provide signature of "123"
         vm.prank(recipient);
         collection.mint{value: MINT_PRICE * 3}(
             123,
@@ -67,11 +69,24 @@ contract FactChain1155Test is Test, IFactChain1155 {
             // sign(bytes(b'\x19Ethereum Signed Message:\n32' + keccak(bytes("123","utf-8")).hex())
             hex"fccfdfb298d4f8ec3e534fe76a074f6aa30c0237a20f6375cf1315f370ab816b5133193ecd9ecc89b3359d8c5cc45660fcb2c32e05712a3a4a00c6c012556a961b"
         );
-
-        // Check if the balance of the recipient has increased
+        // Check if the balance of the recipient has increased by 3
         uint256 balanceAfterMint = collection.balanceOf(recipient, 123);
         assertEq(balanceAfterMint, 3, "Recipient should have 3 tokens after minting");
-        assertEq(address(collection).balance, MINT_PRICE * 3, "Contract Balance should have been increased by MintPrice");
+        // Check the contract balance
+        assertEq(
+            address(collection).balance, MINT_PRICE * 3, "Contract Balance should have been increased by MintPrice"
+        );
+
+        uint256 balanceBefore = address(recipient).balance;
+        vm.prank(recipient);
+        vm.expectEmit();
+        // in this test: random supply is alway 29 case because block.timestamp and msg.sender are fixed.
+        // see worstRandEver contract function.
+        // in this test: we've already minted 3 quantiy of token 123 in the above mint call
+        // remaining supply *should be* = 23
+        emit Refunded(recipient, (MAX_TOKEN_SUPPLY - 23) * MINT_PRICE);
+        collection.mint{value: MINT_PRICE * MAX_TOKEN_SUPPLY}(123, MAX_TOKEN_SUPPLY);
+        assertEq(address(recipient).balance, balanceBefore - (23 * MINT_PRICE));
     }
 
     function testMintSupplyDecrease() public {
@@ -114,7 +129,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         collection.mint{value: MINT_PRICE}(123, 1);
     }
 
-    function testNotAllowed() public {
+    function testMintNotAllowed() public {
         vm.prank(owner);
         // set new backend
         // following signatures should be wrong!
@@ -151,6 +166,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
 
     function testSetBackend() public {
         vm.prank(owner);
+        vm.expectEmit();
         emit NewBackend(backend);
         collection.setBackend(backend);
     }
@@ -161,7 +177,16 @@ contract FactChain1155Test is Test, IFactChain1155 {
     //     vm.startPrank(other);
     //     vm.expectEmit();
     //     emit MintWithAdjustedValue(42, 24);
-    //     collection.mint{value: MINT_PRICE}(42, 26);
+    //     // value should be adjusted to 24
+    //     collection.mint{value: MINT_PRICE * 26}(
+    //         42,
+    //         26,
+    //         // keccak(bytes("123", "utf-8")).hex()
+    //         hex"64e604787cbf194841e7b68d7cd28786f6c9a0a3ab9f8b0a0e87cb4387ab0107",
+    //         // sign(bytes(b'\x19Ethereum Signed Message:\n32' + keccak(bytes("123","utf-8")).hex())
+    //         // SIGNED WITH BACKEND PRIVATE KEY
+    //         hex"fccfdfb298d4f8ec3e534fe76a074f6aa30c0237a20f6375cf1315f370ab816b5133193ecd9ecc89b3359d8c5cc45660fcb2c32e05712a3a4a00c6c012556a961b"
+    //     );
     // }
 
     // function testMintWithProvidedValue() public {
@@ -171,12 +196,19 @@ contract FactChain1155Test is Test, IFactChain1155 {
     //     vm.expectEmit();
 
     //     emit MintWithProvidedValue(42, 12);
-    //     collection.mint{value: MINT_PRICE}(42, 12);
+    //     collection.mint{value: MINT_PRICE * 12}(
+    //         42,
+    //         12,
+    //         // keccak(bytes("123", "utf-8")).hex()
+    //         hex"64e604787cbf194841e7b68d7cd28786f6c9a0a3ab9f8b0a0e87cb4387ab0107",
+    //         // sign(bytes(b'\x19Ethereum Signed Message:\n32' + keccak(bytes("123","utf-8")).hex())
+    //         // SIGNED WITH BACKEND PRIVATE KEY
+    //         hex"fccfdfb298d4f8ec3e534fe76a074f6aa30c0237a20f6375cf1315f370ab816b5133193ecd9ecc89b3359d8c5cc45660fcb2c32e05712a3a4a00c6c012556a961b"
+    //     );
     //     assertEq(collection.supply(42), 12, "Supply should have been decreased by 12!");
-
     //     vm.expectEmit();
     //     emit MintWithProvidedValue(42, 12);
-    //     collection.mint{value: MINT_PRICE}(42, 12);
+    //     collection.mint{value: MINT_PRICE * 12}(42, 12);
     //     assertEq(collection.supply(42), SUPPLY_EXHAUSTED, "Supply should be exhausted!");
     // }
 }
