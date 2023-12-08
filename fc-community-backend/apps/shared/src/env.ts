@@ -12,6 +12,7 @@ const DEFAULT_CONFIG: Config = {
   AWS_SECRET_ACCESS_KEY: "",
   AWS_REGION: "",
   AWS_BUCKET: "",
+  BACKEND_PKEY: "",
 };
 
 export const config: Config = Object.keys(DEFAULT_CONFIG).reduce((o, key) => {

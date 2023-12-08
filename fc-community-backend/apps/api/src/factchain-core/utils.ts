@@ -67,6 +67,20 @@ export function makeS3Path(
 }
 
 export function urlToID(url: string): number {
-  const urlb = new TextEncoder().encode(url);
+  const textEncoder = new TextEncoder();
+  const urlb = textEncoder.encode(url);
   return parseInt(keccak256(urlb).substring(2, 10), 16);
+}
+
+export function toEip191(id: number) {
+  const idBuffer = Buffer.from(id.toString(), "utf-8");
+  const idHash = keccak256(idBuffer).replace("0x", "");
+  const prefix = Buffer.from("\x19Ethereum Signed Message:\n32");
+  const messageBuffer = Buffer.concat([prefix, Buffer.from(idHash, "hex")]);
+  // don't strip `0x` because getBytes from ethers needs the hex prefix
+  const preparedMessage = keccak256(messageBuffer);
+  return {
+    idHash,
+    preparedMessage,
+  };
 }

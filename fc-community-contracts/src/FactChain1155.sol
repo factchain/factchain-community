@@ -2,43 +2,61 @@
 pragma solidity ^0.8.20;
 
 import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
-import {Ownable} from "./utils/Ownable.sol";
+import {SignatureChecker} from "openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol";
+import {MessageHashUtils} from "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
 
+import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+
+import {Ownable} from "./utils/Ownable.sol";
 
 interface IFactChain1155Events {
     // Events
     event NewToken(uint256 tokenId, uint256 tokenSupply);
     event MintWithProvidedValue(uint256 tokenId, uint256 value);
     event MintWithAdjustedValue(uint256 tokenId, uint256 value);
+    event NewBackend(address backend);
+    event Refunded(address sender, uint256 amount);
 }
 
 interface IFactChain1155 is IFactChain1155Events {
     // Errors
     error SupplyExhausted();
-    error Greed();
+    error ValueError();
     error NoTokenAssociated();
     error BadMintPrice();
+    error UnknownToken();
+    error NotAllowed();
+    error FailedToRefund();
 }
-
 
 /// @title X Community Note NFTs
 /// @author Pierre HAY
 /// @notice
 /// @dev
 contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
+
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
+
+    address public backend;
     mapping(uint256 id => uint256) public supply;
 
-
-    constructor(address _owner)
+    constructor(address _owner, address _backend)
         Ownable(_owner)
         ERC1155("https://factchain-community.s3.eu-west-3.amazonaws.com/{id}.json")
-    {}
+    {
+        backend = _backend;
+        emit NewBackend(backend);
+    }
 
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
+    }
+
+    function setBackend(address _backend) public onlyOwner {
+        backend = _backend;
+        emit NewBackend(backend);
     }
 
     function getTokenID(string memory url) public view returns (uint256) {
@@ -52,24 +70,46 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
         return tokenId;
     }
 
-    function mint(uint256 id, uint256 value) external payable {
-        if (msg.value != MINT_PRICE) revert BadMintPrice();
-        if (value > MAX_TOKEN_SUPPLY) revert Greed();
+    function mint(uint256 id, uint256 value) public payable {
+        if (value <= 0) revert ValueError();
+        if (msg.value != MINT_PRICE * value) revert BadMintPrice();
         if (supply[id] == SUPPLY_EXHAUSTED) revert SupplyExhausted();
-
-        if (supply[id] == 0) {
-            supply[id] = worstRandEver();
-            emit NewToken(id, supply[id]);
-        }
+        if (supply[id] == 0) revert UnknownToken();
         if (value > supply[id]) {
-            emit MintWithAdjustedValue(id, supply[id]);
-            _mint(msg.sender, id, supply[id], "");
+            uint256 supplyCache = supply[id];
             supply[id] = SUPPLY_EXHAUSTED;
+            _mint(msg.sender, id, supplyCache, "");
+            uint256 amount = (value - supplyCache) * MINT_PRICE;
+            // use call rather than transfer
+            // to support Smart Contract Wallets.
+            (bool result, ) = payable(msg.sender).call{value: amount}("");
+            if (!result) revert FailedToRefund();
+            emit MintWithAdjustedValue(id, supplyCache);
+            emit Refunded(msg.sender, amount);
         } else {
             emit MintWithProvidedValue(id, value);
             _mint(msg.sender, id, value, "");
             supply[id] == value ? supply[id] = SUPPLY_EXHAUSTED : supply[id] -= value;
         }
+    }
+
+    function mint(uint256 id, uint256 value, bytes32 _hash, bytes memory signature) external payable {
+        if (supply[id] == 0) {
+            verifyHash(Strings.toString(id), _hash);
+            verifySignature(_hash, signature);
+            supply[id] = worstRandEver();
+            emit NewToken(id, supply[id]);
+        }
+        mint(id, value);
+    }
+
+    function verifyHash(string memory id, bytes32 _hash) public pure {
+        if (_hash != keccak256(abi.encodePacked(id))) revert ValueError();
+    }
+
+    function verifySignature(bytes32 _hash, bytes memory signature) public view {
+        bytes32 eip191 = MessageHashUtils.toEthSignedMessageHash(_hash);
+        if (!SignatureChecker.isValidSignatureNow(backend, eip191, signature)) revert NotAllowed();
     }
 
     function worstRandEver() internal view returns (uint256) {

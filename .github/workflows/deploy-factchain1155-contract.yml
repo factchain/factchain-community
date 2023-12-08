@@ -17,6 +17,7 @@ jobs:
       ETHERSCAN_URL: https://sepolia.etherscan.io
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       OWNER_ADDRESS: ${{ vars.OWNER_ADDRESS }}
+      BACKEND_ADDRESS:  ${{ vars.BACKEND_ADDRESS }}
     permissions: write-all
     defaults:
       run:
@@ -33,7 +34,7 @@ jobs:
       - name: Deploy contract
         id: deploy
         run: |
-          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}.sol:${{ env.CONTRACT_NAME }}" --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS`
+          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}.sol:${{ env.CONTRACT_NAME }}" --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS $BACKEND_ADDRESS`
           echo "forge create output:\n\n$createOutput"
           deploymentOutput=`echo "${createOutput}" | head -1`
           echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
