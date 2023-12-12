@@ -1,5 +1,5 @@
 import { S3Client, HeadObjectCommand } from "@aws-sdk/client-s3";
-import { keccak256 } from "ethers";
+import { ethers, keccak256, getBytes } from "ethers";
 
 export function timePeriodToBlockPeriods(
   from: Date,
@@ -82,5 +82,16 @@ export function toEip191(id: number) {
   return {
     idHash,
     preparedMessage,
+  };
+}
+
+export async function getNoteSignature(id: number, signer: ethers.Wallet) {
+  const eip191 = toEip191(id);
+  const signature = await signer.signingKey.sign(
+    getBytes(eip191["preparedMessage"]),
+  ).serialized;
+  return {
+    hash: eip191["idHash"],
+    signature: signature,
   };
 }

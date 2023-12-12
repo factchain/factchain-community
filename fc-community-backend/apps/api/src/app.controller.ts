@@ -2,7 +2,6 @@ import { Controller, Get, Post, Query, Body } from "@nestjs/common";
 import { AppService } from "./app.service";
 import {
   NotesResponse,
-  XNoteIDResponse,
   XSignedNoteIDResponse,
 } from "./factchain-core/types";
 
@@ -28,10 +27,10 @@ export class AppController {
   }
 
   @Get("/x/note/id")
-  async getXNoteID(@Query("noteUrl") noteUrl): Promise<XNoteIDResponse> {
+  async getXNoteID(@Query("noteUrl") noteUrl): Promise<XSignedNoteIDResponse> {
     console.log(`Get factchain ID for X note URL ${noteUrl}`);
-    const id = await this.appService.getXNoteID(noteUrl);
-    return { id: id };
+    const res = await this.appService.getXNoteID(noteUrl);
+    return res;
   }
 
   @Post("/x/note")

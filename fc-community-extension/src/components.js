@@ -64,7 +64,7 @@ export function FCCreateNote({postUrl, createNote}) {
   );
 }
 
-export function FCRateNote({postUrl, creator, content, rateNote}) {
+export function FCRateNote({postUrl, creator, content, currentAddress, rateNote}) {
   const [transaction, setTransaction] = createSignal(null);
   const [error, setError] = createSignal(null);
 
@@ -82,12 +82,14 @@ export function FCRateNote({postUrl, creator, content, rateNote}) {
     return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
   };
 
+  const isCreator = creator.toLowerCase() === currentAddress.toLowerCase();
+
   return (
     <li>
       <div>
         <div><p>{content}</p></div>
-        <div><input id="rating" type="range" min="1" step="1" max="5" disabled={!!transactionHash()}></input></div>
-        <div><button onclick={submit} disabled={!!transactionHash()}>Submit</button></div>
+        <div><input id="rating" type="range" min="1" step="1" max="5" disabled={isCreator || !!transactionHash()}></input></div>
+        <div><button onclick={submit} disabled={isCreator || !!transactionHash()}>Submit</button></div>
         { transactionHash() ? <div>Transaction: <a href={transactionUrl()}>{transactionHash()}</a></div> : <div></div>}
         { error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
       </div>
@@ -95,7 +97,7 @@ export function FCRateNote({postUrl, creator, content, rateNote}) {
   );
 }
 
-export function FCRateNotes({postUrl, notes, rateNote}) {
+export function FCRateNotes({postUrl, notes, rateNote, currentAddress}) {
   return (
     <div>
       <img
@@ -108,7 +110,7 @@ export function FCRateNotes({postUrl, notes, rateNote}) {
 
       <div>Post URL: {postUrl}</div>
       <For each={notes}>{(note) =>
-        <FCRateNote postUrl={note.postUrl} creator={note.creator} content={note.content} rateNote={rateNote} />
+        <FCRateNote postUrl={note.postUrl} creator={note.creator} content={note.content} currentAddress={currentAddress} rateNote={rateNote} />
       }</For>
     </div>
   );

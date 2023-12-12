@@ -4,7 +4,8 @@ import { FCRateNotes } from "./components";
 import { logger } from "./logging";
 
 const provider = createFactCheckProvider();
-const contract = await provider.getContract();
+const contract = await provider.getFCContract();
+const currentAddress = await provider.getAddress();
 
 const postUrl = await chrome.runtime.sendMessage({type: 'fc-get-from-cache', target: "postUrl"});
 logger.log("Post URL", postUrl);
@@ -24,4 +25,4 @@ const rateNote = async (postUrl, creator, rating) => {
   return {transaction, error};
 };
 
-render(() => <FCRateNotes postUrl={postUrl} notes={notes} rateNote={rateNote} />, document.getElementById("app"));
+render(() => <FCRateNotes postUrl={postUrl} notes={notes} rateNote={rateNote} currentAddress={currentAddress} />, document.getElementById("app"));

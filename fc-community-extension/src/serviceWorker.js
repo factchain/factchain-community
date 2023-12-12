@@ -4,12 +4,14 @@ let cache = {
   notes: [],
 };
 
-chrome.notifications.onClicked.addListener(async (postUrl) => {
-  console.log(`Clicked on notification`, postUrl);
-  chrome.tabs.create({
-    url: postUrl
-  });
-});
+/// For now we deactivate notifications
+///
+// chrome.notifications.onClicked.addListener(async (postUrl) => {
+//   console.log(`Clicked on notification`, postUrl);
+//   chrome.tabs.create({
+//     url: postUrl
+//   });
+// });
 
 const getNotes = (postUrl, handler) => {
   const urlParams = new URLSearchParams({postUrl});
@@ -25,6 +27,52 @@ const getNotes = (postUrl, handler) => {
   }).then(res => {
     handler(res.notes);
   });
+}
+
+const getXNoteId = (noteUrl, content, handler) => {
+  const getUrlParams = new URLSearchParams({noteUrl});
+  const getUrl = `${BACKEND_URL}/x/note/id?${getUrlParams}`;
+  console.log("Getting id for note", getUrl);
+  
+  fetch(getUrl, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  }).then(res => {
+    if (!res.ok) {
+      if (res.status === 404) {
+        console.error('Resource not found');
+        // Handle 404 specifically
+        createXNoteId(noteUrl, content, handler);
+      } else {
+        console.error('HTTP error:', res.status);
+        // Handle other HTTP errors
+      }
+      throw new Error('HTTP error: ' + res.status);
+    }
+    return res.json();
+  }).then(res => {
+    handler({
+      id: res.id,
+      hash: null,
+      signature: null,
+    });
+  });
+}
+
+const createXNoteId = (noteUrl, content, handler) => {
+  fetch(`${BACKEND_URL}/x/note`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({noteUrl, content})
+  }).then(res => {
+    return res.json();
+  }).then(res => {
+    handler(res);
+  })
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -62,20 +110,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         top: 0,
         left: 0,
     });
-  } else if (message.type === "fc-notify") {
-    console.log(`Creating notification for ${message.postUrl}`);
-    chrome.notifications.create(message.postUrl, {
-      type: 'basic',
-      iconUrl: 'icons/icon_32.png',
-      title: message.title,
-      message: message.content,
-      buttons: [{ title: 'Take me there' }],
-      priority: 2
-    });
   } else if (message.type === "fc-get-from-cache") {
     console.log(`Get ${message.target} from cache`);
     sendResponse(cache[message.target]);
+  } else if (message.type === "fc-mint-twitter-note") {
+    console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}' to address ${message.address}`);
+
+    getXNoteId(message.noteUrl, message.content, (res) => {
+      console.log("Got id, hash, and signature for note", res);
+      sendResponse(res);
+    });
+    
   }
+  /// For now we deactivate notifications
+  ///
+  // } else if (message.type === "fc-notify") {
+  // console.log(`Creating notification for ${message.postUrl}`);
+  // chrome.notifications.create(message.postUrl, {
+  //   type: 'basic',
+  //   iconUrl: 'icons/icon_32.png',
+  //   title: message.title,
+  //   message: message.content,
+  //   buttons: [{ title: 'Take me there' }],
+  //   priority: 2
+  // });
   
   return true;
 });

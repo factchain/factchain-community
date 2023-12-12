@@ -51,9 +51,6 @@ export type NotesResponse = {
   notes: Array<Note>;
 };
 
-export type XNoteIDResponse = {
-  id: number;
-};
 export type FactChainEvent =
   | "ReserveFunded"
   | "NoteCreated"
@@ -68,7 +65,7 @@ export interface NoteReader {
   getNote: (postUrl: string, creator: string) => Promise<Note>;
   getNotes: (postUrl: string) => Promise<Array<Note>>;
   getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;
-  getXNoteID: (note: XCommunityNote) => Promise<number>;
+  getXNoteID: (note: XCommunityNote) => Promise<XSignedNoteIDResponse>;
 }
 
 export interface NoteWriter {

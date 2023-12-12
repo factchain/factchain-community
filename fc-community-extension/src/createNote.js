@@ -6,7 +6,7 @@ import { logger } from "./logging";
 const provider = createFactCheckProvider();
 const address = provider.getAddress();
 logger.log("Creator address", address);
-const contract = await provider.getContract();
+const contract = await provider.getFCContract();
 
 const postUrl = await chrome.runtime.sendMessage({type: 'fc-get-from-cache', target: "postUrl"});
 logger.log("Post URL", postUrl);

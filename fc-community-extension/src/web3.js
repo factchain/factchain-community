@@ -1,7 +1,7 @@
 import { initializeProvider } from '@metamask/providers';
 import PortStream from 'extension-port-stream'
 import { ethers, utils } from "ethers";
-import { METAMASK_ID, FC_CONTRACT_ABI, FC_CONTRACT_ADDRESS } from "./constants";
+import { METAMASK_ID, FC_CONTRACT_ABI, FC_CONTRACT_ADDRESS, FC_1155_CONTRACT_ABI, FC_1155_CONTRACT_ADDRESS } from "./constants";
 import abiDecoder from "abi-decoder";
 
 abiDecoder.addABI(FC_CONTRACT_ABI);
@@ -38,7 +38,7 @@ export const createFactCheckProvider = () => {
         });
         return accounts[0];
       },
-      getContract: async () => {
+      getFCContract: async () => {
         const ethersProvider = new ethers.BrowserProvider(provider);
         const signer = await ethersProvider.getSigner();
         return new ethers.Contract(
@@ -47,9 +47,25 @@ export const createFactCheckProvider = () => {
           signer,
         );
       },
-      onEvents: (topics, callback) => {
+      onFCEvents: (topics, callback) => {
         filter = {
           address: FC_CONTRACT_ADDRESS,
+          topics: topics.map(utils.id),
+        }
+        provider.on(filter, callback);
+      },
+      getFC1155Contract: async () => {
+        const ethersProvider = new ethers.BrowserProvider(provider);
+        const signer = await ethersProvider.getSigner();
+        return new ethers.Contract(
+          FC_1155_CONTRACT_ADDRESS,
+          FC_1155_CONTRACT_ABI,
+          signer,
+        );
+      },
+      onFC1155Events: (topics, callback) => {
+        filter = {
+          address: FC_1155_CONTRACT_ADDRESS,
           topics: topics.map(utils.id),
         }
         provider.on(filter, callback);

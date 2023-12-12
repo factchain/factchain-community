@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FactChain Community",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Review all socials on chain",
   "icons": {
     "16": "icons/icon_16.png",
@@ -34,16 +34,26 @@
       "js": [
         "statusContentScript.js"
       ]
+    },
+    {
+      "matches": [
+        "https://twitter.com/*/birdwatch/*",
+        "https://x.com/*/birdwatch/*"
+      ],
+      "run_at": "document_idle",
+      "js": [
+        "birdwatchContentScript.js"
+      ]
     }
   ],
-  "permissions": ["alarms", "notifications", "storage"],
+  "permissions": [],
   "host_permissions": ["https://fc-community-backend-15f6c753d352.herokuapp.com/*"],
   "background": {
     "service_worker": "serviceWorker.js"
   },
   "web_accessible_resources": [
     {
-      "resources": [ "icons/icon_128.png" ],
+      "resources": [ "icons/icon_128.png", "factchain.jpeg" ],
       "matches": [ "<all_urls>" ]
     }
   ]
