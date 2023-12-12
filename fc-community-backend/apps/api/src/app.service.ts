@@ -21,7 +21,7 @@ export class AppService {
     return notes;
   }
 
-  async getXNoteID(noteUrl: string): Promise<number> {
+  async getXNoteID(noteUrl: string): Promise<XSignedNoteIDResponse> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
     try {
