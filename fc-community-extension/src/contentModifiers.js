@@ -1,29 +1,11 @@
 import { logger } from "./logging";
-import { createFactCheckProvider, handleContractCallError } from "./web3";
+import { mintXNote } from "./mint";
 import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./constants";
 
 
 /// ---------------------------
 /// Birdwatch content modifiers
 /// ---------------------------
-
-
-// TODO move to a better place
-const mintXNote = async (noteId, value) => {
-  logger.log("Minting X note", noteId, value);
-  const provider = createFactCheckProvider();
-  const contract = await provider.getFC1155Contract();
-  let transaction = null;
-  let error = null;
-  try {
-    // TODO this is not triggering the contract call :(((
-    transaction = await contract.mint(noteId, value, {value: 1_000_000});
-  } catch (e) {
-    logger.log("Failed to mint note", e);
-    error = handleContractCallError(e);
-  }
-  return {transaction, error};
-};
 
 const makeSeparatorMintNoteHtml = () => {
   return `<div class="css-175oi2r r-g2wdr4 r-nsbfu8">
@@ -58,9 +40,9 @@ export const alterTwitterNoteSeparator = (separator) => {
       type: 'fc-mint-twitter-note',
       noteUrl,
       content,
-    }, async (noteId) => {
-      logger.log(`Got id ${noteId} for note`);
-      const {transaction, error} = await mintXNote(noteId, 1);
+    }, async (res) => {
+      logger.log("Got res for note", res);
+      const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
       if (error) {
         logger.log(`Failed to mint note: ${error}`);
       } else {

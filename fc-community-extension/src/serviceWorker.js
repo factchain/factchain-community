@@ -53,7 +53,11 @@ const getXNoteId = (noteUrl, content, handler) => {
     }
     return res.json();
   }).then(res => {
-    handler(res.id);
+    handler({
+      id: res.id,
+      hash: null,
+      signature: null,
+    });
   });
 }
 
@@ -67,7 +71,7 @@ const createXNoteId = (noteUrl, content, handler) => {
   }).then(res => {
     return res.json();
   }).then(res => {
-    handler(res.id);
+    handler(res);
   })
 }
 
@@ -112,9 +116,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === "fc-mint-twitter-note") {
     console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}' to address ${message.address}`);
 
-    getXNoteId(message.noteUrl, message.content, (id) => {
-      console.log(`Got id ${id} for note`);
-      sendResponse(id);
+    getXNoteId(message.noteUrl, message.content, (res) => {
+      console.log("Got id, hash, and signature for note", res);
+      sendResponse(res);
     });
     
   }

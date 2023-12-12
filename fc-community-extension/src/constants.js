@@ -543,13 +543,18 @@ export const FC_CONTRACT_ABI = [
   }
 ];
 
-export const FC_1155_CONTRACT_ADDRESS = "0xca81C4767aA05a026602C753CE58bd2FBb546AeC";
+export const FC_1155_CONTRACT_ADDRESS = "0x16F088aF2eF04580451b50fBAB418AB218fC1452";
 export const FC_1155_CONTRACT_ABI = [
   {
       "type": "constructor",
       "inputs": [
           {
               "name": "_owner",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "_backend",
               "type": "address",
               "internalType": "address"
           }
@@ -591,6 +596,19 @@ export const FC_1155_CONTRACT_ABI = [
               "name": "",
               "type": "uint256",
               "internalType": "uint256"
+          }
+      ],
+      "stateMutability": "view"
+  },
+  {
+      "type": "function",
+      "name": "backend",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
           }
       ],
       "stateMutability": "view"
@@ -706,6 +724,34 @@ export const FC_1155_CONTRACT_ABI = [
   },
   {
       "type": "function",
+      "name": "mint",
+      "inputs": [
+          {
+              "name": "id",
+              "type": "uint256",
+              "internalType": "uint256"
+          },
+          {
+              "name": "value",
+              "type": "uint256",
+              "internalType": "uint256"
+          },
+          {
+              "name": "_hash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+          },
+          {
+              "name": "signature",
+              "type": "bytes",
+              "internalType": "bytes"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
+  },
+  {
+      "type": "function",
       "name": "owner",
       "inputs": [],
       "outputs": [
@@ -803,6 +849,19 @@ export const FC_1155_CONTRACT_ABI = [
   },
   {
       "type": "function",
+      "name": "setBackend",
+      "inputs": [
+          {
+              "name": "_backend",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+  },
+  {
+      "type": "function",
       "name": "setURI",
       "inputs": [
           {
@@ -885,6 +944,42 @@ export const FC_1155_CONTRACT_ABI = [
       "stateMutability": "view"
   },
   {
+      "type": "function",
+      "name": "verifyHash",
+      "inputs": [
+          {
+              "name": "id",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "_hash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "pure"
+  },
+  {
+      "type": "function",
+      "name": "verifySignature",
+      "inputs": [
+          {
+              "name": "_hash",
+              "type": "bytes32",
+              "internalType": "bytes32"
+          },
+          {
+              "name": "signature",
+              "type": "bytes",
+              "internalType": "bytes"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "view"
+  },
+  {
       "type": "event",
       "name": "ApprovalForAll",
       "inputs": [
@@ -949,6 +1044,19 @@ export const FC_1155_CONTRACT_ABI = [
   },
   {
       "type": "event",
+      "name": "NewBackend",
+      "inputs": [
+          {
+              "name": "backend",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
+  },
+  {
+      "type": "event",
       "name": "NewToken",
       "inputs": [
           {
@@ -981,6 +1089,25 @@ export const FC_1155_CONTRACT_ABI = [
               "type": "address",
               "indexed": true,
               "internalType": "address"
+          }
+      ],
+      "anonymous": false
+  },
+  {
+      "type": "event",
+      "name": "Refunded",
+      "inputs": [
+          {
+              "name": "sender",
+              "type": "address",
+              "indexed": false,
+              "internalType": "address"
+          },
+          {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
           }
       ],
       "anonymous": false
@@ -1187,12 +1314,17 @@ export const FC_1155_CONTRACT_ABI = [
   },
   {
       "type": "error",
-      "name": "Greed",
+      "name": "FailedToRefund",
       "inputs": []
   },
   {
       "type": "error",
       "name": "NoTokenAssociated",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "NotAllowed",
       "inputs": []
   },
   {
@@ -1203,6 +1335,16 @@ export const FC_1155_CONTRACT_ABI = [
   {
       "type": "error",
       "name": "SupplyExhausted",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "UnknownToken",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "ValueError",
       "inputs": []
   }
 ];
