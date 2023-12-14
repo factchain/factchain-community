@@ -51,7 +51,6 @@ export class NoteService {
 
   mintNote = async (postUrl: string, creator: string) => {
     const note = await this.reader.getNote(postUrl, creator);
-    // TODO: init final rating to -1 in the FactChainCommunity contract
     if (note.finalRating! == 0)
       throw new Error("mint failed: note isn't finalised!");
 
@@ -64,12 +63,14 @@ export class NoteService {
 
   //Throw if doesn't exist
   getXNoteID = async (noteUrl: string) => {
-    return await this.reader.getXNoteID({ url: noteUrl });
+    const XUrl = noteUrl.replace("twitter", "x");
+    return await this.reader.getXNoteID({ url: XUrl });
   };
 
   createXNoteMetadata = async (noteUrl: string, content: string) => {
+    const XUrl = noteUrl.replace("twitter", "x");
     return await this.writer.createXNoteMetadata({
-      url: noteUrl,
+      url: XUrl,
       content: content,
     });
   };
