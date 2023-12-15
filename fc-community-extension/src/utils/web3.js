@@ -20,7 +20,7 @@ export const handleContractCallError = (e) => {
   }
 }
 
-export const createFactCheckProvider = () => {
+export const createFactCheckProvider = async () => {
   try {
     let currentMetaMaskId = METAMASK_ID;
     const metamaskPort = chrome.runtime.connect(currentMetaMaskId);
@@ -32,13 +32,27 @@ export const createFactCheckProvider = () => {
     provider.on('error', (error) => {
       logger.error(`Failed to connect to metamask`, error);
     });
+
+    await window.ethereum.request({
+      "method": "wallet_switchEthereumChain",
+      "params": [
+        {
+          "chainId": "0xAA36A7"
+        }
+      ]
+    });
   
     return {
       getAddress: async () => {
+        logger.log("Getting accounts...");
         const accounts = await provider.request({
           method: "eth_requestAccounts",
         });
+        logger.log("Received accounts", accounts);
         return accounts[0];
+      },
+      onAddressChange: (handler) => {
+        provider.on('accountsChanged', handler);
       },
       getFCContract: async () => {
         const ethersProvider = new ethers.BrowserProvider(provider);
@@ -81,7 +95,7 @@ export const createFactCheckProvider = () => {
 
 export const mintXNote = async (noteId, value, hash, signature) => {
   logger.log("Minting X note", noteId, value, hash, signature);
-  const provider = createFactCheckProvider();
+  const provider = await createFactCheckProvider();
   const contract = await provider.getFC1155Contract();
   let transaction = null;
   let error = null;

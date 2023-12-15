@@ -3,7 +3,7 @@ import { createFactCheckProvider, handleContractCallError } from "../utils/web3"
 import { FCRateNotes } from "./components";
 import { logger } from "../utils/logging";
 
-const provider = createFactCheckProvider();
+const provider = await createFactCheckProvider();
 const contract = await provider.getFCContract();
 const currentAddress = await provider.getAddress();
 

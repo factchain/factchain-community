@@ -4,7 +4,7 @@ This project was bootstrapped with [Chrome Extension CLI](https://github.com/dut
 
 ## TODO
 
-- [ ] Auto change network to sepolia
+- [X] Auto change network to sepolia
 - [ ] Add loading spinner during long actions, like backend calls (e.g. mint)
 - [ ] Show transaction errors in popup to be reported
 - [ ] Move selectors to separate module
