@@ -33,8 +33,7 @@ export const alterTwitterNoteSeparator = (separator) => {
 
   const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
   document.querySelector("#mintNoteButton").addEventListener("click", async () => {
-    const contentBlocks = document.querySelectorAll("div.css-1rynq56.r-bcqeeo.r-qvutc0.r-1qd0xha.r-a023e6.r-rjixqe.r-16dba41.r-1udh08x");
-    const content = contentBlocks[contentBlocks.length - 1].textContent;
+    const content = document.querySelector("div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a").textContent
     logger.log(`Minting twitter note ${noteUrl}`);
     chrome.runtime.sendMessage({
       type: 'fc-mint-twitter-note',
