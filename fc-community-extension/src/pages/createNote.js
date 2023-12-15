@@ -1,7 +1,7 @@
 import { render } from "solid-js/web";
-import { createFactCheckProvider, handleContractCallError } from "./web3";
+import { createFactCheckProvider, handleContractCallError } from "../utils/web3";
 import { FCCreateNote } from "./components";
-import { logger } from "./logging";
+import { logger } from "../utils/logging";
 
 const provider = createFactCheckProvider();
 const address = provider.getAddress();

@@ -3,7 +3,7 @@
 /// link their web3 provider when the page opens, which is not a
 /// great UX.
 
-// import { logger } from "./logging";
+// import { logger } from "./utils/logging";
 // import { createFactCheckProvider } from "./web3";
 
 // const provider = createFactCheckProvider();
