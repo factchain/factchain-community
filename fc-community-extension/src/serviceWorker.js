@@ -44,6 +44,7 @@ const getXNoteId = (noteUrl, content, handler) => {
       if (res.status === 404) {
         console.error('Resource not found');
         // Handle 404 specifically
+        // TODO: pop a loader
         createXNoteId(noteUrl, content, handler);
       } else {
         console.error('HTTP error:', res.status);
@@ -55,8 +56,8 @@ const getXNoteId = (noteUrl, content, handler) => {
   }).then(res => {
     handler({
       id: res.id,
-      hash: null,
-      signature: null,
+      hash: res.hash,
+      signature: res.signature,
     });
   });
 }
