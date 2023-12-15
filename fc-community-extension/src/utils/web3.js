@@ -6,6 +6,7 @@ import { METAMASK_ID, FC_CONTRACT_ABI, FC_CONTRACT_ADDRESS, FC_1155_CONTRACT_ABI
 import abiDecoder from "abi-decoder";
 
 abiDecoder.addABI(FC_CONTRACT_ABI);
+abiDecoder.addABI(FC_1155_CONTRACT_ABI);
 
 export const decodeError = (abiError) => {
   return abiDecoder.decodeMethod(abiError);
@@ -13,7 +14,7 @@ export const decodeError = (abiError) => {
 
 export const handleContractCallError = (e) => {
   if (e.code === "CALL_EXCEPTION") {
-    return abiDecoder.decodeMethod(e.data);
+    return decodeError(e.data);
   } else {
     return e;
   }
@@ -86,17 +87,13 @@ export const mintXNote = async (noteId, value, hash, signature) => {
   let error = null;
 
   try {
-    if (signature) {
-      transaction = await contract.mint(
-        noteId,
-        value,
-        hash.startsWith("0x") ? hash : `0x${hash}`,
-        signature,
-        {value: value * 1_000_000},
-      );
-    } else {
-      transaction = await contract.mint(noteId, value, {value: value * 1_000_000});
-    }
+    transaction = await contract.mint(
+      noteId,
+      value,
+      hash.startsWith("0x") ? hash : `0x${hash}`,
+      signature,
+      {value: value * 1_000_000},
+    );
   } catch (e) {
     logger.log("Failed to mint note", e);
     error = handleContractCallError(e);

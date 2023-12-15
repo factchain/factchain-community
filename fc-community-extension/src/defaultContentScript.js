@@ -12,7 +12,7 @@ let observer = new MutationObserver(mutations => {
           alterDropdown(dropdown);
         }
 
-        const helpfulRatings = Array.from(document.querySelectorAll("div[data-testid='ratingStatus']")).filter(e => e.textContent.indexOf("Currently rated helpful") >= 0);
+        const helpfulRatings = Array.from(addedNode.querySelectorAll("div[data-testid='ratingStatus']")).filter(e => e.textContent.indexOf("Currently rated helpful") >= 0);
         if (helpfulRatings.length > 0) {
           const helpfulNote = helpfulRatings[0].parentNode.parentNode;
           logger.log("Found helpful note", helpfulNote);

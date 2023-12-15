@@ -38,9 +38,9 @@ export const alterRatingPageTwitterNote = (twitterNote) => {
     twitterNote.insertAdjacentHTML("afterend", makeSeparatorMintNoteHtml());
 
     const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
-    document.querySelector("#mintNoteButton").addEventListener("click", async () => {
-      const content = document.querySelector("div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a").textContent
-      logger.log(`Minting twitter note ${noteUrl}`);
+    twitterNote.parentNode.querySelector("#mintNoteButton").addEventListener("click", async () => {
+      const content = twitterNote.querySelector("div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a").textContent
+      logger.log(`Minting twitter from rating page note ${noteUrl} and content '${content}'`);
       chrome.runtime.sendMessage({
         type: 'fc-mint-twitter-note',
         noteUrl,
@@ -49,7 +49,7 @@ export const alterRatingPageTwitterNote = (twitterNote) => {
         logger.log("Got res for note", res);
         const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
         if (error) {
-          logger.log(`Failed to mint note: ${error}`);
+          logger.log("Failed to mint note", error);
         } else {
           logger.log(`Success! ${transaction}`);
         }
