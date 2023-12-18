@@ -1,6 +1,7 @@
 import { logger } from "./utils/logging";
 import { mintXNote } from "./utils/web3";
 import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./utils/constants";
+import { xSelectors } from "./utils/selectors";
 
 
 /// ---------------------------
@@ -39,7 +40,7 @@ export const alterRatingPageTwitterNote = (twitterNote) => {
 
     const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
     twitterNote.parentNode.querySelector("#mintNoteButton").addEventListener("click", async () => {
-      const content = twitterNote.querySelector("div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a").textContent
+      const content = twitterNote.querySelector(xSelectors.noteContent).textContent
       logger.log(`Minting twitter from rating page note ${noteUrl} and content '${content}'`);
       chrome.runtime.sendMessage({
         type: 'fc-mint-twitter-note',
@@ -150,7 +151,7 @@ export const alterDropdown = (dropdown) => {
     // First time we see this dropdown let's do something with it
     dropdown.classList.add("factchain-1.0");
 
-    const postUrl = parseUrl(dropdown.querySelector("a[data-testid='tweetEngagements']").href, POST_URL_REGEX);
+    const postUrl = parseUrl(dropdown.querySelector(xSelectors.dropdownUrl).href, POST_URL_REGEX);
 
     addNoteCreationButton(dropdown, postUrl);
     addNoteRatingButton(dropdown, postUrl);

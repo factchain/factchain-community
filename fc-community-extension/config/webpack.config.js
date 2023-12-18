@@ -20,6 +20,7 @@ const config = (env, argv) =>
       web3: PATHS.src + '/utils/web3.js',
       logging: PATHS.src + '/utils/logging.js',
       constants: PATHS.src + '/utils/constants.js',
+      selectors: PATHS.src + '/utils/selectors.js',
       serviceWorker: PATHS.src + '/serviceWorker.js',
     },
     devtool: argv.mode === 'production' ? false : 'source-map',
