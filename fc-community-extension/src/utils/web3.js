@@ -52,7 +52,19 @@ export const createFactCheckProvider = async () => {
         return accounts[0];
       },
       onAddressChange: (handler) => {
-        provider.on('accountsChanged', handler);
+        provider.on("accountsChanged", (accounts) => {
+          handler(accounts.length === 0 ? null : accounts[0]);
+        });
+      },
+      disconnect: async () => {
+        return provider.request({
+          "method": "wallet_revokePermissions",
+          "params": [
+            {
+              "eth_accounts": {}
+            }
+          ]
+        });
       },
       getFCContract: async () => {
         const ethersProvider = new ethers.BrowserProvider(provider);

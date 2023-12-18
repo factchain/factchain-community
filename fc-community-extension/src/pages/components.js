@@ -16,28 +16,12 @@ export function Popup({provider}) {
 
 export function FCAddress({provider}) {
   const [address, setAddress] = createSignal(null);
-  const disconnect = async () => {
-    await window.ethereum.request({
-      "method": "wallet_revokePermissions",
-      "params": [
-        {
-          "eth_accounts": {}
-        }
-      ]
-    });
-  };
   const connect = async () => {
     await provider.getAddress().then(setAddress);
   };
 
   provider.getAddress().then(setAddress);
-  provider.onAddressChange((accounts) => {
-    if (accounts.length === 0) {
-      setAddress(null);
-    } else {
-      setAddress(accounts[0]);
-    }
-  })
+  provider.onAddressChange(setAddress);
 
   return (
     <div>
@@ -45,7 +29,7 @@ export function FCAddress({provider}) {
         address() ?
         <div>
           <div>Account: {address()}</div>
-          <button onclick={disconnect}>Disconnect account</button>
+          <button onclick={provider.disconnect}>Disconnect account</button>
         </div>
         : <div>
           <button onclick={connect}>Connect account</button>
