@@ -16,12 +16,25 @@ export function Popup({provider}) {
 
 export function FCAddress({provider}) {
   const [address, setAddress] = createSignal(null);
+  const connect = async () => {
+    await provider.getAddress().then(setAddress);
+  };
 
   provider.getAddress().then(setAddress);
+  provider.onAddressChange(setAddress);
 
   return (
     <div>
-      Account: {address()}
+      {
+        address() ?
+        <div>
+          <div>Account: {address()}</div>
+          <button onclick={provider.disconnect}>Disconnect account</button>
+        </div>
+        : <div>
+          <button onclick={connect}>Connect account</button>
+        </div>
+      }
     </div>
   );
 }

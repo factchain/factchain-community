@@ -1,6 +1,6 @@
-import { logger } from "./logging";
-import { mintXNote } from "./mint";
-import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./constants";
+import { logger } from "./utils/logging";
+import { mintXNote } from "./utils/web3";
+import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./utils/constants";
 
 
 /// ---------------------------
@@ -8,13 +8,13 @@ import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./constants";
 /// ---------------------------
 
 const makeSeparatorMintNoteHtml = () => {
-  return `<div class="css-175oi2r r-g2wdr4 r-nsbfu8">
+  return `<div class="css-175oi2r r-g2wdr4 r-nsbfu8 r-1xfd6ze">
     <div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep">
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-a023e6 r-rjixqe r-b88u0q" style="color: rgb(231, 233, 234); text-overflow: unset;">
         <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
       </div>
       <div class="css-175oi2r r-18u37iz">
-        <div role="button" id="mintNoteButton" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-791edh r-id7aif r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l" style="background-color: rgba(0, 0, 0, 0); border-color: rgb(83, 100, 113);">
+        <div id="mintNoteButton" role="button" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-791edh r-id7aif r-15ysp7h r-4wgw6l r-ymttw5 r-1loqt21 r-o7ynqc r-6416eg r-1ny4l3l" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
           <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="color: rgb(29, 155, 240); text-overflow: unset;">
             <span class="css-1qaijid r-dnmrzs r-1udh08x r-3s2u2q r-bcqeeo r-qvutc0 r-poiln3 r-1b43r93 r-1cwl3u0" style="text-overflow: unset;">
               <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Mint it</span>
@@ -23,32 +23,39 @@ const makeSeparatorMintNoteHtml = () => {
         </div>
       </div>
     </div>
-  </div>
-  <div class="css-175oi2r r-1p6iasa r-109y4c4 r-gu4em3"></div>
-  `;
+  </div>`;
 }
 
-export const alterTwitterNoteSeparator = (separator) => {
-  separator.insertAdjacentHTML("afterend", makeSeparatorMintNoteHtml());
+export const alterRatingPageTwitterNote = (twitterNote) => {
+  if (twitterNote.classList.contains("factchain-1.0")) {
+    // Add a special class to avoid re-processing the same twitter note multiple times
+    // this seems to happen because we are modifying the twitter note, and the modification
+    // is caught by the observer below.
+    logger.log("Twitter note already processed");
+  } else {
+    // First time we see this twitter note let's do something with it
+    twitterNote.classList.add("factchain-1.0");
+    twitterNote.insertAdjacentHTML("afterend", makeSeparatorMintNoteHtml());
 
-  const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
-  document.querySelector("#mintNoteButton").addEventListener("click", async () => {
-    const content = document.querySelector("div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a").textContent
-    logger.log(`Minting twitter note ${noteUrl}`);
-    chrome.runtime.sendMessage({
-      type: 'fc-mint-twitter-note',
-      noteUrl,
-      content,
-    }, async (res) => {
-      logger.log("Got res for note", res);
-      const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
-      if (error) {
-        logger.log(`Failed to mint note: ${error}`);
-      } else {
-        logger.log(`Success! ${transaction}`);
-      }
+    const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
+    twitterNote.parentNode.querySelector("#mintNoteButton").addEventListener("click", async () => {
+      const content = twitterNote.querySelector("div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a").textContent
+      logger.log(`Minting twitter from rating page note ${noteUrl} and content '${content}'`);
+      chrome.runtime.sendMessage({
+        type: 'fc-mint-twitter-note',
+        noteUrl,
+        content,
+      }, async (res) => {
+        logger.log("Got res for note", res);
+        const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
+        if (error) {
+          logger.log("Failed to mint note", error);
+        } else {
+          logger.log(`Success! ${transaction}`);
+        }
+      });
     });
-  });
+  }
 };
 
 const makeMintNoteHtml = () => {
@@ -66,7 +73,7 @@ const makeMintNoteHtml = () => {
   </div>`;
 }
 
-export const alterTwitterNote = (twitterNote) => {
+export const alterMainPageTwitterNote = (twitterNote) => {
   if (twitterNote.classList.contains("factchain-1.0")) {
     // Add a special class to avoid re-processing the same twitter note multiple times
     // this seems to happen because we are modifying the twitter note, and the modification

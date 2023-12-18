@@ -1,4 +1,4 @@
-import { logger } from "./logging";
+import { logger } from "./utils/logging";
 import { alterMainArticle } from "./contentModifiers";
 
 let observer = new MutationObserver(mutations => {

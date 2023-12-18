@@ -34,16 +34,6 @@
       "js": [
         "statusContentScript.js"
       ]
-    },
-    {
-      "matches": [
-        "https://twitter.com/*/birdwatch/*",
-        "https://x.com/*/birdwatch/*"
-      ],
-      "run_at": "document_idle",
-      "js": [
-        "birdwatchContentScript.js"
-      ]
     }
   ],
   "permissions": [],
