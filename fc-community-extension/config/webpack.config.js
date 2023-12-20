@@ -12,6 +12,7 @@ const config = (env, argv) =>
       popup: PATHS.src + '/pages/popup.js',
       createNote: PATHS.src + '/pages/createNote.js',
       rateNotes: PATHS.src + '/pages/rateNotes.js',
+      pendingNFTCreation: PATHS.src + '/pages/pendingNFTCreation.js',
       components: PATHS.src + '/pages/components.js',
       defaultContentScript: PATHS.src + '/defaultContentScript.js',
       statusContentScript: PATHS.src + '/statusContentScript.js',

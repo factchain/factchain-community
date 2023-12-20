@@ -42,12 +42,12 @@ const getXNoteId = (noteUrl, content, handler) => {
   }).then(res => {
     if (!res.ok) {
       if (res.status === 404) {
-        console.error('Resource not found');
+        console.log('Resource not found');
         // Handle 404 specifically
         // TODO: pop a loader
         createXNoteId(noteUrl, content, handler);
       } else {
-        console.error('HTTP error:', res.status);
+        console.log('HTTP error:', res.status);
         // Handle other HTTP errors
       }
       throw new Error('HTTP error: ' + res.status);
@@ -63,17 +63,31 @@ const getXNoteId = (noteUrl, content, handler) => {
 }
 
 const createXNoteId = (noteUrl, content, handler) => {
-  fetch(`${BACKEND_URL}/x/note`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({noteUrl, content})
-  }).then(res => {
-    return res.json();
-  }).then(res => {
-    handler(res);
-  })
+  console.log("Creating page pendingNFTCreation.html");
+  chrome.windows.create({
+    url: "pendingNFTCreation.html",
+    type: "popup",
+    focused: true,
+    width: 300,
+    height: 100,
+    top: 0,
+    left: 0,
+  }, (window) => {
+    fetch(`${BACKEND_URL}/x/note`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({noteUrl, content})
+    }).then(res => {
+      return res.json();
+    }).then(res => {
+      chrome.windows.remove(window.id);
+      handler(res);
+    }).catch(reason => {
+      chrome.windows.remove(window.id);
+    });
+  });
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
