@@ -5,7 +5,7 @@ This project was bootstrapped with [Chrome Extension CLI](https://github.com/dut
 ## TODO
 
 - [X] Auto change network to sepolia
-- [ ] Add loading spinner during long actions, like backend calls (e.g. mint)
+- [X] Add loading spinner during long actions, like backend calls (e.g. mint)
 - [ ] Show transaction errors in popup to be reported
 - [X] Move selectors to separate module
 - [ ] Explore snap extension to clarify what transaction is being signed

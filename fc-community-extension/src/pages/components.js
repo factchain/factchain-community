@@ -128,3 +128,19 @@ export function FCRateNotes({postUrl, notes, rateNote, currentAddress}) {
     </div>
   );
 }
+
+export function FCPendingNFTCreation() {
+  return (
+    <div>
+      <img
+        src="./factchain.jpeg"
+        width="300"
+        style="height:70px; object-fit:cover;"
+      ></img>
+      <div>
+        <span class="loader" style={"width: 30px; height: 30px;"}></span>
+        Creating a new NFT collection for this note!
+      </div>
+    </div>
+  );
+}
