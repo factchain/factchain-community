@@ -3,6 +3,7 @@
 import {
   getEvents,
   getNote,
+  getNotes,
   createNote,
   rateNote,
   finaliseNote,
@@ -33,12 +34,21 @@ program
 
 program
   .command("get-note")
-  .description("Get a community note")
+  .description("Get a factchain note")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Creator address")
   .action(async (options: any) => {
     await getNote(options.url, options.creator);
   });
+
+program
+  .command("get-notes")
+  .description("Get factchain notes for a given post")
+  .option("-u, --url <url>", "Post url")
+  .action(async (options: any) => {
+    await getNotes(options.url);
+  });
+
 
 program
   .command("create-note")

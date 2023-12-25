@@ -23,7 +23,16 @@ export const getNote = async (
   creator: string,
 ): Promise<Note> => {
   const fc = new FactChainBackend(config);
-  const notes = await fc.getNote(postUrl, creator);
+  const note = await fc.getNote(postUrl, creator);
+  console.log(note);
+  return note;
+};
+
+export const getNotes = async (
+  postUrl: string,
+): Promise<Note[]> => {
+  const fc = new FactChainBackend(config);
+  const notes = await fc.getNotes(postUrl);
   console.log(notes);
   return notes;
 };
