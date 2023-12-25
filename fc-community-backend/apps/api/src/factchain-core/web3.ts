@@ -70,7 +70,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       postUrl: result[0],
       content: result[1],
       creator: result[2],
-      finalRating: result[3],
+      finalRating: parseInt(result[3]),
     };
   };
 
