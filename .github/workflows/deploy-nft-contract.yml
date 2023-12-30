@@ -18,34 +18,16 @@ jobs:
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       OWNER_ADDRESS: ${{ vars.OWNER_ADDRESS }}
     permissions: write-all
-    defaults:
-      run:
-        working-directory: ./fc-community-contracts
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
-      - name: Build contract
-        run: forge build
-
-      - name: Deploy contract
-        id: deploy
-        run: |
-          createOutput=`forge create "src/${{ env.CONTRACT_NAME }}.sol:${{ env.CONTRACT_NAME }}" --verify --json --rpc-url=$ETH_RPC_URL --private-key=$PRIVATE_KEY --constructor-args $OWNER_ADDRESS https://gateway.pinata.cloud/ipfs/`
-          echo "forge create output:\n\n$createOutput"
-          deploymentOutput=`echo "${createOutput}" | head -1`
-          echo "deploymentOutput=$deploymentOutput" >> $GITHUB_OUTPUT
-
-      - uses: actions/upload-artifact@v3
+      - uses: YBadiss/deploy-contract@v1
         with:
-          name: ${{ env.CONTRACT_NAME }}.abi.json
-          path: ./fc-community-contracts/out/${{ env.CONTRACT_NAME }}.sol/${{ env.CONTRACT_NAME }}.json
-
-      - name: Log detail of deployment
-        run: |
-          echo "# Contract ${{ env.CONTRACT_NAME }} deployed :rocket:" >> $GITHUB_STEP_SUMMARY
-          echo "- Deployer: [${{ fromJson(steps.deploy.outputs.deploymentOutput).deployer }}](${ETHERSCAN_URL}/address/${{ fromJson(steps.deploy.outputs.deploymentOutput).deployer }})" >> $GITHUB_STEP_SUMMARY
-          echo "- Deployed to: [${{ fromJson(steps.deploy.outputs.deploymentOutput).deployedTo }}](${ETHERSCAN_URL}/address/${{ fromJson(steps.deploy.outputs.deploymentOutput).deployedTo }})" >> $GITHUB_STEP_SUMMARY
-          echo "- Transaction hash: [${{ fromJson(steps.deploy.outputs.deploymentOutput).transactionHash }}](${ETHERSCAN_URL}/tx/${{ fromJson(steps.deploy.outputs.deploymentOutput).transactionHash }})" >> $GITHUB_STEP_SUMMARY
+          contract-name: 'FactChainNFT'
+          parent-dir: 'fc-community-contracts'
+          chain-id: '11155111'
+          rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
+          deployer-pk: ${{ secrets.DEPLOYER_PK }}
+          constructor-args: '${{ vars.OWNER_ADDRESS }} https://gateway.pinata.cloud/ipfs/'
+          verify: true
+          etherscan-url: 'https://sepolia.etherscan.io'
+          etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
