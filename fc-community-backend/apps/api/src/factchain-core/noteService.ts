@@ -1,12 +1,22 @@
-import { Note, NoteReader, NoteWriter, Rating } from "./types";
+import { EventLog } from "ethers";
+import {
+  Note,
+  NoteReader,
+  NoteWriter,
+  Rating,
+  Config,
+} from "./types";
+import { config } from "./env";
 
 export class NoteService {
   reader: NoteReader;
   writer: NoteWriter;
+  config: Config;
 
   constructor(r: NoteReader, w: NoteWriter) {
     this.reader = r;
     this.writer = w;
+    this.config = config;
   }
 
   static getEligibleNotesFromRatings = (
@@ -44,8 +54,13 @@ export class NoteService {
     return notesToFinalise;
   };
 
-  getNotes = async (postUrl: string): Promise<Array<Note>> => {
-    const notes = await this.reader.getNotes(postUrl);
+  getNotes = async (
+    predicate: (event: EventLog) => boolean,
+    paramLookBackDays = 0,
+  ): Promise<Array<Note>> => {
+    const configLookBackDays = parseInt(this.config.LOOKBACK_DAYS);
+    const lookBackDays = paramLookBackDays || configLookBackDays;
+    const notes = await this.reader.getNotes(predicate, lookBackDays);
     return notes;
   };
 
@@ -65,7 +80,7 @@ export class NoteService {
   //Throw if doesn't exist
   getXNoteID = async (noteUrl: string) => {
     const XUrl = noteUrl.replace("twitter", "x");
-    return await this.reader.getXNoteID({ url: noteUrl });
+    return await this.reader.getXNoteID({ url: XUrl });
   };
 
   createXNoteMetadata = async (noteUrl: string, content: string) => {

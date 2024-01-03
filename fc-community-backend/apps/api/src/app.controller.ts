@@ -1,9 +1,6 @@
 import { Controller, Get, Post, Query, Body } from "@nestjs/common";
 import { AppService } from "./app.service";
-import {
-  NotesResponse,
-  XSignedNoteIDResponse,
-} from "./factchain-core/types";
+import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
 
 @Controller()
 export class AppController {
@@ -20,9 +17,22 @@ export class AppController {
   }
 
   @Get("/notes")
-  async getNotes(@Query("postUrl") postUrl): Promise<NotesResponse> {
-    console.log(`Get notes for postUrl=${postUrl}`);
-    const notes = await this.appService.getNotes(postUrl);
+  async getNotes(
+    @Query("postUrl") postUrl: string,
+    @Query("from") from: number,
+    @Query("creator") address: string,
+  ): Promise<NotesResponse> {
+    let notes = [];
+    if (postUrl) {
+      console.log(`Get notes for postUrl=${postUrl}`);
+      notes = await this.appService.getNotesByPost(postUrl);
+    } else if (from) {
+      console.log(`Get all notes from ${from} days ago`);
+      notes = await this.appService.getAllNotesFrom(from);
+    } else if (address) {
+      console.log(`Get all notes created by ${address}`);
+      notes = await this.appService.getNotesByCreator(address);
+    }
     return { notes };
   }
 

@@ -1,6 +1,10 @@
 import { EventLog, ContractTransactionResponse } from "ethers";
 import { FactChainBackend } from "./factchain-core/web3";
-import { FactChainEvent, Note, XSignedNoteIDResponse } from "./factchain-core/types";
+import {
+  FactChainEvent,
+  Note,
+  XSignedNoteIDResponse,
+} from "./factchain-core/types";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
@@ -28,11 +32,12 @@ export const getNote = async (
   return note;
 };
 
-export const getNotes = async (
-  postUrl: string,
-): Promise<Note[]> => {
+export const getNotes = async (postUrl: string): Promise<Note[]> => {
   const fc = new FactChainBackend(config);
-  const notes = await fc.getNotes(postUrl);
+  const ns = new NoteService(fc, fc);
+  const notes = await ns.getNotes(
+    (value: EventLog) => value.args[0] === postUrl,
+  );
   console.log(notes);
   return notes;
 };
@@ -104,7 +109,7 @@ export const createXCommunityNoteNFTMetadata = async (
 ): Promise<XSignedNoteIDResponse> => {
   const fc = new FactChainBackend(config);
   const ns = new NoteService(fc, fc);
-  const res =  await ns.createXNoteMetadata(noteUrl, text);
+  const res = await ns.createXNoteMetadata(noteUrl, text);
   console.log(res);
   return res;
 };

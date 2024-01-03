@@ -1,12 +1,16 @@
-import { Note, NoteReader, NoteWriter, Rating } from "./types";
+import { EventLog } from "ethers";
+import { Note, NoteReader, NoteWriter, Rating, Config } from "./types";
+import { config } from "./env";
 
 export class NoteService {
   reader: NoteReader;
   writer: NoteWriter;
+  config: Config;
 
   constructor(r: NoteReader, w: NoteWriter) {
     this.reader = r;
     this.writer = w;
+    this.config = config;
   }
 
   static getEligibleNotesFromRatings = (
@@ -44,13 +48,19 @@ export class NoteService {
     return notesToFinalise;
   };
 
-  getNotes = async (postUrl: string): Promise<Array<Note>> => {
-    const notes = await this.reader.getNotes(postUrl);
+  getNotes = async (
+    predicate: (event: EventLog) => boolean,
+    paramLookBackDays = 0,
+  ): Promise<Array<Note>> => {
+    const configLookBackDays = parseInt(this.config.LOOKBACK_DAYS);
+    const lookBackDays = paramLookBackDays || configLookBackDays;
+    const notes = await this.reader.getNotes(predicate, lookBackDays);
     return notes;
   };
 
   mintNote = async (postUrl: string, creator: string) => {
     const note = await this.reader.getNote(postUrl, creator);
+
     if (note.finalRating! == 0)
       throw new Error("mint failed: note isn't finalised!");
 

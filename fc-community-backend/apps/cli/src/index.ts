@@ -49,7 +49,6 @@ program
     await getNotes(options.url);
   });
 
-
 program
   .command("create-note")
   .description("create a community note")

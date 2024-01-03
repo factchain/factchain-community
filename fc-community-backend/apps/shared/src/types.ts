@@ -1,4 +1,4 @@
-import { ContractTransactionResponse } from "ethers";
+import { ContractTransactionResponse, EventLog } from "ethers";
 
 export type Config = {
   LOOKBACK_DAYS: string;
@@ -63,7 +63,10 @@ export type FactChainEvent =
 
 export interface NoteReader {
   getNote: (postUrl: string, creator: string) => Promise<Note>;
-  getNotes: (postUrl: string) => Promise<Array<Note>>;
+  getNotes: (
+    predicate: (event: EventLog) => boolean,
+    lookBackDays: number,
+  ) => Promise<Array<Note>>;
   getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;
   getXNoteID: (note: XCommunityNote) => Promise<XSignedNoteIDResponse>;
 }
