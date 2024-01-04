@@ -98,7 +98,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       notes = notes.concat(allCreatedNotes.filter(predicate));
     };
     return notes;
-  }
+  };
 
   getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
