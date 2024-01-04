@@ -20,7 +20,7 @@ export const handleContractCallError = (e) => {
   }
 }
 
-export const createFactCheckProvider = async () => {
+export const createFactchainProvider = async () => {
   try {
     let currentMetaMaskId = METAMASK_ID;
     const metamaskPort = chrome.runtime.connect(currentMetaMaskId);
@@ -107,7 +107,7 @@ export const createFactCheckProvider = async () => {
 
 export const mintXNote = async (noteId, value, hash, signature) => {
   logger.log("Minting X note", noteId, value, hash, signature);
-  const provider = await createFactCheckProvider();
+  const provider = await createFactchainProvider();
   const contract = await provider.getFC1155Contract();
   let transaction = null;
   let error = null;

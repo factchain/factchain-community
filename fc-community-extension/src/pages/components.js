@@ -1,19 +1,5 @@
 import { createSignal } from "solid-js";
 
-export function Popup({provider}) {
-  return (
-    <div>
-      <img
-        src="./factchain.jpeg"
-        width="300"
-        style="height:70px; object-fit:cover;"
-      ></img>
-      
-      <FCAddress provider={provider} />
-    </div>
-  );
-}
-
 export function FCAddress({provider}) {
   const [address, setAddress] = createSignal(null);
   const connect = async () => {
@@ -132,15 +118,27 @@ export function FCRateNotes({postUrl, notes, rateNote, currentAddress}) {
 export function FCPendingNFTCreation() {
   return (
     <div>
-      <img
-        src="./factchain.jpeg"
-        width="300"
-        style="height:70px; object-fit:cover;"
-      ></img>
+      <FCHero/>
       <div>
-        <span class="loader" style={"width: 30px; height: 30px;"}></span>
+        <FCLoader/>
         Creating a new NFT collection for this note!
       </div>
     </div>
+  );
+}
+
+export function FCLoader() {
+  return (
+    <span class="loader" style={"width: 30px; height: 30px;"}></span>
+  );
+}
+
+export function FCHero() {
+  return (
+    <img
+        src="./factchain.jpeg"
+        width="300"
+        style="position: relative; left: 50%; transform: translateX(-50%); height:70px; object-fit:cover;"
+      ></img>
   );
 }

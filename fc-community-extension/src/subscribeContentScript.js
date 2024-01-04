@@ -4,9 +4,9 @@
 /// great UX.
 
 // import { logger } from "./utils/logging";
-// import { createFactCheckProvider } from "./web3";
+// import { createFactchainProvider } from "./web3";
 
-// const provider = createFactCheckProvider();
+// const provider = createFactchainProvider();
 // const contract = await provider.getFCContract();
 
 

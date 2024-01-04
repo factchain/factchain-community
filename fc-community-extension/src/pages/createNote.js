@@ -1,9 +1,9 @@
 import { render } from "solid-js/web";
-import { createFactCheckProvider, handleContractCallError } from "../utils/web3";
+import { createFactchainProvider, handleContractCallError } from "../utils/web3";
 import { FCCreateNote } from "./components";
 import { logger } from "../utils/logging";
 
-const provider = await createFactCheckProvider();
+const provider = await createFactchainProvider();
 const address = await provider.getAddress();
 logger.log("Creator address", address);
 const contract = await provider.getFCContract();
