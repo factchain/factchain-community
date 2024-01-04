@@ -19,14 +19,12 @@ export class AppService {
   async getNotesByPost(postUrl: string): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
-    // NoteCreated (string postUrl, index_topic_1 address creator, uint256 stake)
-    const notes = await ns.getNotes(
-      (value: EventLog) => value.args[0] === postUrl,
-    );
+    const notes = await ns.getNotes((note: Note) => note.postUrl === postUrl);
     return notes;
   }
 
   async getAllNotesFrom(from: number): Promise<Array<Note>> {
+    // Basic QuickNote Plan support 12 max lookback days
     if (!(from > 0 && from < 13)) {
       throw Error(
         `invalid lookbackdays: ${from} should be positive and less than 13`,
@@ -34,18 +32,14 @@ export class AppService {
     }
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
-    // NoteCreated (string postUrl, index_topic_1 address creator, uint256 stake)
-    const notes = await ns.getNotes((value: EventLog) => true, from);
+    const notes = await ns.getNotes((note: Note) => note === note, from);
     return notes;
   }
 
   async getNotesByCreator(creator: string): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
-    // NoteCreated (string postUrl, index_topic_1 address creator, uint256 stake)
-    const notes = await ns.getNotes(
-      (value: EventLog) => value.args[1] === creator,
-    );
+    const notes = await ns.getNotes((note: Note) => note.creator === creator);
     return notes;
   }
 

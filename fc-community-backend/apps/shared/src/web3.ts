@@ -70,38 +70,35 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   };
 
   getNotes = async (
-    predicate: (event: EventLog) => boolean,
+    predicate: (note: Note) => boolean,
     lookBackDays: number,
   ): Promise<Array<Note>> => {
+    
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
     const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
-    console.log(`getting events between ${from} and ${today}`);
+    console.log(`getting notes between ${from} and ${today}`);
 
     const block_periods = timePeriodToBlockPeriods(
       from,
       today,
       currentBlockNumber,
     );
-    let notePromises: Promise<Note>[] = [];
+    let notes: Note[] = [];
+
     for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
+      const allCreatedNotes = await Promise.all(events.map(async (event) => {
+        return await this.getNote(event.args[0], event.args[1])
+      }));
       console.log(
         `Notes between blocks ${period[0]} and ${period[1]}`,
         block_periods,
       );
-      const relatedEvents = events.filter(predicate);
-      if (relatedEvents) {
-        notePromises = notePromises.concat(
-          relatedEvents.map(async (event) => {
-            return await this.getNote(event.args[0], event.args[1]);
-          }),
-        );
-      }
-    }
-    const notes = await Promise.all(notePromises);
+      notes = notes.concat(allCreatedNotes.filter(predicate));
+    };
     return notes;
-  };
+  }
 
   getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();

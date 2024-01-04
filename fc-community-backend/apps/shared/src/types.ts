@@ -64,7 +64,7 @@ export type FactChainEvent =
 export interface NoteReader {
   getNote: (postUrl: string, creator: string) => Promise<Note>;
   getNotes: (
-    predicate: (event: EventLog) => boolean,
+    predicate: (note: Note) => boolean,
     lookBackDays: number,
   ) => Promise<Array<Note>>;
   getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;

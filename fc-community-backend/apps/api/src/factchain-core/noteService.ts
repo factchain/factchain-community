@@ -1,11 +1,5 @@
 import { EventLog } from "ethers";
-import {
-  Note,
-  NoteReader,
-  NoteWriter,
-  Rating,
-  Config,
-} from "./types";
+import { Note, NoteReader, NoteWriter, Rating, Config } from "./types";
 import { config } from "./env";
 
 export class NoteService {
@@ -55,7 +49,7 @@ export class NoteService {
   };
 
   getNotes = async (
-    predicate: (event: EventLog) => boolean,
+    predicate: (note: Note) => boolean,
     paramLookBackDays = 0,
   ): Promise<Array<Note>> => {
     const configLookBackDays = parseInt(this.config.LOOKBACK_DAYS);
