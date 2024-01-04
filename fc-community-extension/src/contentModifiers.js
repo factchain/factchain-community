@@ -208,8 +208,6 @@ const addNote = (mainArticle, note) => {
   const afterThisDiv = [].slice.call(tempDiv.children[tempDiv.children.length - 1].children).find(e => e.innerHTML === "");
   afterThisDiv.insertAdjacentHTML("afterend", htmlNote);
 
-  if (withRateIt) {
-    logger.log(`Creator of note is not current user (${note.creator} !== ${currentAddress})`)
     mainArticle.querySelector("#rateNoteButton").addEventListener("click", () => {
       logger.log("Rating note", note);
       chrome.runtime.sendMessage({
@@ -217,7 +215,6 @@ const addNote = (mainArticle, note) => {
         notes: [note],
       });
     });
-  }
 };
 
 export const alterMainArticle = (mainArticle) => {
