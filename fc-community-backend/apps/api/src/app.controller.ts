@@ -27,10 +27,9 @@ export class AppController {
   async getNotes(
     @Query("postUrl") postUrl: string,
     @Query("from") from: number,
-    @Query("creator") address: string,
+    @Query("creatorAddress") creatorAddress: string,
   ): Promise<NotesResponse> {
     let notes = [];
-    let parsedFrom = 0;
     if (from) {
       // max 21 days of lookbackdays to be kind on quicknode!
       if (!(from > 0 && from <= 21)) {
@@ -38,14 +37,13 @@ export class AppController {
           `invalid from: ${from} should be between 1 and 21 included`,
         );
       }
-      parsedFrom = from;
     }
     if (postUrl) {
       console.log(`Get notes for postUrl=${postUrl}`);
       notes = await this.appService.getNotesByPost(postUrl, from);
-    } else if (address) {
-      console.log(`Get all notes created by ${address}`);
-      notes = await this.appService.getNotesByCreator(address, from);
+    } else if (creatorAddress) {
+      console.log(`Get all notes created by ${creatorAddress}`);
+      notes = await this.appService.getNotesByCreator(creatorAddress, from);
     } else {
       console.log(`Get all notes`);
       notes = await this.appService.getAllNotesFrom(from);

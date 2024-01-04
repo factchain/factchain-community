@@ -70,7 +70,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   };
 
   getNotes = async (
-    predicate: (note: Note) => boolean,
+    predicate: (postUrl: string, creator: string) => boolean,
     lookBackDays: number,
   ): Promise<Array<Note>> => {
     
@@ -84,19 +84,21 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       today,
       currentBlockNumber,
     );
-    let notes: Note[] = [];
 
+    let notePromises: Promise<Note>[] = [];
     for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
-      const allCreatedNotes = await Promise.all(events.map(async (event) => {
-        return await this.getNote(event.args[0], event.args[1])
-      }));
-      console.log(
-        `Notes between blocks ${period[0]} and ${period[1]}`,
-        block_periods,
-      );
-      notes = notes.concat(allCreatedNotes.filter(predicate));
-    };
+      const relatedEvents = events.filter((e) => predicate(e.args[0], e.args[1]));
+
+      if (relatedEvents) {
+        notePromises = notePromises.concat(
+          relatedEvents.map(async (event) => {
+            return await this.getNote(event.args[0], event.args[1]);
+          }),
+        );
+      }
+    }
+    const notes = await Promise.all(notePromises);
     return notes;
   };
 

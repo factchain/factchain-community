@@ -48,7 +48,7 @@ export class NoteService {
   };
 
   getNotes = async (
-    predicate: (event: Note) => boolean,
+    predicate: (postUrl: string, creator: string) => boolean,
     paramLookBackDays = 0,
   ): Promise<Array<Note>> => {
     const configLookBackDays = parseInt(this.config.LOOKBACK_DAYS);

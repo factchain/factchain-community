@@ -35,7 +35,7 @@ export const getNote = async (
 export const getNotes = async (postUrl: string): Promise<Note[]> => {
   const fc = new FactChainBackend(config);
   const ns = new NoteService(fc, fc);
-  const notes = await ns.getNotes((note: Note) => note.postUrl === postUrl);
+  const notes = await ns.getNotes((_postUrl, _) => _postUrl === postUrl);
   console.log(notes);
   return notes;
 };

@@ -4,8 +4,6 @@ import { FactChainBackend } from "./factchain-core/web3";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
-import { EventLog } from "ethers";
-
 @Injectable()
 export class AppService {
   getHello(): string {
@@ -20,7 +18,7 @@ export class AppService {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotes(
-      (note: Note) => note.postUrl === postUrl,
+      (_postUrl, _) => _postUrl === postUrl,
       from,
     );
     return notes;
@@ -29,7 +27,7 @@ export class AppService {
   async getAllNotesFrom(from: number): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
-    const notes = await ns.getNotes((note: Note) => note === note, from);
+    const notes = await ns.getNotes((_postUrl, _creator) => true, from);
     return notes;
   }
 
@@ -37,7 +35,7 @@ export class AppService {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotes(
-      (note: Note) => note.creator === creator,
+      (_, _creator) => _creator === creator,
       from,
     );
     return notes;
