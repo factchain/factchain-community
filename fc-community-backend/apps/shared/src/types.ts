@@ -1,4 +1,4 @@
-import { ContractTransactionResponse, EventLog } from "ethers";
+import { ContractTransactionResponse } from "ethers";
 
 export type Config = {
   LOOKBACK_DAYS: string;

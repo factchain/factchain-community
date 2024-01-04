@@ -1,4 +1,3 @@
-import { EventLog } from "ethers";
 import { Note, NoteReader, NoteWriter, Rating, Config } from "./types";
 import { config } from "./env";
 
