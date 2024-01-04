@@ -14,10 +14,30 @@ export class AppService {
     return "0.1.0";
   }
 
-  async getNotes(postUrl: string): Promise<Array<Note>> {
+  async getNotesByPost(postUrl: string, from: number): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
-    const notes = await ns.getNotes(postUrl);
+    const notes = await ns.getNotes(
+      (_postUrl, _) => _postUrl === postUrl,
+      from,
+    );
+    return notes;
+  }
+
+  async getAllNotesFrom(from: number): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config);
+    const ns = new NoteService(fc, fc);
+    const notes = await ns.getNotes((_postUrl, _creator) => true, from);
+    return notes;
+  }
+
+  async getNotesByCreator(creator: string, from: number): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config);
+    const ns = new NoteService(fc, fc);
+    const notes = await ns.getNotes(
+      (_, _creator) => _creator === creator,
+      from,
+    );
     return notes;
   }
 

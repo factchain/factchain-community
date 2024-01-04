@@ -1,9 +1,4 @@
-import {
-  EventLog,
-  ethers,
-  ContractTransactionResponse,
-  getBytes,
-} from "ethers";
+import { EventLog, ethers, ContractTransactionResponse } from "ethers";
 import {
   Note,
   XCommunityNote,
@@ -74,28 +69,28 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     };
   };
 
-  getNotes = async (postUrl: string): Promise<Array<Note>> => {
+  getNotes = async (
+    predicate: (postUrl: string, creator: string) => boolean,
+    lookBackDays: number,
+  ): Promise<Array<Note>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
-    const lookbackDays = parseInt(this._config.LOOKBACK_DAYS);
-    const from = new Date(today.getTime() - lookbackDays * 24 * 60 * 60 * 1000);
-    console.log(
-      `Getting notes created on '${postUrl}' between ${from} and ${today}`,
-    );
+    const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
+    console.log(`getting notes between ${from} and ${today}`);
 
     const block_periods = timePeriodToBlockPeriods(
       from,
       today,
       currentBlockNumber,
     );
+
     let notePromises: Promise<Note>[] = [];
     for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
-      console.log(
-        `Notes between blocks ${period[0]} and ${period[1]}`,
-        block_periods,
+      const relatedEvents = events.filter((e) =>
+        predicate(e.args[0], e.args[1]),
       );
-      const relatedEvents = events.filter((e) => e.args[0] == postUrl);
+
       if (relatedEvents) {
         notePromises = notePromises.concat(
           relatedEvents.map(async (event) => {
@@ -223,6 +218,4 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       signature: noteSignature.signature,
     };
   };
-
-
 }

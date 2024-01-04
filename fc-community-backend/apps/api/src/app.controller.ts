@@ -1,9 +1,13 @@
-import { Controller, Get, Post, Query, Body } from "@nestjs/common";
-import { AppService } from "./app.service";
 import {
-  NotesResponse,
-  XSignedNoteIDResponse,
-} from "./factchain-core/types";
+  Controller,
+  Get,
+  Post,
+  Query,
+  Body,
+  BadRequestException,
+} from "@nestjs/common";
+import { AppService } from "./app.service";
+import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
 
 @Controller()
 export class AppController {
@@ -20,9 +24,30 @@ export class AppController {
   }
 
   @Get("/notes")
-  async getNotes(@Query("postUrl") postUrl): Promise<NotesResponse> {
-    console.log(`Get notes for postUrl=${postUrl}`);
-    const notes = await this.appService.getNotes(postUrl);
+  async getNotes(
+    @Query("postUrl") postUrl: string,
+    @Query("from") from: number,
+    @Query("creatorAddress") creatorAddress: string,
+  ): Promise<NotesResponse> {
+    let notes = [];
+    if (from) {
+      // max 21 days of lookbackdays to be kind on quicknode!
+      if (!(from > 0 && from <= 21)) {
+        throw new BadRequestException(
+          `invalid from: ${from} should be between 1 and 21 included`,
+        );
+      }
+    }
+    if (postUrl) {
+      console.log(`Get notes for postUrl=${postUrl}`);
+      notes = await this.appService.getNotesByPost(postUrl, from);
+    } else if (creatorAddress) {
+      console.log(`Get all notes created by ${creatorAddress}`);
+      notes = await this.appService.getNotesByCreator(creatorAddress, from);
+    } else {
+      console.log(`Get all notes`);
+      notes = await this.appService.getAllNotesFrom(from);
+    }
     return { notes };
   }
 
