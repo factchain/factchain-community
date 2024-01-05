@@ -164,15 +164,16 @@ export const alterDropdown = (dropdown) => {
 /// ---------------------------
 
 const makeFactchainHtmlNote = (note) => {
+
   const rateItHtml = `<span class="r-4qtqp9" style="min-height: 12px; min-width: 12px;"></span>
-    <div class="css-1dbjc4n r-1awozwy r-1roi411 r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu">
-      <div dir="ltr" class="css-901oao r-1nao33i r-1qd0xha r-1b43r93 r-16dba41 r-1cwl3u0 r-bcqeeo r-qvutc0">
-        <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">Do you find this helpful?</span>
+    <div class="css-175oi2r r-1awozwy r-1roi411 r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu">
+      <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-1b43r93 r-1cwl3u0 r-16dba41" style="text-overflow: unset; color: rgb(231, 233, 234);">
+        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you find this helpful?</span>
       </div>
-      <div id="rateNoteButton" tabindex="0" class="css-18t94o4 css-1dbjc4n r-1niwhzg r-sdzlij r-1phboty r-rs99b7 r-1loqt21 r-15ysp7h r-4wgw6l r-1ny4l3l r-ymttw5 r-o7ynqc r-6416eg r-lrvibr" style="border-color: rgb(83, 100, 113);">
-        <div dir="ltr" class="css-901oao r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1qd0xha r-a023e6 r-b88u0q r-1777fci r-rjixqe r-bcqeeo r-q4m81j r-qvutc0" style="color: rgb(239, 243, 244);">
-          <span class="css-901oao css-16my406 css-1hf3ou5 r-poiln3 r-1b43r93 r-1cwl3u0 r-bcqeeo r-qvutc0">
-            <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">Rate it</span>
+      <div id="rateNoteButton" role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
+        <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="text-overflow: unset; color: rgb(239, 243, 244);">
+          <span class="css-1qaijid r-dnmrzs r-1udh08x r-3s2u2q r-bcqeeo r-qvutc0 r-poiln3 r-1b43r93 r-1cwl3u0" style="text-overflow: unset;">
+            <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Rate it</span>
           </span>
         </div>
       </div>
