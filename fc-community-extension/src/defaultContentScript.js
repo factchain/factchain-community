@@ -3,7 +3,7 @@ import { alterDropdown, alterRatingPageTwitterNote, alterMainPageTwitterNote } f
 import { xSelectors } from "./utils/selectors";
 
 
-let observer = new MutationObserver(mutations => {
+let observer = new MutationObserver(async mutations => {
   for(let mutation of mutations) {
     for(let addedNode of mutation.addedNodes) {
       if (addedNode && (typeof addedNode.querySelector) === "function") {
@@ -12,7 +12,7 @@ let observer = new MutationObserver(mutations => {
         if (dropdown) {
           // Triggered whenever the user opens a dropdown on an article.
           logger.log("New dropdown", dropdown);
-          alterDropdown(dropdown);
+          await alterDropdown(dropdown);
         }
         
         const ratingStatuses = Array.from(addedNode.querySelectorAll(xSelectors.ratingStatus));

@@ -1,4 +1,4 @@
-import {getNotesWithHandler, getXNoteId } from "./utils/backend";
+import { getNotes, getXNoteId } from "./utils/backend";
 
 let cache = {
   postUrl: "",
@@ -15,7 +15,7 @@ let cache = {
 // });
 
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+const mainHandler = async (message, sendResponse) => {
   console.log("Received message", message);
 
   if (message.type === "fc-create-note") {
@@ -23,32 +23,31 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     cache.postUrl = message.postUrl;
 
     chrome.windows.create({
-        url: "createNote.html",
-        type: "popup",
-        focused: true,
-        width: 400,
-        height: 600,
-        top: 0,
-        left: 0,
+      url: "createNote.html",
+      type: "popup",
+      focused: true,
+      width: 400,
+      height: 600,
+      top: 0,
+      left: 0,
     });
   } else if (message.type === "fc-get-notes") {
-    getNotesWithHandler(message.postUrl, (notes) => {
-      console.log("Retrieved notes", notes);
-      sendResponse(notes);
-    });
+    const notes = await getNotes(message.postUrl);
+    console.log("Retrieved notes", notes);
+    sendResponse(notes);
   } else if (message.type === "fc-rate-notes") {
     console.log("Rating notes", message.notes);
     cache.postUrl = message.notes[0].postUrl;
     cache.notes = message.notes;
 
     chrome.windows.create({
-        url: "rateNotes.html",
-        type: "popup",
-        focused: true,
-        width: 400,
-        height: 600,
-        top: 0,
-        left: 0,
+      url: "rateNotes.html",
+      type: "popup",
+      focused: true,
+      width: 400,
+      height: 600,
+      top: 0,
+      left: 0,
     });
   } else if (message.type === "fc-get-from-cache") {
     console.log(`Get ${message.target} from cache`);
@@ -56,11 +55,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === "fc-mint-twitter-note") {
     console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}' to address ${message.address}`);
 
-    getXNoteId(message.noteUrl, message.content, (res) => {
-      console.log("Got id, hash, and signature for note", res);
-      sendResponse(res);
-    });
-    
+    const response = await getXNoteId(message.noteUrl, message.content);
+    console.log("Got id, hash, and signature for note", response);
+    sendResponse(response);
   }
   /// For now we deactivate notifications
   ///
@@ -74,7 +71,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   //   buttons: [{ title: 'Take me there' }],
   //   priority: 2
   // });
-  
+};
+
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  mainHandler(message, sendResponse);
   return true;
 });
 
