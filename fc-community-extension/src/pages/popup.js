@@ -1,23 +1,34 @@
 import { render } from "solid-js/web";
-import { createSignal, Switch, Match } from "solid-js";
+import { createSignal, createEffect, Switch, Match, createResource } from "solid-js";
 import { createFactchainProvider } from "../utils/web3";
 import { FCAddress, FCHero } from "./components";
+import { getNotes } from "../utils/backend";
 
 
-function FCProfile({provider}) {
+function FCProfile({ provider }) {
     return (
         <div style="height: 75%; overflow:auto;">
-            <FCAddress provider={provider}/>
+            <FCAddress provider={provider} />
         </div>
     );
 }
 
-function FCNotes({notes}) {
-    function FCNote({postUrl, content, creator}) {
+function FCNotes() {
+    const [notes, { reload }] = createResource(() => getNotes());
+
+    createEffect(async () => {
+        try {
+            await reload();
+        } catch (error) {
+            console.error("Error fetching notes:", error);
+        }
+    });
+
+    function FCNote({ postUrl, content, creator }) {
         const contentLimit = 115;
         const cutContent = content.length < contentLimit ? content : `${content.slice(0, contentLimit)}...`;
         return (
-            <div style="margin: 10px; background-color: #393E46; padding: 10px; border-radius: 10px;">
+            <div key={postUrl} style="margin: 10px; background-color: #393E46; padding: 10px; border-radius: 10px;">
                 <div><a href={postUrl} target="_blank">{postUrl}</a></div>
                 <div>{cutContent}</div>
                 <div style="display: flex; justify-content: flex-end; font-style: italic;">-- {creator}</div>
@@ -27,8 +38,8 @@ function FCNotes({notes}) {
 
     return (
         <div style="height: 75%; overflow:auto;">
-            <For each={notes}>{(note) =>
-                <FCNote postUrl={note.postUrl} creator={note.creator} content={note.content} />
+            <For each={notes()}>{(note) =>
+                <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creator} content={note.content} />
             }</For>
         </div>
     );
@@ -68,33 +79,24 @@ function FCFooterTab(props) {
     );
 }
 
-function FCPopup({provider}) {
+function FCPopup({ provider }) {
     const [selectedTab, setSelectedTab] = createSignal("");
-    const numberNotes = 10;
-    const notes = [...Array(numberNotes).keys()].map(i => {
-        return {
-            postUrl: `https://x.com/${i+1}`,
-            content: "Something something something ".repeat(i+1),
-            creator: "0xabcdef",
-        };
-    });
-
     return (
-      <div style="height:580px; width: 350px;">
-        <FCHero />
-        <Switch>
-            <Match when={selectedTab() === "Profile"}>
-                <FCProfile provider={provider} />
-            </Match>
-            <Match when={selectedTab() === "Notes"}>
-                <FCNotes notes={notes} />
-            </Match>
-            <Match when={selectedTab() === "Votes"}>
-                <FCVotes />
-            </Match>
-        </Switch>
-        <FCFooter selectedTab={selectedTab()} setSelectedTab={setSelectedTab} />
-      </div>
+        <div style="height:580px; width: 350px;">
+            <FCHero />
+            <Switch>
+                <Match when={selectedTab() === "Profile"}>
+                    <FCProfile provider={provider} />
+                </Match>
+                <Match when={selectedTab() === "Notes"}>
+                    <FCNotes />
+                </Match>
+                <Match when={selectedTab() === "Votes"}>
+                    <FCVotes />
+                </Match>
+            </Switch>
+            <FCFooter selectedTab={selectedTab()} setSelectedTab={setSelectedTab} />
+        </div>
     );
 }
 
