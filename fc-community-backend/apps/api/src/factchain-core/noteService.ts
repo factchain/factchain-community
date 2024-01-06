@@ -39,11 +39,25 @@ export class NoteService {
     to: Date,
     minimumRatingsPerNote: number,
   ): Promise<Array<Note>> => {
+    // get all ratings of FactChainCommunity within the given time period
     const eligibleRatings = await this.reader.getRatings(from, to);
-    const notesToFinalise = NoteService.getEligibleNotesFromRatings(
+    // map ratings to note and filter out note below `minimumRatingsPerNote`
+    const eligibleNotes = NoteService.getEligibleNotesFromRatings(
       eligibleRatings,
       minimumRatingsPerNote,
     );
+    // read FactChainCommunity to get note's finalRating for all eligible notes
+    const eligibleNotesWithFinalRating = await Promise.all(
+      eligibleNotes.map(async (note) => {
+        const noteWithFinalRating = await this.getNote(note.postUrl, note.creator);
+        return {
+          ...noteWithFinalRating,
+          ratings: note.ratings!,
+        }
+      })
+    );
+    // filter out already finalised notes
+    const notesToFinalise = eligibleNotesWithFinalRating.filter((note) => !note.finalRating);
     return notesToFinalise;
   };
 
@@ -68,6 +82,11 @@ export class NoteService {
       creator: creator,
       content: note.content,
     });
+  };
+
+  getNote = async (noteUrl: string, creator: string) => {
+    const XUrl = noteUrl.replace("twitter", "x");
+    return await this.reader.getNote(XUrl, creator);
   };
 
   //Throw if doesn't exist
