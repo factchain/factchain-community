@@ -42,19 +42,18 @@ export const alterRatingPageTwitterNote = (twitterNote) => {
     twitterNote.parentNode.querySelector("#mintNoteButton").addEventListener("click", async () => {
       const content = twitterNote.querySelector(xSelectors.noteContent).textContent
       logger.log(`Minting twitter from rating page note ${noteUrl} and content '${content}'`);
-      chrome.runtime.sendMessage({
+      const res = await chrome.runtime.sendMessage({
         type: 'fc-mint-twitter-note',
         noteUrl,
         content,
-      }, async (res) => {
-        logger.log("Got res for note", res);
-        const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
-        if (error) {
-          logger.log("Failed to mint note", error);
-        } else {
-          logger.log(`Success! ${transaction}`);
-        }
       });
+      logger.log("Got res for note", res);
+      const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
+      if (error) {
+        logger.log("Failed to mint note", error);
+      } else {
+        logger.log(`Success! ${transaction}`);
+      }
     });
   }
 };
@@ -112,37 +111,36 @@ const addNoteCreationButton = (dropdown, postUrl) => {
   });
 }
 
-const addNoteRatingButton = (dropdown, postUrl) => {
-  chrome.runtime.sendMessage({
+const addNoteRatingButton = async (dropdown, postUrl) => {
+  const notes = await chrome.runtime.sendMessage({
     type: 'fc-get-notes',
     postUrl,
-  }, async (notes) => {
-    logger.log('received notes', notes);
-    if (notes.length > 0) {
-      const buttonText = `Rate ${notes.length} Factchain Note${notes.length > 1 ? "s" : ""}`;
-      dropdown.insertAdjacentHTML("beforeend", `<a role="menuitem" class="css-175oi2r r-18u37iz r-ymttw5 r-1f1sjgu r-13qz1uu r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" data-testid="fc-note"> \
-        <div class="css-1dbjc4n r-1777fci r-j2kj52"> \
-          <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-1q142lx"><g><path d="M19 16h2.6c-.23-1.2-.66-2.12-1.2-2.77-.67-.8-1.55-1.23-2.65-1.23-.51 0-.96.09-1.36.26l-.78-1.84c.67-.28 1.38-.42 2.14-.42 1.7 0 3.14.7 4.19 1.95 1.03 1.24 1.63 2.95 1.81 4.96l.09 1.09H19v-2zM5 16H2.4c.23-1.2.66-2.12 1.2-2.77.67-.8 1.55-1.23 2.65-1.23.51 0 .96.09 1.36.26l.78-1.84c-.67-.28-1.38-.42-2.14-.42-1.7 0-3.14.7-4.19 1.95C1.032 13.19.433 14.9.254 16.91L.157 18H5v-2zM15.5 6c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3zm2 0c0 .55.45 1 1 1s1-.45 1-1-.45-1-1-1-1 .45-1 1zm-12-3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 2c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6.5 6.5c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-2c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm0 3c1.78 0 3.29.75 4.37 2.1 1.07 1.32 1.69 3.15 1.88 5.31l.09 1.09H5.66l.09-1.09c.19-2.16.81-3.99 1.88-5.31 1.08-1.35 2.59-2.1 4.37-2.1zm-2.82 3.35c-.59.74-1.05 1.79-1.29 3.15h8.22c-.24-1.36-.7-2.41-1.29-3.15-.72-.88-1.66-1.35-2.82-1.35s-2.1.47-2.82 1.35z"></path></g></svg> \
-        </div> \
-        <div class="css-1dbjc4n r-16y2uox r-1wbh5a2" id="createNoteButton"> \
-          <div dir="ltr" class="css-901oao r-1nao33i r-1qd0xha r-a023e6 r-b88u0q r-rjixqe r-bcqeeo r-qvutc0"> \
-            <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${buttonText}</span> \
-          </div> \
-        </div> \
-      </div>`);
-
-      dropdown.querySelector("#rateNoteButton").addEventListener("click", () => {
-        logger.log(`Rating note on ${postUrl}`);
-        chrome.runtime.sendMessage({
-          type: 'fc-rate-notes',
-          notes
-        });
-      });
-    }
   });
+  logger.log('received notes', notes);
+  if (notes.length > 0) {
+    const buttonText = `Rate ${notes.length} Factchain Note${notes.length > 1 ? "s" : ""}`;
+    dropdown.insertAdjacentHTML("beforeend", `<a role="menuitem" class="css-175oi2r r-18u37iz r-ymttw5 r-1f1sjgu r-13qz1uu r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" data-testid="fc-note"> \
+      <div class="css-1dbjc4n r-1777fci r-j2kj52"> \
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1nao33i r-1q142lx"><g><path d="M19 16h2.6c-.23-1.2-.66-2.12-1.2-2.77-.67-.8-1.55-1.23-2.65-1.23-.51 0-.96.09-1.36.26l-.78-1.84c.67-.28 1.38-.42 2.14-.42 1.7 0 3.14.7 4.19 1.95 1.03 1.24 1.63 2.95 1.81 4.96l.09 1.09H19v-2zM5 16H2.4c.23-1.2.66-2.12 1.2-2.77.67-.8 1.55-1.23 2.65-1.23.51 0 .96.09 1.36.26l.78-1.84c-.67-.28-1.38-.42-2.14-.42-1.7 0-3.14.7-4.19 1.95C1.032 13.19.433 14.9.254 16.91L.157 18H5v-2zM15.5 6c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3zm2 0c0 .55.45 1 1 1s1-.45 1-1-.45-1-1-1-1 .45-1 1zm-12-3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 2c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6.5 6.5c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0-2c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1zm0 3c1.78 0 3.29.75 4.37 2.1 1.07 1.32 1.69 3.15 1.88 5.31l.09 1.09H5.66l.09-1.09c.19-2.16.81-3.99 1.88-5.31 1.08-1.35 2.59-2.1 4.37-2.1zm-2.82 3.35c-.59.74-1.05 1.79-1.29 3.15h8.22c-.24-1.36-.7-2.41-1.29-3.15-.72-.88-1.66-1.35-2.82-1.35s-2.1.47-2.82 1.35z"></path></g></svg> \
+      </div> \
+      <div class="css-1dbjc4n r-16y2uox r-1wbh5a2" id="rateNoteButton"> \
+        <div dir="ltr" class="css-901oao r-1nao33i r-1qd0xha r-a023e6 r-b88u0q r-rjixqe r-bcqeeo r-qvutc0"> \
+          <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${buttonText}</span> \
+        </div> \
+      </div> \
+    </div>`);
+
+    dropdown.querySelector("#rateNoteButton").addEventListener("click", () => {
+      logger.log(`Rating note on ${postUrl}`);
+      chrome.runtime.sendMessage({
+        type: 'fc-rate-notes',
+        notes
+      });
+    });
+  }
 }
 
-export const alterDropdown = (dropdown) => {
+export const alterDropdown = async (dropdown) => {
   if (dropdown.classList.contains("factchain-1.0")) {
     // Add a special class to avoid re-processing the same dropdown multiple times
     // this seems to happen because we are modifying the dropdown, and the modification
@@ -155,7 +153,7 @@ export const alterDropdown = (dropdown) => {
     const postUrl = parseUrl(dropdown.querySelector(xSelectors.dropdownUrl).href, POST_URL_REGEX);
 
     addNoteCreationButton(dropdown, postUrl);
-    addNoteRatingButton(dropdown, postUrl);
+    await addNoteRatingButton(dropdown, postUrl);
   }
 }
 
@@ -218,18 +216,16 @@ const addNote = (mainArticle, note) => {
     });
 };
 
-export const alterMainArticle = (mainArticle) => {
+export const alterMainArticle = async (mainArticle) => {
   const postUrl = parseUrl(document.URL, POST_URL_REGEX);
-
-  chrome.runtime.sendMessage({
+  const notes = await chrome.runtime.sendMessage({
     type: 'fc-get-notes',
     postUrl,
-  }, async (notes) => {
-    logger.log('received notes', notes);
-    if (notes.length > 0) {
-      for (const note of notes) {
-        addNote(mainArticle, note);
-      }
-    }
   });
+  logger.log('received notes', notes);
+  if (notes.length > 0) {
+    for (const note of notes) {
+      addNote(mainArticle, note);
+    }
+  }
 };
