@@ -1,5 +1,5 @@
 
 export const logger = {
-  log: (message, ...args) => { console.log(`FactChain> ${message}`, ...args); },
-  error: (message, ...args) => { console.error(`FactChain> ${message}`, ...args); },
+  log: (message, ...args) => { console.log(`Factchain> ${message}`, ...args); },
+  error: (message, ...args) => { console.error(`Factchain> ${message}`, ...args); },
 };
