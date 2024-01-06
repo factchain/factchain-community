@@ -3,7 +3,7 @@ const BACKEND_URL = "https://fc-community-backend-15f6c753d352.herokuapp.com";
 export const getNotes = async (queryparams) => {
   let fullUrl = `${BACKEND_URL}/notes`;
   if (queryparams) {
-    const urlParams = new URLSearchParams({ queryparams });
+    const urlParams = new URLSearchParams(queryparams);
     fullUrl = `${BACKEND_URL}/notes?${urlParams}`;
   }
   console.log("Getting notes", fullUrl);

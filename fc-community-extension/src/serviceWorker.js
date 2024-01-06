@@ -32,7 +32,7 @@ const mainHandler = async (message, sendResponse) => {
       left: 0,
     });
   } else if (message.type === "fc-get-notes") {
-    const notes = await getNotes(message.postUrl);
+    const notes = await getNotes({postUrl: message.postUrl});
     console.log("Retrieved notes", notes);
     sendResponse(notes);
   } else if (message.type === "fc-rate-notes") {
