@@ -1,9 +1,13 @@
 import { render } from "solid-js/web";
 import { createSignal, createEffect, Switch, Match, createResource } from "solid-js";
 import { createFactchainProvider } from "../utils/web3";
-import { FCAddress, FCHero } from "./components";
+import { FCAddress, FCHero, FCLoader } from "./components";
 import { getNotes } from "../utils/backend";
 
+
+const cutText = (text, maxLength) => {
+    return text.length < maxLength ? text : `${text.slice(0, maxLength)}...`;
+}
 
 function FCProfile({ provider }) {
     return (
@@ -25,12 +29,10 @@ function FCNotes() {
     });
 
     function FCNote({ postUrl, content, creator }) {
-        const contentLimit = 115;
-        const cutContent = content.length < contentLimit ? content : `${content.slice(0, contentLimit)}...`;
         return (
             <div key={postUrl} style="margin: 10px; background-color: #393E46; padding: 10px; border-radius: 10px;">
-                <div><a href={postUrl} target="_blank">{postUrl}</a></div>
-                <div>{cutContent}</div>
+                <div><a href={postUrl} target="_blank">{cutText(postUrl, 35)}</a></div>
+                <div>{cutText(content, 115)}</div>
                 <div style="display: flex; justify-content: flex-end; font-style: italic;">-- {creator}</div>
             </div>
         );
@@ -38,9 +40,16 @@ function FCNotes() {
 
     return (
         <div style="height: 75%; overflow:auto;">
-            <For each={notes()}>{(note) =>
-                <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creator} content={note.content} />
-            }</For>
+            <Switch>
+                <Match when={(notes() || []).length > 0}>
+                    <For each={notes()}>{(note) =>
+                        <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creator} content={note.content} />
+                    }</For>
+                </Match>
+                <Match when={(notes() || []).length === 0}>
+                    <FCLoader />
+                </Match>
+            </Switch>
         </div>
     );
 }
