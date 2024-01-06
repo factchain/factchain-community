@@ -43,6 +43,10 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     );
   }
 
+  getBlockNumber = async (): Promise<number> => {
+    return await this._provider.getBlockNumber();
+  };
+
   getEvents = async (
     eventType: FactChainEvent,
     fromBlock: number,
@@ -64,7 +68,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     return {
       postUrl: result[0],
       content: result[1],
-      creator: result[2],
+      creatorAddress: result[2],
       finalRating: parseInt(result[3]),
     };
   };
@@ -73,7 +77,6 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     predicate: (postUrl: string, creator: string) => boolean,
     lookBackDays: number,
   ): Promise<Array<Note>> => {
-    
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
     const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
@@ -88,7 +91,9 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     let notePromises: Promise<Note>[] = [];
     for (const period of block_periods) {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
-      const relatedEvents = events.filter((e) => predicate(e.args[0], e.args[1]));
+      const relatedEvents = events.filter((e) =>
+        predicate(e.args[0], e.args[1]),
+      );
 
       if (relatedEvents) {
         notePromises = notePromises.concat(
@@ -102,11 +107,26 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     return notes;
   };
 
-  getRatings = async (from: Date, to: Date): Promise<Array<Rating>> => {
+  getRating = async (
+    postUrl: string,
+    creator: string,
+    rater: string,
+  ): Promise<Rating> => {
+    return {
+      postUrl: postUrl,
+      noteCreatorAddress: creator,
+      raterAddress: rater,
+      value: await this._fcCommunity.communityRatings(postUrl, creator, rater),
+    };
+  };
+
+  getRatings = async (lookBackDays: number): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
+    const today = new Date();
+    const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
     const block_periods = timePeriodToBlockPeriods(
       from,
-      to,
+      today,
       currentBlockNumber,
     );
     var ratings: Array<Rating> = [];
@@ -115,7 +135,8 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       ratings = ratings.concat(
         events.map((event) => ({
           postUrl: event.args[0],
-          creator: event.args[1],
+          noteCreatorAddress: event.args[1],
+          raterAddress: event.args[2],
           value: event.args[3],
         })),
       );
@@ -178,7 +199,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.REPLICATE_API_TOKEN,
       this._config.PINATA_JWT,
     );
-    return await this._fcNFT.mint(note.creator, metadataIpfsHash);
+    return await this._fcNFT.mint(note.creatorAddress, metadataIpfsHash);
   };
 
   getXNoteID = async (note: XCommunityNote): Promise<XSignedNoteIDResponse> => {

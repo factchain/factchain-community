@@ -12,63 +12,103 @@ export class NoteService {
     this.config = config;
   }
 
-  static getEligibleNotesFromRatings = (
-    oldEnoughRatings: Array<Rating>,
-    minimumRatingsPerNote: number,
-  ): Array<Note> => {
+  static inferNotesFromRatings = (ratings: Array<Rating>): Array<Note> => {
     const noteRatingsMap: Record<string, Note> = {};
-    for (const rating of oldEnoughRatings) {
-      const key = `${rating.postUrl}-${rating.creator}`;
+    for (const rating of ratings) {
+      const key = `${rating.postUrl}-${rating.noteCreatorAddress}`;
       if (!noteRatingsMap[key]) {
         noteRatingsMap[key] = {
           postUrl: rating.postUrl,
-          creator: rating.creator,
+          creatorAddress: rating.noteCreatorAddress,
           ratings: [],
         };
       }
       noteRatingsMap[key].ratings!.push(rating.value);
     }
-    const eligibleNotes = Object.values(noteRatingsMap).filter(
+    return Object.values(noteRatingsMap);
+  };
+
+  static getEligibleNotesFromRatings = (
+    oldEnoughRatings: Array<Rating>,
+    minimumRatingsPerNote: number,
+  ): Array<Note> => {
+    const notes = NoteService.inferNotesFromRatings(oldEnoughRatings);
+    const eligibleNotes = notes.filter(
       (note) => note.ratings!.length >= minimumRatingsPerNote,
     );
     return eligibleNotes;
   };
 
   getNotesToFinalise = async (
-    from: Date,
-    to: Date,
+    lookBackDays: number,
     minimumRatingsPerNote: number,
   ): Promise<Array<Note>> => {
     // get all ratings of FactChainCommunity within the given time period
-    // only note with at least one rating will be finalized
-    const eligibleRatings = await this.reader.getRatings(from, to);
+    const eligibleRatings = await this.reader.getRatings(lookBackDays);
     // map ratings to note and filter out note below `minimumRatingsPerNote`
     const eligibleNotes = NoteService.getEligibleNotesFromRatings(
       eligibleRatings,
       minimumRatingsPerNote,
     );
     // read FactChainCommunity to get note's finalRating for all eligible notes
-    // and get it's content for NFT generation
+    // and to get note's content for the NFT generation
     const eligibleNotesWithFinalRating = await Promise.all(
       eligibleNotes.map(async (note) => {
-        const noteWithFinalRating = await this.getNote(note.postUrl, note.creator);
+        const noteWithFinalRating = await this.getNote(
+          note.postUrl,
+          note.creatorAddress,
+        );
         return {
           ...noteWithFinalRating,
           ratings: note.ratings!,
-        }
-      })
+        };
+      }),
     );
     // filter out already finalised notes
-    const notesToFinalise = eligibleNotesWithFinalRating.filter((note) => !note.finalRating);
+    const notesToFinalise = eligibleNotesWithFinalRating.filter(
+      (note) => !note.finalRating,
+    );
     return notesToFinalise;
+  };
+
+  getNotesAwaitingRatingBy = async (
+    predicate: (postUrl: string, creator: string) => boolean,
+    byAddress: string,
+    paramLookBackDays = 0,
+  ): Promise<Note[]> => {
+    const lookBackDays =
+      paramLookBackDays || parseInt(this.config.LOOKBACK_DAYS);
+    const notes = await this.reader.getNotes(predicate, lookBackDays);
+    // factchainer can't rate their own note
+    const othersNotes = notes.filter(
+      (note) => note.creatorAddress.toLowerCase() != byAddress.toLowerCase(),
+    );
+    const awaitingRatingBy = [];
+    for (const note of othersNotes) {
+      const rating = await this.reader.getRating(
+        note.postUrl,
+        note.creatorAddress,
+        byAddress,
+      );
+      // factchainer can rate the same note only once
+      if (rating.value) continue;
+      awaitingRatingBy.push(note);
+    }
+    // factchainer can't rate a finalised note
+    return awaitingRatingBy.filter((note) => !note.finalRating);
+  };
+
+  getNote = async (noteUrl: string, creator: string) => {
+    const XUrl = noteUrl.replace("twitter", "x");
+    return await this.reader.getNote(XUrl, creator);
   };
 
   getNotes = async (
     predicate: (postUrl: string, creator: string) => boolean,
     paramLookBackDays = 0,
   ): Promise<Array<Note>> => {
-    const configLookBackDays = parseInt(this.config.LOOKBACK_DAYS);
-    const lookBackDays = paramLookBackDays || configLookBackDays;
+    const lookBackDays =
+      paramLookBackDays || parseInt(this.config.LOOKBACK_DAYS);
     const notes = await this.reader.getNotes(predicate, lookBackDays);
     return notes;
   };
@@ -81,14 +121,9 @@ export class NoteService {
 
     return await this.writer.mintNote721({
       postUrl: postUrl,
-      creator: creator,
+      creatorAddress: creator,
       content: note.content,
     });
-  };
-
-  getNote = async (noteUrl: string, creator: string) => {
-    const XUrl = noteUrl.replace("twitter", "x");
-    return await this.reader.getNote(XUrl, creator);
   };
 
   //Throw if doesn't exist
