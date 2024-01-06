@@ -41,6 +41,20 @@ export class AppService {
     return notes;
   }
 
+  async getNotesAwaitingRatingBy(
+    rater: string,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config);
+    const ns = new NoteService(fc, fc);
+    const notes = await ns.getNotesAwaitingRatingBy(
+      (_postUrl, _creator) => true,
+      rater,
+      from,
+    );
+    return notes;
+  }
+
   async getXNoteID(noteUrl: string): Promise<XSignedNoteIDResponse> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);

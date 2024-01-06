@@ -4,6 +4,7 @@ import {
   getEvents,
   getNote,
   getNotes,
+  getRating,
   createNote,
   rateNote,
   finaliseNote,
@@ -82,21 +83,19 @@ program
 program
   .command("finalise-notes")
   .description("set to all eligible factchain notes their final rating")
-  .option("-f, --from <number>", "Start date YYYY-DD-MMTHH:MM:SSZ")
-  .option("-t, --to <number>", "End date YYYY-DD-MMTHH:MM:SSZ")
   .option("-m, --minimum <number>", "minimum note ratings", 1)
+  .option("-f, --from <number>", "lookback days")
   .action(async (options: any) => {
-    await finaliseNotes(options.from, options.to, options.minimum);
+    await finaliseNotes(options.minimum, options.from);
   });
 
 program
   .command("get-eligible-notes")
   .description("get factchain notes to finalised")
   .option("-n, --minimum <number>", "minimum note ratings", 1)
-  .option("-f, --from <number>", "Start date YYYY-DD-MMTHH:MM:SSZ")
-  .option("-t, --to <number>", "End date YYYY-DD-MMTHH:MM:SSZ")
+  .option("-f, --from <number>", "lookback days")
   .action(async (options: any) => {
-    await getEligibleNotes(options.from, options.to, options.minimum);
+    await getEligibleNotes(options.minimum, options.from);
   });
 
 program
@@ -118,4 +117,13 @@ program
     await createXCommunityNoteNFTMetadata(options.text, options.url);
   });
 
+program
+  .command("get-ratings")
+  .description("get ratings by note")
+  .option("-u, --url <url>", "Post url")
+  .option("-c, --creator <address>", "Note creator")
+  .option("-r, --rater <address>", "Note Rater")
+  .action(async (options: any) => {
+    await getRating(options.url, options.creator, options.rater);
+  });
 program.parse();

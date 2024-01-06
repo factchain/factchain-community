@@ -28,6 +28,7 @@ export class AppController {
     @Query("postUrl") postUrl: string,
     @Query("from") from: number,
     @Query("creatorAddress") creatorAddress: string,
+    @Query("awaitingRatingBy") awaitingRatingBy: string,
   ): Promise<NotesResponse> {
     let notes = [];
     if (from) {
@@ -44,6 +45,12 @@ export class AppController {
     } else if (creatorAddress) {
       console.log(`Get all notes created by ${creatorAddress}`);
       notes = await this.appService.getNotesByCreator(creatorAddress, from);
+    } else if (awaitingRatingBy) {
+      console.log(`Get all notes awaiting for rating by ${awaitingRatingBy}`);
+      notes = await this.appService.getNotesAwaitingRatingBy(
+        awaitingRatingBy,
+        from,
+      );
     } else {
       console.log(`Get all notes`);
       notes = await this.appService.getAllNotesFrom(from);
