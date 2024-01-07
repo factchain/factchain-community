@@ -23,13 +23,14 @@ export type Config = {
 
 export type Rating = {
   postUrl: string;
-  creator: string;
+  noteCreatorAddress: string;
+  raterAddress: string;
   value: number;
 };
 
 export type Note = {
   postUrl: string;
-  creator: string;
+  creatorAddress: string;
   content?: string;
   finalRating?: number;
   ratings?: Array<number>;
@@ -67,7 +68,12 @@ export interface NoteReader {
     predicate: (postUrl: string, creator: string) => boolean,
     lookBackDays: number,
   ) => Promise<Array<Note>>;
-  getRatings: (from: Date, to: Date) => Promise<Array<Rating>>;
+  getRating: (
+    postUrl: string,
+    creator: string,
+    rater: string,
+  ) => Promise<Rating>;
+  getRatings: (lookBackDays: number) => Promise<Array<Rating>>;
   getXNoteID: (note: XCommunityNote) => Promise<XSignedNoteIDResponse>;
 }
 

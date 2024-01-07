@@ -17,8 +17,8 @@ function FCProfile({ provider }) {
     );
 }
 
-function FCNotes() {
-    const [notes, { reload }] = createResource(() => getNotes());
+function FCNotes({ queryparams }) {
+    const [notes, { reload }] = createResource(() => getNotes(queryparams));
 
     createEffect(async () => {
         try {
@@ -54,21 +54,13 @@ function FCNotes() {
     );
 }
 
-function FCVotes() {
-    return (
-        <div style="height: 75%; overflow:auto;">
-            Votes
-        </div>
-    );
-}
-
 function FCFooter(props) {
     props.setSelectedTab("Notes");
     return (
         <div style="margin-top: 15px; display: flex; flex-direction: row; justify-content: space-between;">
             <FCFooterTab name="Profile" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
             <FCFooterTab name="Notes" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
-            <FCFooterTab name="Votes" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
+            <FCFooterTab name="Ratings" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
         </div>
     );
 }
@@ -90,6 +82,9 @@ function FCFooterTab(props) {
 
 function FCPopup({ provider }) {
     const [selectedTab, setSelectedTab] = createSignal("");
+    const [address, setAddress] = createSignal(null);
+    provider.getAddress().then(setAddress);
+
     return (
         <div style="height:580px; width: 350px;">
             <FCHero />
@@ -98,10 +93,10 @@ function FCPopup({ provider }) {
                     <FCProfile provider={provider} />
                 </Match>
                 <Match when={selectedTab() === "Notes"}>
-                    <FCNotes />
+                    <FCNotes queryparams={{creatorAddress: address()}}/>
                 </Match>
-                <Match when={selectedTab() === "Votes"}>
-                    <FCVotes />
+                <Match when={selectedTab() === "Ratings"}>
+                    <FCNotes queryparams={{awaitingRatingBy: address()}} />
                 </Match>
             </Switch>
             <FCFooter selectedTab={selectedTab()} setSelectedTab={setSelectedTab} />

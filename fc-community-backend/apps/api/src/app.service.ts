@@ -18,7 +18,7 @@ export class AppService {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotes(
-      (_postUrl, _) => _postUrl === postUrl,
+      (_postUrl, _) => _postUrl === postUrl.replace("twitter", "x"),
       from,
     );
     return notes;
@@ -35,7 +35,21 @@ export class AppService {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotes(
-      (_, _creator) => _creator === creator,
+      (_, _creator) => _creator.toLowerCase() === creator.toLowerCase(),
+      from,
+    );
+    return notes;
+  }
+
+  async getNotesAwaitingRatingBy(
+    rater: string,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config);
+    const ns = new NoteService(fc, fc);
+    const notes = await ns.getNotesAwaitingRatingBy(
+      (_postUrl, _creator) => true,
+      rater,
       from,
     );
     return notes;
