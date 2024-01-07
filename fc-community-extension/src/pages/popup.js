@@ -138,7 +138,7 @@ function FCPopup({ provider }) {
                     <FCProfile provider={provider} />
                 </Match>
                 <Match when={selectedTab() === "Notes"}>
-                    <FCNotes />
+                    <FCNotes queryparams={{creatorAddress: address()}}/>
                 </Match>
                 <Match when={selectedTab() === "Ratings"}>
                     <FCNotes queryparams={{awaitingRatingBy: address()}} />
