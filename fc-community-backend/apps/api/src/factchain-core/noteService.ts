@@ -83,7 +83,8 @@ export class NoteService {
     const othersNotes = notes.filter(
       (note) => note.creatorAddress.toLowerCase() != byAddress.toLowerCase(),
     );
-    // use Promise.all to parallelize calls
+    // factchainer can rate the same note only once
+    // and can't rate finalised notes
     const awaitingRatingBy = await Promise.all(
       othersNotes.map(async (note) => {
         const rating = await this.reader.getRating(
@@ -97,7 +98,6 @@ export class NoteService {
         return null;
       })
     );
-    // factchainer can't rate a finalised note
     return awaitingRatingBy.filter((note) => note !== null);
   };
 

@@ -38,16 +38,20 @@
   ],
   "permissions": [],
   "host_permissions": [
-    "https://fc-community-backend-15f6c753d352.herokuapp.com/*",
-    "http://localhost/*"
+    "https://fc-community-backend-15f6c753d352.herokuapp.com/*"
   ],
   "background": {
     "service_worker": "serviceWorker.js"
   },
   "web_accessible_resources": [
     {
-      "resources": [ "icons/icon_128.png", "factchain.jpeg" ],
-      "matches": [ "<all_urls>" ]
+      "resources": [
+        "icons/icon_128.png",
+        "factchain.jpeg"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }
