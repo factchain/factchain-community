@@ -39,6 +39,20 @@ export class AppController {
         );
       }
     }
+
+    // Double Query Params
+    if (postUrl && awaitingRatingBy) {
+
+      console.log(`Get all notes awaiting for rating by ${awaitingRatingBy} on ${postUrl}`);
+      notes = await this.appService.getNotesAwaitingRatingByOnGivenPost(
+        postUrl,
+        awaitingRatingBy,
+        from,
+      );
+      return { notes };
+    }
+
+    // simple QueryParam
     if (postUrl) {
       console.log(`Get notes for postUrl=${postUrl}`);
       notes = await this.appService.getNotesByPost(postUrl, from);

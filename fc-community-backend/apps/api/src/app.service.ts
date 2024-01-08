@@ -61,9 +61,8 @@ export class AppService {
     return notes;
   }
 
-  async getNoteAwaitingRatingBy(
+  async getNotesAwaitingRatingByOnGivenPost(
     postUrl: string,
-    creator: string,
     rater: string,
     from: number,
   ): Promise<Array<Note>> {
@@ -72,8 +71,7 @@ export class AppService {
 
     const sanitizedPostUrl = sanitizeXUrl(postUrl);
     const notes = await ns.getNotesAwaitingRatingBy(
-      (_postUrl, _creator) =>
-        _postUrl == sanitizedPostUrl && _creator == creator,
+      (_postUrl, _) => _postUrl == sanitizedPostUrl,
       rater,
       from,
     );
