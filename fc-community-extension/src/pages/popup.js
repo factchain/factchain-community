@@ -10,6 +10,16 @@ const cutText = (text, maxLength) => {
 }
 
 function FCProfile({ provider }) {
+
+    function StatCard({ name, value }) {
+        return (
+            <div style="text-align: center;">
+                <div style="font-size: 140%; font-weight: bold;">{value}</div>
+                <div style="font-size: 110%;">{name}</div>
+            </div>
+        );
+    }
+
     const [address, setAddress] = createSignal(null);
     const changeConnectionState = async () => {
         if (address()) {
@@ -24,7 +34,7 @@ function FCProfile({ provider }) {
         <div style="height: 75%; overflow:auto;">
             <div>
                 <div
-                    style="padding: 10px; font-size: 200%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;"
+                    style="margin-top: 20px; padding: 10px; font-size: 200%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;"
                 >
                     Account
                 </div>
@@ -33,8 +43,13 @@ function FCProfile({ provider }) {
                 >
                     {address() || "0x?"}
                 </div>
+                <div style="margin-top: 40px; margin: 30px; display: flex; flex-direction: row; justify-content: space-between;">
+                    <StatCard name="Notes" value="?" />
+                    <StatCard name="Ratings" value="?" />
+                    <StatCard name="Earnings" value="? ETH" />
+                </div>
                 <button
-                    style="padding: 8px; font-size: 140%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%);"
+                    style="margin-top: 10px; padding: 8px; font-size: 140%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%);"
                     onclick={changeConnectionState}
                 >
                     {address() ? "Log out" : "Connect a wallet"}
@@ -90,7 +105,7 @@ function FCVotes() {
 }
 
 function FCFooter(props) {
-    props.setSelectedTab("Notes");
+    props.setSelectedTab("Profile");
     return (
         <div style="margin-top: 15px; display: flex; flex-direction: row; justify-content: space-between;">
             <FCFooterTab name="Profile" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
