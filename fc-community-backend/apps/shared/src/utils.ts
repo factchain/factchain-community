@@ -95,3 +95,8 @@ export async function getNoteSignature(id: number, signer: ethers.Wallet) {
     signature: signature,
   };
 }
+
+export const sanitizeXUrl = (url: string) =>
+  typeof url === "string"
+    ? url.replace(/^(http(s)?):\/\/twitter.com/, "$1://x.com")
+    : url;

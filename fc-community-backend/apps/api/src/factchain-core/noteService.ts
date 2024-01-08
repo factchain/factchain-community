@@ -1,5 +1,6 @@
 import { Note, NoteReader, NoteWriter, Rating, Config } from "./types";
 import { config } from "./env";
+import { sanitizeXUrl } from "./utils";
 
 export class NoteService {
   reader: NoteReader;
@@ -13,6 +14,9 @@ export class NoteService {
   }
 
   static inferNotesFromRatings = (ratings: Array<Rating>): Array<Note> => {
+    // pure function to infer "light notes" from ratings.
+    // useful before notes finalisation to gather ratings.
+
     const noteRatingsMap: Record<string, Note> = {};
     for (const rating of ratings) {
       const key = `${rating.postUrl}-${rating.noteCreatorAddress}`;
@@ -96,14 +100,13 @@ export class NoteService {
           return note;
         }
         return null;
-      })
+      }),
     );
-    return awaitingRatingBy.filter((note) => note !== null);
+    return awaitingRatingBy.filter((note) => note !== null) as Note[];
   };
 
   getNote = async (noteUrl: string, creator: string) => {
-    const XUrl = noteUrl.replace("twitter", "x");
-    return await this.reader.getNote(XUrl, creator);
+    return await this.reader.getNote(sanitizeXUrl(noteUrl), creator);
   };
 
   getNotes = async (
@@ -131,14 +134,12 @@ export class NoteService {
 
   //Throw if doesn't exist
   getXNoteID = async (noteUrl: string) => {
-    const XUrl = noteUrl.replace("twitter", "x");
-    return await this.reader.getXNoteID({ url: XUrl });
+    return await this.reader.getXNoteID({ url: sanitizeXUrl(noteUrl) });
   };
 
   createXNoteMetadata = async (noteUrl: string, content: string) => {
-    const XUrl = noteUrl.replace("twitter", "x");
     return await this.writer.createXNoteMetadata({
-      url: XUrl,
+      url: sanitizeXUrl(noteUrl),
       content: content,
     });
   };
