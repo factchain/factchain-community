@@ -68,12 +68,12 @@ function FCNotes() {
     return (
         <div style="height: 75%; overflow:auto;">
             <Switch>
-                <Match when={(notes() || []).length > 0}>
+                <Match when={notes() !== undefined}>
                     <For each={notes()}>{(note) =>
                         <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creator} content={note.content} />
                     }</For>
                 </Match>
-                <Match when={(notes() || []).length === 0}>
+                <Match when={true}>
                     <FCLoader />
                 </Match>
             </Switch>
