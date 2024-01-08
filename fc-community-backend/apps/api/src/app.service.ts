@@ -4,6 +4,8 @@ import { FactChainBackend } from "./factchain-core/web3";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
+import { sanitizeXUrl } from "./factchain-core/utils";
+
 @Injectable()
 export class AppService {
   getHello(): string {
@@ -17,8 +19,10 @@ export class AppService {
   async getNotesByPost(postUrl: string, from: number): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
+
+    const sanitizedPostUrl = sanitizeXUrl(postUrl);
     const notes = await ns.getNotes(
-      (_postUrl, _) => _postUrl === postUrl,
+      (_postUrl, _) => _postUrl === sanitizedPostUrl,
       from,
     );
     return notes;
@@ -34,8 +38,41 @@ export class AppService {
   async getNotesByCreator(creator: string, from: number): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
+    // TODO: only push lowered address to contract
+    // and remove the conversion here
     const notes = await ns.getNotes(
-      (_, _creator) => _creator === creator,
+      (_, _creator) => _creator.toLowerCase() === creator.toLowerCase(),
+      from,
+    );
+    return notes;
+  }
+
+  async getNotesAwaitingRatingBy(
+    rater: string,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config);
+    const ns = new NoteService(fc, fc);
+    const notes = await ns.getNotesAwaitingRatingBy(
+      (_postUrl, _creator) => true,
+      rater,
+      from,
+    );
+    return notes;
+  }
+
+  async getNotesAwaitingRatingByOnGivenPost(
+    postUrl: string,
+    rater: string,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config);
+    const ns = new NoteService(fc, fc);
+
+    const sanitizedPostUrl = sanitizeXUrl(postUrl);
+    const notes = await ns.getNotesAwaitingRatingBy(
+      (_postUrl, _) => _postUrl == sanitizedPostUrl,
+      rater,
       from,
     );
     return notes;

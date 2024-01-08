@@ -59,8 +59,8 @@ function FCProfile({ provider }) {
     );
 }
 
-function FCNotes() {
-    const [notes, { reload }] = createResource(() => getNotes());
+function FCNotes({ queryparams }) {
+    const [notes, { reload }] = createResource(() => getNotes(queryparams));
 
     createEffect(async () => {
         try {
@@ -96,14 +96,6 @@ function FCNotes() {
     );
 }
 
-function FCVotes() {
-    return (
-        <div style="height: 75%; overflow:auto;">
-            Votes
-        </div>
-    );
-}
-
 function FCFooter(props) {
     function FCFooterTab(props) {
         const selected = () => props.name === props.selectedTab;
@@ -128,13 +120,16 @@ function FCFooter(props) {
         <div style="width: 100%; margin-top: 15px; padding: 10px; display: flex; flex-direction: row; justify-content: space-between; background-color: #393e46; position: relative; left: 50%; transform: translateX(-50%);">
             <FCFooterTab name="Profile" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
             <FCFooterTab name="Notes" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
-            <FCFooterTab name="Votes" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
+            <FCFooterTab name="Ratings" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
         </div>
     );
 }
 
 function FCPopup({ provider }) {
     const [selectedTab, setSelectedTab] = createSignal("Profile");
+    const [address, setAddress] = createSignal(null);
+    provider.getAddress().then(setAddress);
+
     return (
         <div style="height:575px; width: 350px;">
             <FCHero />
@@ -143,10 +138,10 @@ function FCPopup({ provider }) {
                     <FCProfile provider={provider} />
                 </Match>
                 <Match when={selectedTab() === "Notes"}>
-                    <FCNotes />
+                    <FCNotes queryparams={{creatorAddress: address()}}/>
                 </Match>
-                <Match when={selectedTab() === "Votes"}>
-                    <FCVotes />
+                <Match when={selectedTab() === "Ratings"}>
+                    <FCNotes queryparams={{awaitingRatingBy: address()}} />
                 </Match>
             </Switch>
             <FCFooter selectedTab={selectedTab()} setSelectedTab={setSelectedTab} />
