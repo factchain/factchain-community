@@ -6,9 +6,16 @@ body {
 
 button {
   font-family: 'Space Mono';
-  background-color: #00ADB5;
-  color: #222831;
-  border: none;
+  background-color: #222831;
+  color: #00ADB5;
+  border: 1px solid #00ADB5;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+button:hover {
+  background: #00ADB5;
+  color: #EEEEEE;
 }
 
 a:link {

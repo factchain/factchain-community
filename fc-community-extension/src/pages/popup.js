@@ -1,7 +1,7 @@
 import { render } from "solid-js/web";
 import { createSignal, createEffect, Switch, Match, createResource } from "solid-js";
 import { createFactchainProvider } from "../utils/web3";
-import { FCAddress, FCHero, FCLoader } from "./components";
+import { FCHero, FCLoader } from "./components";
 import { getNotes } from "../utils/backend";
 
 
@@ -10,9 +10,36 @@ const cutText = (text, maxLength) => {
 }
 
 function FCProfile({ provider }) {
+    const [address, setAddress] = createSignal(null);
+    const changeConnectionState = async () => {
+        if (address()) {
+            await provider.disconnect();
+        } else {
+            await provider.getAddress(true).then(setAddress);
+        }
+    }
+    provider.getAddress(false).then(setAddress);
+    provider.onAddressChange(setAddress);
     return (
         <div style="height: 75%; overflow:auto;">
-            <FCAddress provider={provider} />
+            <div>
+                <div
+                    style="padding: 10px; font-size: 200%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;"
+                >
+                    Account
+                </div>
+                <div
+                    style="font-size: 110%; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;"
+                >
+                    {address() || "0x?"}
+                </div>
+                <button
+                    style="padding: 8px; font-size: 140%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%);"
+                    onclick={changeConnectionState}
+                >
+                    {address() ? "Log out" : "Connect a wallet"}
+                </button>
+            </div>
         </div>
     );
 }

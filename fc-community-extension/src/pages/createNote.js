@@ -4,7 +4,7 @@ import { FCCreateNote } from "./components";
 import { logger } from "../utils/logging";
 
 const provider = await createFactchainProvider();
-const address = await provider.getAddress();
+const address = await provider.getAddress(true);
 logger.log("Creator address", address);
 const contract = await provider.getFCContract();
 
