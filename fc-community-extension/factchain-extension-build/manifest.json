@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "FactChain Community",
+  "name": "Factchain Community",
   "version": "0.2.0",
   "description": "Review all socials on chain",
   "icons": {
@@ -10,7 +10,7 @@
     "128": "icons/icon_128.png"
   },
   "action": {
-    "default_title": "FactChain",
+    "default_title": "Factchain",
     "default_popup": "popup.html"
   },
   "content_scripts": [

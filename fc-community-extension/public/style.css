@@ -18,6 +18,23 @@ button:hover {
   color: #EEEEEE;
 }
 
+.tab {
+  background-color: #393e46;
+  border: none;
+  cursor: pointer;
+  border-radius: 32px;
+  width: 48px;
+  height: 48px;
+}
+
+.tab.selected {
+  background: #00ADB5;
+}
+
+.tab:hover {
+  background: #00ADB5;
+}
+
 a:link {
   color: #00ADB5;
 }

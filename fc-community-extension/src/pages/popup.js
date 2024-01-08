@@ -105,9 +105,27 @@ function FCVotes() {
 }
 
 function FCFooter(props) {
-    props.setSelectedTab("Profile");
+    function FCFooterTab(props) {
+        const selected = () => props.name === props.selectedTab;
+        const classes = () => `tab ${selected() ? "selected" : ""}`;
+        const imgSrc = `./${props.name.toLowerCase()}.svg`;
+        return (
+            <div
+                class={classes()}
+                onclick={() => props.onClick(props.name)}
+                title={props.name}
+                style="margin: 0 20px 0 20px"
+            >
+                <img
+                    src={imgSrc}
+                    alt={props.name}
+                    style="width: 18px; height:18px; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);"
+                ></img>
+            </div>
+        );
+    }
     return (
-        <div style="margin-top: 15px; display: flex; flex-direction: row; justify-content: space-between;">
+        <div style="width: 100%; margin-top: 15px; padding: 10px; display: flex; flex-direction: row; justify-content: space-between; background-color: #393e46; position: relative; left: 50%; transform: translateX(-50%);">
             <FCFooterTab name="Profile" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
             <FCFooterTab name="Notes" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
             <FCFooterTab name="Votes" selectedTab={props.selectedTab} onClick={props.setSelectedTab} />
@@ -115,25 +133,10 @@ function FCFooter(props) {
     );
 }
 
-function FCFooterTab(props) {
-    const selected = () => props.name === props.selectedTab;
-    const backgroundColor = () => selected() ? "#222831" : "#00ADB5";
-    const fontColor = () => selected() ? "#00ADB5" : "#222831";
-    const fontWeight = () => selected() ? "900" : "normal";
-    return (
-        <div
-            style={`background-color: ${backgroundColor()}; color: ${fontColor()}; font-weight: ${fontWeight()}; padding: 10px; flex-basis: 33%; text-align: center;`}
-            onclick={() => props.onClick(props.name)}
-        >
-            {props.name}
-        </div>
-    );
-}
-
 function FCPopup({ provider }) {
-    const [selectedTab, setSelectedTab] = createSignal("");
+    const [selectedTab, setSelectedTab] = createSignal("Profile");
     return (
-        <div style="height:580px; width: 350px;">
+        <div style="height:575px; width: 350px;">
             <FCHero />
             <Switch>
                 <Match when={selectedTab() === "Profile"}>
