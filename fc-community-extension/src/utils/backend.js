@@ -38,7 +38,7 @@ export const getXNoteId = async (noteUrl, content) => {
     if (response.status === 404) {
       console.log('Resource not found');
       // Handle 404 specifically
-      response = await createXNoteId(cleanNoteUrl, content);
+      response = await createXNoteId(noteUrl, content);
     } else {
       // Handle other HTTP errors
       console.log('HTTP error:', response.status);
