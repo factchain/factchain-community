@@ -8,548 +8,580 @@ export const NOTE_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/birdwatch\/.+?\
 */
 export const sanitizeXUrl = (url) => url ? url.replace(/^(http(s)?):\/\/twitter.com/, "$1://x.com") : url;
 export const parseUrl = (url, regex) => sanitizeXUrl(url.match(regex)[1]);
-// TODO read address from service once
-export const FC_CONTRACT_ADDRESS = "0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428";
+
 export const FC_CONTRACT_ABI = [
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_owner",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+      "type": "constructor",
+      "inputs": [
+          {
+              "name": "_owner",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "stateMutability": "nonpayable"
   },
   {
-    "inputs": [],
-    "name": "CantRateOwnNote",
-    "type": "error"
+      "type": "receive",
+      "stateMutability": "payable"
   },
   {
-    "inputs": [],
-    "name": "ContentInvalid",
-    "type": "error"
+      "type": "function",
+      "name": "communityNotes",
+      "inputs": [
+          {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "content",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "finalRating",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    "inputs": [],
-    "name": "FailedToReward",
-    "type": "error"
+      "type": "function",
+      "name": "communityRatings",
+      "inputs": [
+          {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    "inputs": [],
-    "name": "FailedToSlash",
-    "type": "error"
+      "type": "function",
+      "name": "createNote",
+      "inputs": [
+          {
+              "name": "_postUrl",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "_content",
+              "type": "string",
+              "internalType": "string"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
   },
   {
-    "inputs": [],
-    "name": "InsufficientStake",
-    "type": "error"
+      "type": "function",
+      "name": "finaliseNote",
+      "inputs": [
+          {
+              "name": "_postUrl",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "_creator",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "_finalRating",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    "inputs": [],
-    "name": "NotOwner",
-    "type": "error"
+      "type": "function",
+      "name": "noteRaters",
+      "inputs": [
+          {
+              "name": "",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "",
+              "type": "uint256",
+              "internalType": "uint256"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    "inputs": [],
-    "name": "NoteAlreadyExists",
-    "type": "error"
+      "type": "function",
+      "name": "owner",
+      "inputs": [],
+      "outputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    "inputs": [],
-    "name": "NoteAlreadyFinalised",
-    "type": "error"
+      "type": "function",
+      "name": "rateNote",
+      "inputs": [
+          {
+              "name": "_postUrl",
+              "type": "string",
+              "internalType": "string"
+          },
+          {
+              "name": "_creator",
+              "type": "address",
+              "internalType": "address"
+          },
+          {
+              "name": "_rating",
+              "type": "uint8",
+              "internalType": "uint8"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
   },
   {
-    "inputs": [],
-    "name": "NoteDoesNotExist",
-    "type": "error"
+      "type": "function",
+      "name": "supportsInterface",
+      "inputs": [
+          {
+              "name": "interfaceId",
+              "type": "bytes4",
+              "internalType": "bytes4"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "",
+              "type": "bool",
+              "internalType": "bool"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    "inputs": [],
-    "name": "PostUrlInvalid",
-    "type": "error"
+      "type": "function",
+      "name": "transferOwnership",
+      "inputs": [
+          {
+              "name": "_newOwner",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
   },
   {
-    "inputs": [],
-    "name": "RatingAlreadyExists",
-    "type": "error"
+      "type": "function",
+      "name": "userStats",
+      "inputs": [
+          {
+              "name": "",
+              "type": "address",
+              "internalType": "address"
+          }
+      ],
+      "outputs": [
+          {
+              "name": "numberNotes",
+              "type": "uint32",
+              "internalType": "uint32"
+          },
+          {
+              "name": "numberRatings",
+              "type": "uint32",
+              "internalType": "uint32"
+          },
+          {
+              "name": "ethRewarded",
+              "type": "uint96",
+              "internalType": "uint96"
+          },
+          {
+              "name": "ethSlashed",
+              "type": "uint96",
+              "internalType": "uint96"
+          }
+      ],
+      "stateMutability": "view"
   },
   {
-    "inputs": [],
-    "name": "RatingInvalid",
-    "type": "error"
+      "type": "event",
+      "name": "CreatorRewarded",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "reward",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "stake",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "reward",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "CreatorRewarded",
-    "type": "event"
+      "type": "event",
+      "name": "CreatorSlashed",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "slash",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "stake",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "slash",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "CreatorSlashed",
-    "type": "event"
+      "type": "event",
+      "name": "NoteCreated",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "stake",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "NoteCreated",
-    "type": "event"
+      "type": "event",
+      "name": "NoteFinalised",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "finalRating",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint8",
-        "name": "finalRating",
-        "type": "uint8"
-      }
-    ],
-    "name": "NoteFinalised",
-    "type": "event"
+      "type": "event",
+      "name": "NoteRated",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "rater",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "rating",
+              "type": "uint8",
+              "indexed": true,
+              "internalType": "uint8"
+          },
+          {
+              "name": "stake",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "rater",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint8",
-        "name": "rating",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "NoteRated",
-    "type": "event"
+      "type": "event",
+      "name": "OwnershipTransferred",
+      "inputs": [
+          {
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
+      "type": "event",
+      "name": "RaterRewarded",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "rater",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "reward",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "stake",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "rater",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "reward",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "RaterRewarded",
-    "type": "event"
+      "type": "event",
+      "name": "RaterSlashed",
+      "inputs": [
+          {
+              "name": "postUrl",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+          },
+          {
+              "name": "creator",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "rater",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+          },
+          {
+              "name": "slash",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          },
+          {
+              "name": "stake",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "rater",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "slash",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "stake",
-        "type": "uint256"
-      }
-    ],
-    "name": "RaterSlashed",
-    "type": "event"
+      "type": "event",
+      "name": "ReserveFunded",
+      "inputs": [
+          {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+          }
+      ],
+      "anonymous": false
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "ReserveFunded",
-    "type": "event"
+      "type": "error",
+      "name": "CantRateOwnNote",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "communityNotes",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "postUrl",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "content",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "internalType": "uint8",
-        "name": "finalRating",
-        "type": "uint8"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+      "type": "error",
+      "name": "ContentInvalid",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "communityRatings",
-    "outputs": [
-      {
-        "internalType": "uint8",
-        "name": "",
-        "type": "uint8"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+      "type": "error",
+      "name": "FailedToReward",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_postUrl",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "_content",
-        "type": "string"
-      }
-    ],
-    "name": "createNote",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
+      "type": "error",
+      "name": "FailedToSlash",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_postUrl",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "_creator",
-        "type": "address"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_finalRating",
-        "type": "uint8"
-      }
-    ],
-    "name": "finaliseNote",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+      "type": "error",
+      "name": "InsufficientStake",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "noteRaters",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+      "type": "error",
+      "name": "NotOwner",
+      "inputs": []
   },
   {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+      "type": "error",
+      "name": "NoteAlreadyExists",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_postUrl",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "_creator",
-        "type": "address"
-      },
-      {
-        "internalType": "uint8",
-        "name": "_rating",
-        "type": "uint8"
-      }
-    ],
-    "name": "rateNote",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
+      "type": "error",
+      "name": "NoteAlreadyFinalised",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "bytes4",
-        "name": "interfaceId",
-        "type": "bytes4"
-      }
-    ],
-    "name": "supportsInterface",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+      "type": "error",
+      "name": "NoteDoesNotExist",
+      "inputs": []
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+      "type": "error",
+      "name": "PostUrlInvalid",
+      "inputs": []
   },
   {
-    "stateMutability": "payable",
-    "type": "receive"
+      "type": "error",
+      "name": "RatingAlreadyExists",
+      "inputs": []
+  },
+  {
+      "type": "error",
+      "name": "RatingInvalid",
+      "inputs": []
   }
 ];
 
-export const FC_1155_CONTRACT_ADDRESS = "0x16F088aF2eF04580451b50fBAB418AB218fC1452";
 export const FC_1155_CONTRACT_ABI = [
   {
       "type": "constructor",

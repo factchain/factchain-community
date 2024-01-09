@@ -24,7 +24,7 @@ export const getNotes = async (queryparams) => {
 };
   
 export const getXNoteId = async (noteUrl, content) => {
-  const getUrlParams = new URLSearchParams({noteUrl: cleanNoteUrl});
+  const getUrlParams = new URLSearchParams({noteUrl});
   const getUrl = `${BACKEND_URL}/x/note/id?${getUrlParams}`;
   console.log("Getting id for note", getUrl);
   
@@ -71,7 +71,7 @@ export const createXNoteId = async (noteUrl, content) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({noteUrl: cleanNoteUrl, content})
+      body: JSON.stringify({noteUrl, content})
     });
     chrome.windows.remove(window.id);
     return response;
@@ -79,5 +79,24 @@ export const createXNoteId = async (noteUrl, content) => {
     console.error("Error fetching notes:", error);
     chrome.windows.remove(window.id);
     throw error;
+  }
+}
+
+export const getContracts = async () => {
+  let fullUrl = `${BACKEND_URL}/_contracts`;
+  console.log("Getting contracts", fullUrl);
+
+  try {
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
+    const data = await response.json();
+    return data.contracts;
+  } catch (error) {
+    console.error("Error fetching contracts:", error);
+    throw error; 
   }
 }

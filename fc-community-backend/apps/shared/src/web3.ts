@@ -37,7 +37,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       wallet,
     );
     this._fcNFT = new ethers.Contract(
-      this._config.NFT_CONTRACT_ADDRESS,
+      this._config.NFT_721_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       wallet,
     );

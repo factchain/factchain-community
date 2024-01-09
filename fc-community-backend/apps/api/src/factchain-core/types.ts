@@ -6,7 +6,8 @@ export type Config = {
   OWNER_PKEY: string;
   INFRA_RPC_URL: string;
   MAIN_CONTRACT_ADDRESS: string;
-  NFT_CONTRACT_ADDRESS: string;
+  NFT_721_CONTRACT_ADDRESS: string;
+  NFT_1155_CONTRACT_ADDRESS: string;
   // AI image generation
   REPLICATE_API_TOKEN: string;
   // ipfs vars
@@ -50,6 +51,16 @@ export type XSignedNoteIDResponse = {
 
 export type NotesResponse = {
   notes: Array<Note>;
+};
+
+export type ContractAddresses = {
+  main: string;
+  nft721: string;
+  nft1155: string;
+};
+
+export type ContractsResponse = {
+  contracts: ContractAddresses;
 };
 
 export type FactChainEvent =
