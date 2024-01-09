@@ -9,8 +9,7 @@ const cutText = (text, maxLength) => {
     return text.length < maxLength ? text : `${text.slice(0, maxLength)}...`;
 }
 
-function FCProfile({ provider }) {
-
+function FCProfile(props) {
     function StatCard({ name, value }) {
         return (
             <div style="text-align: center;">
@@ -20,16 +19,15 @@ function FCProfile({ provider }) {
         );
     }
 
-    const [address, setAddress] = createSignal(null);
+    const loggedIn = () => !!props.address;
     const changeConnectionState = async () => {
-        if (address()) {
-            await provider.disconnect();
+        if (loggedIn()) {
+            await props.provider.disconnect();
+            props.setAddress(null);
         } else {
-            await provider.getAddress(true).then(setAddress);
+            await props.provider.requestAddress().then(props.setAddress);
         }
     }
-    provider.getAddress(false).then(setAddress);
-    provider.onAddressChange(setAddress);
     return (
         <div style="height: 75%; overflow:auto;">
             <div>
@@ -41,7 +39,7 @@ function FCProfile({ provider }) {
                 <div
                     style="font-size: 110%; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;"
                 >
-                    {address() || "0x?"}
+                    {loggedIn() ? props.address : "0x?"}
                 </div>
                 <div style="margin-top: 40px; margin: 30px; display: flex; flex-direction: row; justify-content: space-between;">
                     <StatCard name="Notes" value="?" />
@@ -52,7 +50,7 @@ function FCProfile({ provider }) {
                     style="margin-top: 10px; padding: 8px; font-size: 140%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%);"
                     onclick={changeConnectionState}
                 >
-                    {address() ? "Log out" : "Connect a wallet"}
+                    {loggedIn() ? "Log out" : "Connect a wallet"}
                 </button>
             </div>
         </div>
@@ -135,7 +133,7 @@ function FCPopup({ provider }) {
             <FCHero />
             <Switch>
                 <Match when={selectedTab() === "Profile"}>
-                    <FCProfile provider={provider} />
+                    <FCProfile provider={provider} address={address()} setAddress={setAddress}/>
                 </Match>
                 <Match when={selectedTab() === "Notes"}>
                     <FCNotes queryparams={{creatorAddress: address()}}/>

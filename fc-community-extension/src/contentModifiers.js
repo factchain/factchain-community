@@ -166,7 +166,7 @@ const addNote = async (mainArticle, note) => {
   let htmlNote = makeFactchainHtmlNote(note);
   if (!note.finalRating) {
     const provider = await createFactchainProvider();
-    const userAddress = await provider.getAddress(false);
+    const userAddress = await provider.getAddress();
     if (!userAddress || userAddress.toLowerCase() !== note.creatorAddress.toLowerCase()) {
       htmlNote += `<div>${rateItHtml}</div>`
     }

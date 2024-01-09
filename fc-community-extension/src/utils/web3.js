@@ -44,10 +44,15 @@ export const createFactchainProvider = async () => {
     });
   
     return {
-      getAddress: async (requestAccess) => {
-        const method = requestAccess ? "eth_requestAccounts" : "eth_accounts";
-        logger.log(`Getting accounts (requestAccess=${requestAccess} => ${method})`);
-        const accounts = await provider.request({method});
+      getAddress: async () => {
+        logger.log("Getting accounts");
+        const accounts = await provider.request({method: "eth_accounts"});
+        logger.log("Received accounts", accounts);
+        return accounts[0];
+      },
+      requestAddress: async () => {
+        logger.log("Requesting access to accounts");
+        const accounts = await provider.request({method: "eth_requestAccounts"});
         logger.log("Received accounts", accounts);
         return accounts[0];
       },
