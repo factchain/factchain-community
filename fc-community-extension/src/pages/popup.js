@@ -85,7 +85,7 @@ function FCNotes({ queryparams }) {
             <Switch>
                 <Match when={notes() !== undefined}>
                     <For each={notes()}>{(note) =>
-                        <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creator} content={note.content} />
+                        <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creatorAddress} content={note.content} />
                     }</For>
                 </Match>
                 <Match when={true}>

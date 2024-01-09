@@ -84,7 +84,7 @@ export function FCRateNotes({postUrl, notes, rateNote, currentAddress}) {
 
       <div>Post URL: {postUrl}</div>
       <For each={notes}>{(note) =>
-        <FCRateNote postUrl={note.postUrl} creator={note.creator} content={note.content} currentAddress={currentAddress} rateNote={rateNote} />
+        <FCRateNote postUrl={note.postUrl} creator={note.creatorAddress} content={note.content} currentAddress={currentAddress} rateNote={rateNote} />
       }</For>
     </div>
   );
