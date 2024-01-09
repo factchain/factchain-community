@@ -1,14 +1,13 @@
 export const METAMASK_ID = "nkbihfbeogaeaoehlefnkodbefgpgknn";
 export const POST_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/status\/\d+).*$/;
 export const NOTE_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/birdwatch\/.+?\/\d+).*$/;
-export const parseUrl = (url, regex) => sanitizeXUrl(url.match(regex)[1]);
-
 /*
 - `^` to only match the start of the string
 - Then we match `http` and `https` alike
 - Finally we use `$1` to keep the `http(s)` we found and thus replace `twitter.com` by `x.com`
 */
 export const sanitizeXUrl = (url) => url ? url.replace(/^(http(s)?):\/\/twitter.com/, "$1://x.com") : url;
+export const parseUrl = (url, regex) => sanitizeXUrl(url.match(regex)[1]);
 // TODO read address from service once
 export const FC_CONTRACT_ADDRESS = "0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428";
 export const FC_CONTRACT_ABI = [
