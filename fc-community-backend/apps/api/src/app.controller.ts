@@ -25,7 +25,7 @@ export class AppController {
 
   @Get("/_contracts")
   getContracts(): ContractsResponse {
-    return this.appService.getContracts();
+    return { contracts: this.appService.getContracts() };
   }
 
   @Get("/notes")

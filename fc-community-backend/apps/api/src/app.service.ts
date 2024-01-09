@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { ContractsResponse, Note, XSignedNoteIDResponse } from "./factchain-core/types";
+import { ContractAddresses, Note, XSignedNoteIDResponse } from "./factchain-core/types";
 import { FactChainBackend } from "./factchain-core/web3";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
@@ -16,7 +16,7 @@ export class AppService {
     return "0.1.0";
   }
 
-  getContracts(): ContractsResponse {
+  getContracts(): ContractAddresses {
     return {
       main: config.MAIN_CONTRACT_ADDRESS,
       nft721: config.NFT_721_CONTRACT_ADDRESS,

@@ -2,7 +2,8 @@ import { logger } from "./logging";
 import { initializeProvider } from '@metamask/providers';
 import PortStream from 'extension-port-stream'
 import { ethers, utils } from "ethers";
-import { METAMASK_ID, FC_CONTRACT_ABI, FC_CONTRACT_ADDRESS, FC_1155_CONTRACT_ABI, FC_1155_CONTRACT_ADDRESS } from "./constants";
+import { METAMASK_ID, FC_CONTRACT_ABI, FC_1155_CONTRACT_ABI } from "./constants";
+import { getContracts } from "./backend";
 import abiDecoder from "abi-decoder";
 
 abiDecoder.addABI(FC_CONTRACT_ABI);
@@ -68,15 +69,17 @@ export const createFactchainProvider = async () => {
       getFCContract: async () => {
         const ethersProvider = new ethers.BrowserProvider(provider);
         const signer = await ethersProvider.getSigner();
+        const fcContractAddress = (await getContracts()).main;
         return new ethers.Contract(
-          FC_CONTRACT_ADDRESS,
+          fcContractAddress,
           FC_CONTRACT_ABI,
           signer,
         );
       },
-      onFCEvents: (topics, callback) => {
+      onFCEvents: async (topics, callback) => {
+        const fcContractAddress = (await getContracts()).main;
         filter = {
-          address: FC_CONTRACT_ADDRESS,
+          address: fcContractAddress,
           topics: topics.map(utils.id),
         }
         provider.on(filter, callback);
@@ -84,15 +87,17 @@ export const createFactchainProvider = async () => {
       getFC1155Contract: async () => {
         const ethersProvider = new ethers.BrowserProvider(provider);
         const signer = await ethersProvider.getSigner();
+        const fc1155ContractAddress = (await getContracts()).nft1155;
         return new ethers.Contract(
-          FC_1155_CONTRACT_ADDRESS,
+          fc1155ContractAddress,
           FC_1155_CONTRACT_ABI,
           signer,
         );
       },
-      onFC1155Events: (topics, callback) => {
+      onFC1155Events: async (topics, callback) => {
+        const fc1155ContractAddress = (await getContracts()).nft1155;
         filter = {
-          address: FC_1155_CONTRACT_ADDRESS,
+          address: fc1155ContractAddress,
           topics: topics.map(utils.id),
         }
         provider.on(filter, callback);
