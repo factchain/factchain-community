@@ -3,6 +3,7 @@ import { createSignal, createEffect, Switch, Match, createResource } from "solid
 import { createFactchainProvider } from "../utils/web3";
 import { FCHero, FCLoader } from "./components";
 import { getNotes } from "../utils/backend";
+import { ethers } from "ethers";
 
 
 const cutText = (text, maxLength) => {
@@ -10,24 +11,15 @@ const cutText = (text, maxLength) => {
 }
 
 function FCProfile(props) {
-    function StatCard({ name, value }) {
+    function StatCard(props) {
         return (
             <div style="text-align: center;">
-                <div style="font-size: 140%; font-weight: bold;">{value}</div>
-                <div style="font-size: 110%;">{name}</div>
+                <div style="font-size: 140%; font-weight: bold;">{props.value}</div>
+                <div style="font-size: 110%;">{props.name}</div>
             </div>
         );
     }
-
-    const loggedIn = () => !!props.address;
-    const changeConnectionState = async () => {
-        if (loggedIn()) {
-            await props.provider.disconnect();
-            props.setAddress(null);
-        } else {
-            await props.provider.requestAddress().then(props.setAddress);
-        }
-    }
+    
     return (
         <div style="height: 75%; overflow:auto;">
             <div>
@@ -39,34 +31,26 @@ function FCProfile(props) {
                 <div
                     style="font-size: 110%; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;"
                 >
-                    {loggedIn() ? props.address : "0x?"}
+                    {props.loggedIn ? props.address : "0x?"}
                 </div>
                 <div style="margin-top: 40px; margin: 30px; display: flex; flex-direction: row; justify-content: space-between;">
-                    <StatCard name="Notes" value="?" />
-                    <StatCard name="Ratings" value="?" />
-                    <StatCard name="Earnings" value="? ETH" />
+                    <StatCard name="Notes" value={props.numberNotes} />
+                    <StatCard name="Ratings" value={props.numberRatings} />
+                    <StatCard name="Earnings" value={props.earnings} />
                 </div>
                 <button
                     style="margin-top: 10px; padding: 8px; font-size: 140%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%);"
-                    onclick={changeConnectionState}
+                    onclick={props.changeConnectionState}
                 >
-                    {loggedIn() ? "Log out" : "Connect a wallet"}
+                    {props.loggedIn ? "Log out" : "Connect a wallet"}
                 </button>
             </div>
         </div>
     );
 }
 
-function FCNotes({ queryparams }) {
-    const [notes, { reload }] = createResource(() => getNotes(queryparams));
-
-    createEffect(async () => {
-        try {
-            await reload();
-        } catch (error) {
-            console.error("Error fetching notes:", error);
-        }
-    });
+function FCNotes(props) {
+    const [notes] = createResource(() => getNotes(props.queryparams));
 
     function FCNote({ postUrl, content, creator }) {
         return (
@@ -81,13 +65,21 @@ function FCNotes({ queryparams }) {
     return (
         <div style="height: 75%; overflow:auto;">
             <Switch>
+                <Match when={!props.loggedIn}>
+                    <div style="font-size: 150%; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                        <div class="link" onclick={props.connectWallet}>Connect a wallet</div>
+                        <div>to view Factchain notes</div>
+                    </div>
+                </Match>
                 <Match when={notes() !== undefined}>
                     <For each={notes()}>{(note) =>
                         <FCNote key={note.postUrl} postUrl={note.postUrl} creator={note.creatorAddress} content={note.content} />
                     }</For>
                 </Match>
                 <Match when={true}>
-                    <FCLoader />
+                    <div style="position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+                        <FCLoader />
+                    </div>
                 </Match>
             </Switch>
         </div>
@@ -125,21 +117,68 @@ function FCFooter(props) {
 
 function FCPopup({ provider }) {
     const [selectedTab, setSelectedTab] = createSignal("Profile");
-    const [address, setAddress] = createSignal(null);
+    const [address, setAddress] = createSignal("");
+    const loggedIn = () => !!address();
+
+    const changeConnectionState = async () => {
+        if (loggedIn()) {
+            await provider.disconnect();
+            setAddress("");
+        } else {
+            await provider.requestAddress().then(setAddress);
+        }
+    };
+    const connectWallet = async() => {
+        setSelectedTab("Profile");
+        await provider.requestAddress().then(setAddress);
+    };
+    const getUserStats = async (address) => {
+        console.log(`address: ${address}`);
+        if (address) {
+            const contract = await provider.getFCContract();
+            const stats = await contract.userStats(address);
+            console.log(`User stats: ${stats}`);
+            const earnings = `${Math.max(Number(stats[2] - stats[3]), 0)}`;
+            return {
+                notes: `${stats[0]}`,
+                ratings: `${stats[1]}`,
+                earnings: `${ethers.formatEther(earnings)} ETH`,
+            };
+        } else {
+            console.log(`Default data for user stats`);
+            return {
+                notes: "?",
+                ratings: "?",
+                earnings: "? ETH",
+            };
+        }
+    };
+    const [userStats] = createResource(address, getUserStats);
+    const numberNotes = () => (userStats.ready || !userStats()) ? "?" : userStats().notes;
+    const numberRatings = () => (userStats.loading || !userStats()) ? "?" : userStats().ratings;
+    const earnings = () => (userStats.loading || !userStats()) ? "? ETH" : userStats().earnings;
     provider.getAddress().then(setAddress);
 
     return (
-        <div style="height:575px; width: 350px;">
+        <div style="height:575px; width: 340px;">
             <FCHero />
             <Switch>
                 <Match when={selectedTab() === "Profile"}>
-                    <FCProfile provider={provider} address={address()} setAddress={setAddress}/>
+                    <FCProfile
+                        provider={provider}
+                        loggedIn={loggedIn()}
+                        address={address()}
+                        changeConnectionState={changeConnectionState}
+                        numberNotes={numberNotes()}
+                        numberRatings={numberRatings()}
+                        earnings={earnings()}
+                    />
                 </Match>
                 <Match when={selectedTab() === "Notes"}>
-                    <FCNotes queryparams={{creatorAddress: address()}}/>
+                    <FCNotes loggedIn={loggedIn()} queryparams={{creatorAddress: address()}} connectWallet={connectWallet} />
                 </Match>
                 <Match when={selectedTab() === "Ratings"}>
-                    <FCNotes queryparams={{awaitingRatingBy: address()}} />
+                    <FCNotes loggedIn={loggedIn()} queryparams={{awaitingRatingBy: address()}} connectWallet={connectWallet} />
                 </Match>
             </Switch>
             <FCFooter selectedTab={selectedTab()} setSelectedTab={setSelectedTab} />

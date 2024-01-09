@@ -35,6 +35,11 @@ button:hover {
   background: #00ADB5;
 }
 
+.link {
+  color: #00ADB5;
+  cursor: pointer;
+}
+
 a:link {
   color: #00ADB5;
 }
