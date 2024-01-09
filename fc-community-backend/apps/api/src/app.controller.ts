@@ -7,7 +7,7 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { AppService } from "./app.service";
-import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
+import { NotesResponse, XSignedNoteIDResponse, ContractsResponse } from "./factchain-core/types";
 
 @Controller()
 export class AppController {
@@ -21,6 +21,11 @@ export class AppController {
   @Get("/_version")
   getVersion(): string {
     return this.appService.getVersion();
+  }
+
+  @Get("/_contracts")
+  getContracts(): ContractsResponse {
+    return this.appService.getContracts();
   }
 
   @Get("/notes")

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Note, XSignedNoteIDResponse } from "./factchain-core/types";
+import { ContractsResponse, Note, XSignedNoteIDResponse } from "./factchain-core/types";
 import { FactChainBackend } from "./factchain-core/web3";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
@@ -14,6 +14,14 @@ export class AppService {
 
   getVersion(): string {
     return "0.1.0";
+  }
+
+  getContracts(): ContractsResponse {
+    return {
+      main: config.MAIN_CONTRACT_ADDRESS,
+      nft721: config.NFT_721_CONTRACT_ADDRESS,
+      nft1155: config.NFT_1155_CONTRACT_ADDRESS,
+    };
   }
 
   async getNotesByPost(postUrl: string, from: number): Promise<Array<Note>> {
