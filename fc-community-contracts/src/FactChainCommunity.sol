@@ -38,6 +38,18 @@ interface IFactChainCommunity is IFactChainCommunityEvents {
         uint8 finalRating;
     }
 
+    /// @notice UserStats structure
+    /// @param postUrl URL of the post targeted by this Note
+    /// @param content Content of the Note
+    /// @param creator Address of the Note's creator
+    /// @param finalRating Final rating attributed by FactChain
+    struct UserStats {
+        uint32 numberNotes;
+        uint32 numberRatings;
+        uint96 ethRewarded;
+        uint96 ethSlashed;
+    }
+
     /// Errors
     error PostUrlInvalid();
     error ContentInvalid();
@@ -62,14 +74,20 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
     uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
     uint32 internal constant MINIMUM_STAKE_PER_NOTE = 100_000;
 
-    /// @notice Map of community notes
+    /// @notice Mapping of note identifier (postUrl + creatorAddress) to Note object
     mapping(string => mapping(address => Note)) public communityNotes;
 
-    /// @notice Map of community ratings
+    /// @notice Mapping of note identifier (postUrl + creatorAddress) to ratings by each rater
     mapping(string => mapping(address => mapping(address => uint8))) public communityRatings;
 
-    /// @notice List of raters
+    /// @notice Mapping of note identifier (postUrl + creatorAddress) to rater addresses
     mapping(string => mapping(address => address[])) public noteRaters;
+
+    /// @notice Mapping of user address to their Factchain stats
+    /// TODO: Storing stats on chain is ok for now on testnet, but will be removed
+    /// before moving to mainnet and replaced by an indexing of contract events.
+    /// It costs an extra 20k gas per call to createNote/rateNote
+    mapping(address => UserStats) public userStats;
 
     /// @notice Instantiate a new contract and set its owner
     /// @param _owner Owner of the contract
@@ -110,18 +128,22 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
     function rewardOrSlashCreator(string memory _postUrl, address _creator) internal {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
         if (finalRating >= 3) {
-            uint256 reward = uint256(finalRating - 2) * 10;
+            uint96 reward = uint96(finalRating - 2) * 10;
             // This will revert if contract current balance
             // (address(this).balance) < MINIMUM_STAKE_PER_NOTE + reward
             (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE + reward}("");
             if (!result) revert FailedToReward();
+
+            userStats[_creator].ethRewarded += reward;
             emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: MINIMUM_STAKE_PER_NOTE});
         } else if (finalRating < 2) {
-            uint256 slash = finalRating * 10;
+            uint96 slash = finalRating * 10;
             // This will revert if contract current balance
             // (address(this).balance) < MINIMUM_STAKE_PER_NOTE - slash
             (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE - slash}("");
             if (!result) revert FailedToSlash();
+            
+            userStats[_creator].ethSlashed += slash;
             emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: MINIMUM_STAKE_PER_NOTE});
         }
     }
@@ -130,13 +152,15 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
         for (uint256 index = 0; index < noteRaters[_postUrl][_creator].length; index++) {
             address rater = noteRaters[_postUrl][_creator][index];
-            uint256 delta = stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]);
+            uint96 delta = uint96(stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]));
             if (delta < 2) {
-                uint256 reward = 2 - delta;
+                uint96 reward = 2 - delta;
                 // This will revert if contract current balance
                 // (address(this).balance) < MINIMUM_STAKE_PER_RATING + reward
                 (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING + reward}("");
                 if (!result) revert FailedToReward();
+
+                userStats[rater].ethRewarded += reward;
                 emit RaterRewarded({
                     postUrl: _postUrl,
                     creator: _creator,
@@ -145,11 +169,13 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
                     stake: MINIMUM_STAKE_PER_RATING
                 });
             } else if (delta > 2) {
-                uint256 slash = delta - 2;
+                uint96 slash = delta - 2;
                 // This will revert if contract current balance
                 // (address(this).balance) < MINIMUM_STAKE_PER_RATING - slash
                 (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING - slash}("");
                 if (!result) revert FailedToSlash();
+
+                userStats[rater].ethSlashed += slash;
                 emit RaterSlashed({
                     postUrl: _postUrl,
                     creator: _creator,
@@ -174,6 +200,8 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
 
         communityNotes[_postUrl][msg.sender] =
             Note({postUrl: _postUrl, content: _content, creator: msg.sender, finalRating: 0});
+
+        userStats[msg.sender].numberNotes += 1;
         emit NoteCreated({postUrl: _postUrl, creator: msg.sender, stake: MINIMUM_STAKE_PER_NOTE});
     }
 
@@ -188,6 +216,8 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
 
         communityRatings[_postUrl][_creator][msg.sender] = _rating;
         noteRaters[_postUrl][_creator].push(msg.sender);
+
+        userStats[msg.sender].numberRatings += 1;
         emit NoteRated({
             postUrl: _postUrl,
             creator: _creator,
