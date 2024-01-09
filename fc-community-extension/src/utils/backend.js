@@ -1,11 +1,8 @@
-import { sanitizeXUrl } from "./constants";
-
 const BACKEND_URL = "https://fc-community-backend-15f6c753d352.herokuapp.com";
 
 export const getNotes = async (queryparams) => {
   let fullUrl = `${BACKEND_URL}/notes`;
   if (queryparams) {
-    queryparams.postUrl = sanitizeXUrl(queryparams.postUrl);
     const urlParams = new URLSearchParams(queryparams);
     fullUrl = `${BACKEND_URL}/notes?${urlParams}`;
   }
@@ -27,7 +24,6 @@ export const getNotes = async (queryparams) => {
 };
   
 export const getXNoteId = async (noteUrl, content) => {
-  const cleanNoteUrl = sanitizeXUrl(noteUrl);
   const getUrlParams = new URLSearchParams({noteUrl: cleanNoteUrl});
   const getUrl = `${BACKEND_URL}/x/note/id?${getUrlParams}`;
   console.log("Getting id for note", getUrl);
@@ -58,7 +54,6 @@ export const getXNoteId = async (noteUrl, content) => {
 }
   
 export const createXNoteId = async (noteUrl, content) => {
-  const cleanNoteUrl = sanitizeXUrl(noteUrl);
   console.log("Creating page pendingNFTCreation.html");
   const window = await chrome.windows.create({
     url: "pendingNFTCreation.html",
