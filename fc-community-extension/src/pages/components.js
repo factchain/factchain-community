@@ -1,43 +1,5 @@
 import { createSignal } from "solid-js";
 
-export function FCCreateNote({postUrl, createNote}) {
-  const [transaction, setTransaction] = createSignal(null);
-  const [error, setError] = createSignal(null);
-
-  const submit = async () => {
-    const {transaction, error} = await createNote(postUrl, document.getElementById('content').value);
-    setTransaction(transaction);
-    setError(error);
-  };
-
-  const transactionHash = () => {
-    return transaction() ? transaction().hash : null;
-  };
-
-  const transactionUrl = () => {
-    return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
-  };
-
-  return (
-    <div>
-      <img
-        src="./factchain.jpeg"
-        width="300"
-        style="height:70px; object-fit:cover;"
-      ></img>
-      
-      <h1>Create New Note</h1>
-      <div>
-        <div>Post URL: {postUrl}</div>
-        <div><textarea id="content" disabled={!!transactionHash()} rows="10" cols="60" maxlength="500"></textarea></div>
-        <div><button onclick={submit} disabled={!!transactionHash()}>Submit</button></div>
-      </div>
-      { transactionHash() ? <div>Transaction: <a href={transactionUrl()}>{transactionHash()}</a></div> : <div></div>}
-      { error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
-    </div>
-  );
-}
-
 export function FCRateNote({postUrl, creator, content, currentAddress, rateNote}) {
   const [transaction, setTransaction] = createSignal(null);
   const [error, setError] = createSignal(null);
@@ -104,7 +66,7 @@ export function FCPendingNFTCreation() {
 
 export function FCLoader() {
   return (
-    <span class="loader" style="width: 30px; height: 30px; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);"></span>
+    <span class="loader" style="width: 30px; height: 30px;"></span>
   );
 }
 

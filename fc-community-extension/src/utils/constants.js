@@ -8,6 +8,9 @@ export const NOTE_URL_REGEX = /^(https:\/\/(twitter|x).com\/.+?\/birdwatch\/.+?\
 */
 export const sanitizeXUrl = (url) => url ? url.replace(/^(http(s)?):\/\/twitter.com/, "$1://x.com") : url;
 export const parseUrl = (url, regex) => sanitizeXUrl(url.match(regex)[1]);
+export const cutText = (text, maxLength) => {
+    return text.length < maxLength ? text : `${text.slice(0, maxLength)}...`;
+};
 
 export const FC_CONTRACT_ABI = [
   {

@@ -11,7 +11,7 @@ abiDecoder.addABI(FC_1155_CONTRACT_ABI);
 
 export const decodeError = (abiError) => {
   return abiDecoder.decodeMethod(abiError);
-}
+};
 
 export const handleContractCallError = (e) => {
   if (e.code === "CALL_EXCEPTION") {
@@ -19,7 +19,19 @@ export const handleContractCallError = (e) => {
   } else {
     return e;
   }
-}
+};
+
+export const makeTransactionCall = async (contract, transactionCall) => {
+  let transaction = null;
+  let error = null;
+  try {
+    transaction = await transactionCall(contract);
+  } catch (e) {
+    logger.log("Transaction failed", e);
+    error = handleContractCallError(e);
+  }
+  return {transaction, error};
+};
 
 export const createFactchainProvider = async () => {
   try {
@@ -118,20 +130,12 @@ export const mintXNote = async (noteId, value, hash, signature) => {
   logger.log("Minting X note", noteId, value, hash, signature);
   const provider = await createFactchainProvider();
   const contract = await provider.getFC1155Contract();
-  let transaction = null;
-  let error = null;
 
-  try {
-    transaction = await contract.mint(
-      noteId,
-      value,
-      hash.startsWith("0x") ? hash : `0x${hash}`,
-      signature,
-      {value: value * 1_000_000},
-    );
-  } catch (e) {
-    logger.log("Failed to mint note", e);
-    error = handleContractCallError(e);
-  }
-  return {transaction, error};
+  return await makeTransactionCall(contract, async (c) => await c.mint(
+    noteId,
+    value,
+    hash.startsWith("0x") ? hash : `0x${hash}`,
+    signature,
+    {value: value * 1_000_000},
+  ));
 };

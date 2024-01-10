@@ -1,14 +1,10 @@
 import { render } from "solid-js/web";
-import { createSignal, createEffect, Switch, Match, createResource } from "solid-js";
+import { createSignal, Switch, Match, createResource } from "solid-js";
 import { createFactchainProvider } from "../utils/web3";
 import { FCHero, FCLoader } from "./components";
 import { getNotes } from "../utils/backend";
 import { ethers } from "ethers";
-
-
-const cutText = (text, maxLength) => {
-    return text.length < maxLength ? text : `${text.slice(0, maxLength)}...`;
-}
+import { cutText } from "../utils/constants";
 
 function FCProfile(props) {
     function StatCard(props) {
