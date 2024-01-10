@@ -1,11 +1,11 @@
 import { createSignal } from "solid-js";
 
-export function FCRateNote({postUrl, creator, content, currentAddress, rateNote}) {
+export function FCRateNote({creator, content, currentAddress, rateNote}) {
   const [transaction, setTransaction] = createSignal(null);
   const [error, setError] = createSignal(null);
 
   const submit = async () => {
-    const {transaction, error} = await rateNote(postUrl, creator, document.getElementById('rating').value);
+    const {transaction, error} = await rateNote(creator, document.getElementById('rating').value);
     setTransaction(transaction);
     setError(error);
   };
@@ -46,7 +46,7 @@ export function FCRateNotes({postUrl, notes, rateNote, currentAddress}) {
 
       <div>Post URL: {postUrl}</div>
       <For each={notes}>{(note) =>
-        <FCRateNote postUrl={note.postUrl} creator={note.creatorAddress} content={note.content} currentAddress={currentAddress} rateNote={rateNote} />
+        <FCRateNote creator={note.creatorAddress} content={note.content} currentAddress={currentAddress} rateNote={rateNote} />
       }</For>
     </div>
   );
