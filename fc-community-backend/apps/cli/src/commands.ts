@@ -82,8 +82,10 @@ const finaliseNoteHelper = async (
 ): Promise<ContractTransactionResponse> => {
   const fc = new FactChainBackend(config);
   // Rocket Science factchain scoring algorithm!
-  const finalRating =
-    note.ratings!.reduce((a, b) => a + Number(b), 0) / note.ratings!.length;
+  // Half Round Down Average
+  const finalRating = ~~(
+    note.ratings!.reduce((a, b) => a + Number(b), 0) / note.ratings!.length
+  );
   console.log(
     `Final Rating of note on ${note.postUrl} created by ${note.creatorAddress} is ${finalRating}`,
   );

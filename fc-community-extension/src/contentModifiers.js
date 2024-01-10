@@ -8,7 +8,7 @@ import { xSelectors } from "./utils/selectors";
 /// Birdwatch content modifiers
 /// ---------------------------
 
-const separatorMintNoteHtml = 
+const separatorMintNoteHtml =
   `<div class="css-175oi2r r-g2wdr4 r-nsbfu8 r-1xfd6ze">
     <div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep">
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-a023e6 r-rjixqe r-b88u0q" style="color: rgb(231, 233, 234); text-overflow: unset;">
@@ -137,8 +137,9 @@ const rateItHtml = `<span class="r-4qtqp9" style="min-height: 12px; min-width: 1
   </div>
 </div>`;
 
-const makeFactchainHtmlNote = (note, author) => {
-  return `<div tabindex="0" class="css-1dbjc4n r-1kqtdi0 r-1867qdf r-rs99b7 r-1loqt21 r-1s2bzr4 r-1ny4l3l r-1udh08x r-o7ynqc r-6416eg" data-testid="birdwatch-pivot" role="link">
+const makeFactchainHtmlNote = (note, userAddress) => {
+  const author = userAddress && userAddress.toLowerCase() === note.creatorAddress.toLowerCase() ? "You" : "Factchain users"
+  let noteHTML = `<div tabindex="0" class="css-1dbjc4n r-1kqtdi0 r-1867qdf r-rs99b7 r-1loqt21 r-1s2bzr4 r-1ny4l3l r-1udh08x r-o7ynqc r-6416eg" data-testid="birdwatch-pivot" role="link">
     <div class="css-175oi2r r-k4xj1c r-g2wdr4 r-6koalj r-18u37iz r-1e081e0 r-1f1sjgu">
       <div class="css-175oi2r r-18u37iz r-13qz1uu">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="r-4qtqp9 r-yyyyoo r-1xvli5t r-dnmrzs r-bnwqim r-1plcrui r-lrvibr r-1cvl2hr r-1q142lx r-1kb76zh" data-testid="icon-birdwatch-fill"><g><path d="M5.5 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm18.25 13.91c-.18-2.01-.78-3.72-1.81-4.96C20.89 10.7 19.45 10 17.75 10c-.35 0-.68.03-1.01.09-.18.54-.45 1.05-.8 1.49.74.46 1.41 1.05 1.99 1.76 1.05 1.3 1.71 2.91 2.06 4.66h3.85l-.09-1.09zM18.5 9c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM6.07 13.34c.58-.71 1.25-1.3 1.99-1.76-.35-.44-.62-.95-.8-1.49-.33-.06-.66-.09-1.01-.09-1.7 0-3.14.7-4.19 1.95C1.032 13.19.433 14.9.254 16.91L.157 18H4.01c.35-1.75 1.01-3.36 2.06-4.66zM15 8.5c0-1.66-1.34-3-3-3s-3 1.34-3 3 1.34 3 3 3 3-1.34 3-3zm-7.37 6.1c-1.07 1.32-1.69 3.15-1.88 5.31L5.66 21h12.68l-.09-1.09c-.19-2.16-.81-3.99-1.88-5.31-1.08-1.35-2.59-2.1-4.37-2.1s-3.28.75-4.37 2.1z"></path></g></svg>
@@ -152,24 +153,27 @@ const makeFactchainHtmlNote = (note, author) => {
       <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">
         <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${note.content}</span>
       </span>
+    </div>
   `;
+
+  if (!note.finalRating) {
+    if (!userAddress || author !== "You") {
+      noteHTML += `<div>${rateItHtml}</div></div>`
+    }
+  }
+  return noteHTML;
 }
 
 const addNote = async (mainArticle, note) => {
-  
   const provider = await createFactchainProvider();
   const userAddress = await provider.getAddress();
-  const author = userAddress.toLowerCase() === note.creatorAddress.toLowerCase() ? "You" : "Factchain users"
-  let htmlNote = makeFactchainHtmlNote(note, author);
-  
-  if (!note.finalRating) {
-    if (!userAddress || author !== "You") {
-      htmlNote += `<div>${rateItHtml}</div>`
-    }
-  }
+  let htmlNote = makeFactchainHtmlNote(note, userAddress);
   const tempDiv = mainArticle.children[0].children[0]
   const afterThisDiv = [].slice.call(tempDiv.children[tempDiv.children.length - 1].children).find(e => e.innerHTML === "");
   afterThisDiv.insertAdjacentHTML("afterend", htmlNote);
+  const rateNoteButton = mainArticle.querySelector("#rateNoteButton")
+
+  if (rateNoteButton) {
     mainArticle.querySelector("#rateNoteButton").addEventListener("click", () => {
       logger.log("Rating note", note);
       chrome.runtime.sendMessage({
@@ -177,6 +181,7 @@ const addNote = async (mainArticle, note) => {
         notes: [note],
       });
     });
+  }
 };
 
 export const alterMainArticle = async (mainArticle) => {
