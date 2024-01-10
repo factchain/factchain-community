@@ -1,8 +1,10 @@
-import { getNotes, getXNoteId } from "./utils/backend";
+import { getNotes } from "./utils/backend";
 
 let cache = {
   postUrl: "",
   notes: [],
+  noteUrl: "",
+  content: "",
 };
 
 /// For now we deactivate notifications
@@ -50,14 +52,22 @@ const mainHandler = async (message, sendResponse) => {
       left: 0,
     });
   } else if (message.type === "fc-get-from-cache") {
-    console.log(`Get ${message.target} from cache`);
+    console.log(`Get ${message.target} from cache`, cache);
     sendResponse(cache[message.target]);
   } else if (message.type === "fc-mint-twitter-note") {
-    console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}' to address ${message.address}`);
+    console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}'`);
+    cache.noteUrl = message.noteUrl;
+    cache.content = message.content;
 
-    const response = await getXNoteId(message.noteUrl, message.content);
-    console.log("Got id, hash, and signature for note", response);
-    sendResponse(response);
+    chrome.windows.create({
+      url: "mintXNote.html",
+      type: "popup",
+      focused: true,
+      width: 400,
+      height: 600,
+      top: 0,
+      left: 0,
+    });
   }
   /// For now we deactivate notifications
   ///

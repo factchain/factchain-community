@@ -2,7 +2,7 @@ import { render } from "solid-js/web";
 import { createSignal, Switch, Match } from "solid-js";
 import { createFactchainProvider, makeTransactionCall } from "../utils/web3";
 import { logger } from "../utils/logging";
-import { cutText } from "../utils/constants";
+import { cutText, makeTransactionUrl } from "../utils/constants";
 import { FCHero, FCLoader } from "./components";
 
 export function FCCreateNote({postUrl, createNote}) {
@@ -24,10 +24,6 @@ export function FCCreateNote({postUrl, createNote}) {
     return transaction() ? transaction().hash : null;
   };
 
-  const transactionUrl = () => {
-    return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
-  };
-
   return (
     <div>
       <FCHero />
@@ -39,7 +35,7 @@ export function FCCreateNote({postUrl, createNote}) {
         <Switch>
           <Match when={transactionHash()}>
             <div>
-              <a href={transactionUrl()} target="_blank">View transaction {transactionHash()}</a>
+              <a href={makeTransactionUrl(transactionHash())} target="_blank">View transaction {transactionHash()}</a>
             </div>
           </Match>
           <Match when={submitted()}>

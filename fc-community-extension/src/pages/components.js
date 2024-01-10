@@ -52,21 +52,9 @@ export function FCRateNotes({postUrl, notes, rateNote, currentAddress}) {
   );
 }
 
-export function FCPendingNFTCreation() {
-  return (
-    <div>
-      <FCHero/>
-      <div>
-        <FCLoader/>
-        Creating a new NFT collection for this note!
-      </div>
-    </div>
-  );
-}
-
 export function FCLoader() {
   return (
-    <span class="loader" style="width: 30px; height: 30px;"></span>
+    <span class="loader" style="width: 30px; height: 30px; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);"></span>
   );
 }
 

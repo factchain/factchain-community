@@ -11,6 +11,8 @@ export const parseUrl = (url, regex) => sanitizeXUrl(url.match(regex)[1]);
 export const cutText = (text, maxLength) => {
     return text.length < maxLength ? text : `${text.slice(0, maxLength)}...`;
 };
+export const makeTransactionUrl = (transactionHash) => `https://sepolia.etherscan.io/tx/${transactionHash}`;
+export const makeOpenseaUrl = (contractAddress, tokenId) => `https://testnets.opensea.io/assets/sepolia/${contractAddress}/${tokenId}`;
 
 export const FC_CONTRACT_ABI = [
   {

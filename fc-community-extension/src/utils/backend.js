@@ -22,49 +22,38 @@ export const getNotes = async (queryparams) => {
     throw error; 
   }
 };
-  
-export const getXNoteId = async (noteUrl, content) => {
+
+export const getXNoteId = async (noteUrl) => {
   const getUrlParams = new URLSearchParams({noteUrl});
   const getUrl = `${BACKEND_URL}/x/note/id?${getUrlParams}`;
   console.log("Getting id for note", getUrl);
   
-  let response = await fetch(getUrl, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-  });
-  if (!response.ok) {
+  try {
+    let response = await fetch(getUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    });
     if (response.status === 404) {
-      console.log('Resource not found');
+      console.log('X Note id not found');
       // Handle 404 specifically
-      response = await createXNoteId(noteUrl, content);
+      return null;
     } else {
-      // Handle other HTTP errors
-      console.log('HTTP error:', response.status);
-      throw new Error('HTTP error: ' + response.status);
+      const data = await response.json();
+      return {
+        id: data.id,
+        hash: data.hash,
+        signature: data.signature,
+      };
     }
+  } catch (error) {
+    console.error("Error fetching X Note id:", error);
+    throw error;
   }
-  const data = await response.json();
-  return {
-    id: data.id,
-    hash: data.hash,
-    signature: data.signature,
-  };
 }
-  
+
 export const createXNoteId = async (noteUrl, content) => {
-  console.log("Creating page pendingNFTCreation.html");
-  const window = await chrome.windows.create({
-    url: "pendingNFTCreation.html",
-    type: "popup",
-    focused: true,
-    width: 300,
-    height: 100,
-    top: 0,
-    left: 0,
-  });
-  
   try {
     const response = await fetch(`${BACKEND_URL}/x/note`, {
       method: 'POST',
@@ -73,11 +62,14 @@ export const createXNoteId = async (noteUrl, content) => {
       },
       body: JSON.stringify({noteUrl, content})
     });
-    chrome.windows.remove(window.id);
-    return response;
+    const data = await response.json();
+    return {
+      id: data.id,
+      hash: data.hash,
+      signature: data.signature,
+    };
   } catch (error) {
-    console.error("Error fetching notes:", error);
-    chrome.windows.remove(window.id);
+    console.error("Error creating X Note id:", error);
     throw error;
   }
 }

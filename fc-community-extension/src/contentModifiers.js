@@ -1,5 +1,5 @@
 import { logger } from "./utils/logging";
-import { createFactchainProvider, mintXNote } from "./utils/web3";
+import { createFactchainProvider } from "./utils/web3";
 import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from "./utils/constants";
 import { xSelectors } from "./utils/selectors";
 
@@ -42,18 +42,11 @@ export const alterRatingPageTwitterNote = (twitterNote) => {
     twitterNote.parentNode.querySelector("#mintNoteButton").addEventListener("click", async () => {
       const content = twitterNote.querySelector(xSelectors.noteContent).textContent
       logger.log(`Minting twitter from rating page note ${noteUrl} and content '${content}'`);
-      const res = await chrome.runtime.sendMessage({
+      chrome.runtime.sendMessage({
         type: 'fc-mint-twitter-note',
         noteUrl,
         content,
       });
-      logger.log("Got res for note", res);
-      const {transaction, error} = await mintXNote(res.id, 1, res.hash, res.signature);
-      if (error) {
-        logger.log("Failed to mint note", error);
-      } else {
-        logger.log(`Success! ${transaction}`);
-      }
     });
   }
 };
