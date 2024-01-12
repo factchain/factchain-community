@@ -123,12 +123,12 @@ export const alterDropdown = async (dropdown) => {
 /// ---------------------------
 
 
-const rateItHtml = `<span class="r-4qtqp9" style="min-height: 12px; min-width: 12px;"></span>
+const rateItHtml = (rateNoteButtonID) => `<span class="r-4qtqp9" style="min-height: 12px; min-width: 12px;"></span>
 <div class="css-175oi2r r-1awozwy r-1roi411 r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu">
   <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-1b43r93 r-1cwl3u0 r-16dba41" style="text-overflow: unset; color: rgb(231, 233, 234);">
     <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you find this helpful?</span>
   </div>
-  <div id="rateNoteButton" role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
+  <div id="${rateNoteButtonID}" role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
     <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="text-overflow: unset; color: rgb(239, 243, 244);">
       <span class="css-1qaijid r-dnmrzs r-1udh08x r-3s2u2q r-bcqeeo r-qvutc0 r-poiln3 r-1b43r93 r-1cwl3u0" style="text-overflow: unset;">
         <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Rate it</span>
@@ -137,8 +137,8 @@ const rateItHtml = `<span class="r-4qtqp9" style="min-height: 12px; min-width: 1
   </div>
 </div>`;
 
-const makeFactchainHtmlNote = (note, userAddress) => {
-  const author = userAddress && userAddress.toLowerCase() === note.creatorAddress.toLowerCase() ? "You" : "Factchain users"
+const makeFactchainHtmlNote = (isAuthor, content, rateNoteButtonID) => {
+  const author = isAuthor ? "You" : "Factchain users"
   let noteHTML = `<div tabindex="0" class="css-1dbjc4n r-1kqtdi0 r-1867qdf r-rs99b7 r-1loqt21 r-1s2bzr4 r-1ny4l3l r-1udh08x r-o7ynqc r-6416eg" data-testid="birdwatch-pivot" role="link">
     <div class="css-175oi2r r-k4xj1c r-g2wdr4 r-6koalj r-18u37iz r-1e081e0 r-1f1sjgu">
       <div class="css-175oi2r r-18u37iz r-13qz1uu">
@@ -151,15 +151,13 @@ const makeFactchainHtmlNote = (note, userAddress) => {
     <span class="r-4qtqp9" style="min-height: 12px; min-width: 12px;"></span>
     <div dir="ltr" class="css-901oao r-1nao33i r-1qd0xha r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-1e081e0 r-qvutc0">
       <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">
-        <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${note.content}</span>
+        <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${content}</span>
       </span>
     </div>
   `;
 
-  if (!note.finalRating) {
-    if (!userAddress || author !== "You") {
-      noteHTML += `<div>${rateItHtml}</div></div>`
-    }
+  if (rateNoteButtonID) {
+    noteHTML += `<div>${rateItHtml(rateNoteButtonID)}</div></div>`
   }
   return noteHTML;
 }
@@ -167,14 +165,15 @@ const makeFactchainHtmlNote = (note, userAddress) => {
 const addNote = async (mainArticle, note) => {
   const provider = await createFactchainProvider();
   const userAddress = await provider.getAddress();
-  let htmlNote = makeFactchainHtmlNote(note, userAddress);
+  const isAuthor = userAddress && userAddress.toLowerCase() === note.creatorAddress.toLowerCase();
+  const rateNoteButtonID = !note.finalRating && !isAuthor ? `#rateNoteButton-${note.creatorAddress}` : null;
+  let htmlNote = makeFactchainHtmlNote(isAuthor, note.content, rateNoteButtonID);
   const tempDiv = mainArticle.children[0].children[0]
   const afterThisDiv = [].slice.call(tempDiv.children[tempDiv.children.length - 1].children).find(e => e.innerHTML === "");
   afterThisDiv.insertAdjacentHTML("afterend", htmlNote);
-  const rateNoteButton = mainArticle.querySelector("#rateNoteButton")
 
-  if (rateNoteButton) {
-    mainArticle.querySelector("#rateNoteButton").addEventListener("click", () => {
+  if (rateNoteButtonID) {
+    mainArticle.querySelector(rateNoteButtonID).addEventListener("click", () => {
       logger.log("Rating note", note);
       chrome.runtime.sendMessage({
         type: 'fc-rate-notes',
