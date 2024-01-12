@@ -37,24 +37,6 @@ export const makeTransactionCall = async (contract, transactionCall) => {
   return { transaction, error };
 };
 
-export const mintXNote = async (noteId, value, hash, signature) => {
-  logger.log('Minting X note', noteId, value, hash, signature);
-  const provider = await createFactchainProvider();
-  const contract = await provider.getFC1155Contract();
-
-  return await makeTransactionCall(
-    contract,
-    async (c) =>
-      await c.mint(
-        noteId,
-        value,
-        hash.startsWith('0x') ? hash : `0x${hash}`,
-        signature,
-        { value: value * 1_000_000 }
-      )
-  );
-};
-
 export const createFactchainProvider = async () => {
   try {
     let currentMetaMaskId = METAMASK_ID;
