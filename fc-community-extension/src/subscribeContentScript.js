@@ -9,7 +9,6 @@
 // const provider = createFactchainProvider();
 // const contract = await provider.getFCContract();
 
-
 // const notify = (title, content, postUrl) => {
 //   logger.log("Requestion notification");
 //   chrome.runtime.sendMessage({

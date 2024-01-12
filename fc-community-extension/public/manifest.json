@@ -15,25 +15,14 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://twitter.com/*",
-        "https://x.com/*"
-      ],
+      "matches": ["https://twitter.com/*", "https://x.com/*"],
       "run_at": "document_idle",
-      "js": [
-        "defaultContentScript.js",
-        "subscribeContentScript.js"
-      ]
+      "js": ["defaultContentScript.js", "subscribeContentScript.js"]
     },
     {
-      "matches": [
-        "https://twitter.com/*/status/*",
-        "https://x.com/*/status/*"
-      ],
+      "matches": ["https://twitter.com/*/status/*", "https://x.com/*/status/*"],
       "run_at": "document_idle",
-      "js": [
-        "statusContentScript.js"
-      ]
+      "js": ["statusContentScript.js"]
     }
   ],
   "permissions": [],
@@ -45,13 +34,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "icons/icon_128.png",
-        "factchain.jpeg"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["icons/icon_128.png", "factchain.jpeg"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

@@ -1,10 +1,10 @@
-import { getNotes } from "./utils/backend";
+import { getNotes } from './utils/backend';
 
 let cache = {
-  postUrl: "",
+  postUrl: '',
   notes: [],
-  noteUrl: "",
-  content: "",
+  noteUrl: '',
+  content: '',
 };
 
 /// For now we deactivate notifications
@@ -16,52 +16,53 @@ let cache = {
 //   });
 // });
 
-
 const mainHandler = async (message, sendResponse) => {
-  console.log("Received message", message);
+  console.log('Received message', message);
 
-  if (message.type === "fc-create-note") {
-    console.log("Creating a note", message.postUrl);
+  if (message.type === 'fc-create-note') {
+    console.log('Creating a note', message.postUrl);
     cache.postUrl = message.postUrl;
 
     chrome.windows.create({
-      url: "createNote.html",
-      type: "popup",
+      url: 'createNote.html',
+      type: 'popup',
       focused: true,
       width: 400,
       height: 600,
       top: 0,
       left: 0,
     });
-  } else if (message.type === "fc-get-notes") {
-    const notes = await getNotes({postUrl: message.postUrl});
-    console.log("Retrieved notes", notes);
+  } else if (message.type === 'fc-get-notes') {
+    const notes = await getNotes({ postUrl: message.postUrl });
+    console.log('Retrieved notes', notes);
     sendResponse(notes);
-  } else if (message.type === "fc-rate-notes") {
-    console.log("Rating notes", message.notes);
+  } else if (message.type === 'fc-rate-notes') {
+    console.log('Rating notes', message.notes);
     cache.postUrl = message.notes[0].postUrl;
     cache.notes = message.notes;
 
     chrome.windows.create({
-      url: "rateNotes.html",
-      type: "popup",
+      url: 'rateNotes.html',
+      type: 'popup',
       focused: true,
       width: 400,
       height: 600,
       top: 0,
       left: 0,
     });
-  } else if (message.type === "fc-get-from-cache") {
+  } else if (message.type === 'fc-get-from-cache') {
     console.log(`Get ${message.target} from cache`, cache);
     sendResponse(cache[message.target]);
-  } else if (message.type === "fc-mint-twitter-note") {
-    console.log(`Mint twitter note '${message.noteUrl}' with content '${message.content}'`);
+  } else if (message.type === 'fc-mint-twitter-note') {
+    console.log(
+      `Mint twitter note '${message.noteUrl}' with content '${message.content}'`
+    );
     cache.noteUrl = message.noteUrl;
     cache.content = message.content;
 
     chrome.windows.create({
-      url: "mintXNote.html",
-      type: "popup",
+      url: 'mintXNote.html',
+      type: 'popup',
       focused: true,
       width: 400,
       height: 600,
@@ -83,10 +84,9 @@ const mainHandler = async (message, sendResponse) => {
   // });
 };
 
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   mainHandler(message, sendResponse);
   return true;
 });
 
-console.log("Initialised");
+console.log('Initialised');
