@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://fc-community-backend-15f6c753d352.herokuapp.com";
+const BACKEND_URL = 'https://fc-community-backend-15f6c753d352.herokuapp.com';
 
 export const getNotes = async (queryparams) => {
   let fullUrl = `${BACKEND_URL}/notes`;
@@ -6,33 +6,33 @@ export const getNotes = async (queryparams) => {
     const urlParams = new URLSearchParams(queryparams);
     fullUrl = `${BACKEND_URL}/notes?${urlParams}`;
   }
-  console.log("Getting notes", fullUrl);
+  console.log('Getting notes', fullUrl);
 
   try {
     const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     });
     const data = await response.json();
     return data.notes;
   } catch (error) {
-    console.error("Error fetching notes:", error);
-    throw error; 
+    console.error('Error fetching notes:', error);
+    throw error;
   }
 };
 
 export const getXNoteId = async (noteUrl) => {
-  const getUrlParams = new URLSearchParams({noteUrl});
+  const getUrlParams = new URLSearchParams({ noteUrl });
   const getUrl = `${BACKEND_URL}/x/note/id?${getUrlParams}`;
-  console.log("Getting id for note", getUrl);
-  
+  console.log('Getting id for note', getUrl);
+
   try {
     let response = await fetch(getUrl, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     });
     if (response.status === 404) {
@@ -48,19 +48,19 @@ export const getXNoteId = async (noteUrl) => {
       };
     }
   } catch (error) {
-    console.error("Error fetching X Note id:", error);
+    console.error('Error fetching X Note id:', error);
     throw error;
   }
-}
+};
 
 export const createXNoteId = async (noteUrl, content) => {
   try {
     const response = await fetch(`${BACKEND_URL}/x/note`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({noteUrl, content})
+      body: JSON.stringify({ noteUrl, content }),
     });
     const data = await response.json();
     return {
@@ -69,26 +69,26 @@ export const createXNoteId = async (noteUrl, content) => {
       signature: data.signature,
     };
   } catch (error) {
-    console.error("Error creating X Note id:", error);
+    console.error('Error creating X Note id:', error);
     throw error;
   }
-}
+};
 
 export const getContracts = async () => {
   let fullUrl = `${BACKEND_URL}/_contracts`;
-  console.log("Getting contracts", fullUrl);
+  console.log('Getting contracts', fullUrl);
 
   try {
     const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
     });
     const data = await response.json();
     return data.contracts;
   } catch (error) {
-    console.error("Error fetching contracts:", error);
-    throw error; 
+    console.error('Error fetching contracts:', error);
+    throw error;
   }
-}
+};

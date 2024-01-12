@@ -53,9 +53,9 @@ const common = {
         use: {
           loader: 'babel-loader',
           options: {
-            "presets": ["solid"]
-          }
-        }
+            presets: ['solid'],
+          },
+        },
       },
     ],
   },
