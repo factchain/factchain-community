@@ -142,24 +142,18 @@ function FCPopup({ provider }) {
   const [address, setAddress] = createSignal('');
   const loggedIn = () => !!address();
 
-  const setCurrentAddress = async (address) => {
-    await chrome.runtime.sendMessage({
-      type: 'fc-set-address',
-      address,
-    });
-    setAddress(address);
-  };
   const changeConnectionState = async () => {
+    setSelectedTab('Profile');
     if (loggedIn()) {
       await provider.disconnect();
-      setCurrentAddress('');
+      await chrome.runtime.sendMessage({
+        type: 'fc-set-address',
+        address: '',
+      });
+      setAddress('');
     } else {
-      await provider.requestAddress().then(setCurrentAddress);
+      await provider.requestAddress().then(setAddress);
     }
-  };
-  const connectWallet = async () => {
-    setSelectedTab('Profile');
-    await provider.requestAddress().then(setCurrentAddress);
   };
   const getUserStats = async (address) => {
     console.log(`address: ${address}`);
@@ -189,7 +183,7 @@ function FCPopup({ provider }) {
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '? ETH' : userStats().earnings;
-  provider.getAddress().then(setCurrentAddress);
+  provider.getAddress().then(setAddress);
 
   return (
     <div style="height:575px; width: 340px;">
@@ -210,14 +204,14 @@ function FCPopup({ provider }) {
           <FCNotes
             loggedIn={loggedIn()}
             queryparams={{ creatorAddress: address() }}
-            connectWallet={connectWallet}
+            connectWallet={changeConnectionState}
           />
         </Match>
         <Match when={selectedTab() === 'Ratings'}>
           <FCNotes
             loggedIn={loggedIn()}
             queryparams={{ awaitingRatingBy: address() }}
-            connectWallet={connectWallet}
+            connectWallet={changeConnectionState}
           />
         </Match>
       </Switch>
