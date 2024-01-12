@@ -25,7 +25,9 @@
       "js": ["statusContentScript.js"]
     }
   ],
-  "permissions": [],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://fc-community-backend-15f6c753d352.herokuapp.com/*"
   ],

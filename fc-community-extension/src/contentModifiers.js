@@ -1,5 +1,4 @@
 import { logger } from './utils/logging';
-import { createFactchainProvider } from './utils/web3';
 import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from './utils/constants';
 import { xSelectors } from './utils/selectors';
 
@@ -167,22 +166,24 @@ const makeFactchainHtmlNote = (isAuthor, content, rateNoteButtonID) => {
   `;
 
   if (rateNoteButtonID) {
-    noteHTML += `<div>${rateItHtml(rateNoteButtonID)}</div></div>`;
+    noteHTML += `<div>${rateItHtml(rateNoteButtonID)}</div>`;
   }
+  noteHTML += '</div>';
   return noteHTML;
 };
 
 const addNote = async (mainArticle, note) => {
-  const provider = await createFactchainProvider();
-  const userAddress = await provider.getAddress();
+  const {address} = await chrome.runtime.sendMessage({
+    type: 'fc-get-address',
+  });
   const isAuthor =
-    userAddress &&
-    userAddress.toLowerCase() === note.creatorAddress.toLowerCase();
+    address &&
+    address.toLowerCase() === note.creatorAddress.toLowerCase();
   const rateNoteButtonID =
     !note.finalRating && !isAuthor
       ? `#rateNoteButton-${note.creatorAddress}`
       : null;
-  let htmlNote = makeFactchainHtmlNote(
+  const htmlNote = makeFactchainHtmlNote(
     isAuthor,
     note.content,
     rateNoteButtonID

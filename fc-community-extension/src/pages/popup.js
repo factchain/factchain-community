@@ -142,17 +142,24 @@ function FCPopup({ provider }) {
   const [address, setAddress] = createSignal('');
   const loggedIn = () => !!address();
 
+  const setCurrentAddress = async (address) => {
+    await chrome.runtime.sendMessage({
+      type: 'fc-set-address',
+      address,
+    });
+    setAddress(address);
+  };
   const changeConnectionState = async () => {
     if (loggedIn()) {
       await provider.disconnect();
-      setAddress('');
+      setCurrentAddress('');
     } else {
-      await provider.requestAddress().then(setAddress);
+      await provider.requestAddress().then(setCurrentAddress);
     }
   };
   const connectWallet = async () => {
     setSelectedTab('Profile');
-    await provider.requestAddress().then(setAddress);
+    await provider.requestAddress().then(setCurrentAddress);
   };
   const getUserStats = async (address) => {
     console.log(`address: ${address}`);
@@ -182,7 +189,7 @@ function FCPopup({ provider }) {
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '? ETH' : userStats().earnings;
-  provider.getAddress().then(setAddress);
+  provider.getAddress().then(setCurrentAddress);
 
   return (
     <div style="height:575px; width: 340px;">
