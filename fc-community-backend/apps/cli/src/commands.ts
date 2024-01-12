@@ -79,7 +79,7 @@ export const getEligibleNotes = async (
 
 const finaliseNoteHelper = async (
   note: Note,
-): Promise<ContractTransactionResponse> => {
+): Promise<[number, ContractTransactionResponse]> => {
   const fc = new FactChainBackend(config);
   // Rocket Science factchain scoring algorithm!
   // Half Round Down Average
@@ -94,27 +94,34 @@ const finaliseNoteHelper = async (
     note.creatorAddress,
     finalRating,
   );
-  return transactionResponse;
+  return [finalRating, transactionResponse];
 };
 
 export const finaliseNote = async (
   postUrl: string,
   creator: string,
   minimumRatingsPerNote: number,
-): Promise<ContractTransactionResponse | undefined> => {
+): Promise<ContractTransactionResponse[] | null> => {
   const fc = new FactChainBackend(config);
   const ns = new NoteService(fc, fc);
   const note = await ns.getNote(postUrl, creator);
   if (note.ratings!.length < minimumRatingsPerNote) {
     console.log("Not enough rating");
-    return;
+    return null;
   }
   if (note.finalRating) {
     console.log("Note already finalised!");
-    return;
+    return null;
   }
-  const transactionResponse = finaliseNoteHelper(note);
-  return transactionResponse;
+  const [finalRating, finaliseTransactionResponse] =
+    await finaliseNoteHelper(note);
+  const mintTransactionResponse = await mintNote(
+    note.content!,
+    note.postUrl,
+    note.creatorAddress,
+    finalRating,
+  );
+  return [finaliseTransactionResponse, mintTransactionResponse];
 };
 
 export const finaliseNotes = async (
@@ -133,16 +140,19 @@ export const finaliseNotes = async (
     console.log(
       `finalising note on ${note.postUrl} created by ${note.creatorAddress}`,
     );
-    const finaliseTransactionResponse = await finaliseNoteHelper(note);
+    const [finalRating, finaliseTransactionResponse] =
+      await finaliseNoteHelper(note);
     responses.push(finaliseTransactionResponse);
     const mintTransactionResponse = await mintNote(
       note.content!,
       note.postUrl,
       note.creatorAddress,
+      finalRating,
     );
     responses.push(mintTransactionResponse);
   }
   console.log(responses);
+  console.log(`minted ${notesToFinalise.length} NFTs`);
   return responses;
 };
 
@@ -150,12 +160,14 @@ export const mintNote = async (
   text: string,
   postUrl: string,
   creator: string,
+  finalRating: number,
 ): Promise<ContractTransactionResponse> => {
   const fc = new FactChainBackend(config);
   return await fc.mintNote721({
-    postUrl: postUrl,
+    postUrl,
     creatorAddress: creator,
     content: text,
+    finalRating,
   });
 };
 

@@ -92,8 +92,15 @@ const uploadMetadataToPinata = async (
   try {
     const noteNFTMetadata = JSON.stringify({
       pinataContent: {
-        name: `${note.postUrl}`,
-        description: `${note.content}`,
+        name: note.postUrl,
+        description: note.content,
+        attributes: [
+          {
+            "display_type": "number",
+            "trait_type": "Final Rating",
+            "value": note.finalRating!,
+          },
+        ],
         external_url: "https://gateway.pinata.cloud/ipfs/",
         image: `ipfs://${CID}`,
       },
