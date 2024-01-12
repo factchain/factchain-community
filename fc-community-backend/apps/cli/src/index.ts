@@ -83,19 +83,19 @@ program
 program
   .command("finalise-notes")
   .description("set to all eligible factchain notes their final rating")
-  .option("-m, --minimum <number>", "minimum note ratings", 1)
   .option("-f, --from <number>", "lookback days")
+  .option("-m, --minimum <number>", "minimum note ratings", 1)
   .action(async (options: any) => {
-    await finaliseNotes(options.minimum, options.from);
+    await finaliseNotes(options.from, options.minimum);
   });
 
 program
   .command("get-eligible-notes")
   .description("get factchain notes to finalised")
-  .option("-n, --minimum <number>", "minimum note ratings", 1)
   .option("-f, --from <number>", "lookback days")
+  .option("-m, --minimum <number>", "minimum note ratings", 1)
   .action(async (options: any) => {
-    await getEligibleNotes(options.minimum, options.from);
+    await getEligibleNotes(options.from, options.minimum);
   });
 
 program
