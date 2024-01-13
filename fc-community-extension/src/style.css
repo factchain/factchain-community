@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* we keep it there for page we didn't migrate to tailwind yet */
+body {
+  background-color: #222830;
+  font-family: 'Space Mono';
+  background-color: #222831;
+  color: #eeeeee;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+.colors-animation {
+  @apply transition-colors duration-300 ease-out;
+}
+
+.btn {
+  @apply colors-animation font-mono border border-2 border-cyan-300 rounded-xl bg-gray-800 text-cyan-300 py-2 px-4 font-bold text-lg hover:bg-gray-900;
+}

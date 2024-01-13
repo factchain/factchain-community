@@ -32,7 +32,7 @@ const common = {
       // Help webpack in understanding CSS files imported in .js files
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
       },
       // Check for images imported in .js files and
       {
@@ -71,7 +71,7 @@ const common = {
     }),
     // Extract CSS into separate files
     new MiniCssExtractPlugin({
-      filename: '[name].css',
+      filename: 'style.css',
     }),
     // Required to support metamask's libs that need polyfills
     // which are not provided anymore by default in webpack >= 5

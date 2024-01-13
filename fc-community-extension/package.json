@@ -14,11 +14,16 @@
   },
   "devDependencies": {
     "adm-zip": "^0.5.10",
+    "autoprefixer": "^10.4.16",
     "copy-webpack-plugin": "^10.2.4",
     "css-loader": "^6.8.1",
     "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^2.7.6",
+    "postcss": "^8.4.33",
+    "postcss-loader": "^7.3.4",
     "prettier": "^2.8.8",
+    "style-loader": "^3.3.4",
+    "tailwindcss": "^3.4.1",
     "webpack": "^5.89.0",
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.9.0"

@@ -9,7 +9,7 @@ const PATHS = require('./paths');
 const config = (env, argv) =>
   merge(common, {
     entry: {
-      popup: PATHS.src + '/pages/popup.js',
+      popup: PATHS.src + '/pages/popup/index.js',
       createNote: PATHS.src + '/pages/createNote.js',
       rateNotes: PATHS.src + '/pages/rateNotes.js',
       mintXNote: PATHS.src + '/pages/mintXNote.js',
@@ -26,6 +26,11 @@ const config = (env, argv) =>
       serviceWorker: PATHS.src + '/serviceWorker.js',
     },
     devtool: argv.mode === 'production' ? false : 'source-map',
+    resolve: {
+      alias: {
+        '@': PATHS.src,
+      },
+    },
   });
 
 module.exports = config;
