@@ -5,7 +5,6 @@ import {
   alterMainPageTwitterNote,
 } from './contentModifiers';
 import { xSelectors } from './utils/selectors';
-import { createFactchainProvider } from './utils/web3';
 
 let observer = new MutationObserver(async (mutations) => {
   for (let mutation of mutations) {
