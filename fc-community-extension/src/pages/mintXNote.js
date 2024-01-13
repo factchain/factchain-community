@@ -40,7 +40,7 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
         <Switch>
           <Match when={error()}>
             <div style="margin-bottom: 50px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-              Failed to create the NFT collection
+              Failed to create a collection for this note :(
             </div>
             <div style="margin-bottom: 10px; font-size: 110%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               {JSON.stringify(error())}
@@ -48,31 +48,35 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
           </Match>
           <Match when={transaction() && xNoteId()}>
             <div style="margin-bottom: 50px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-              NFT minted successfully!
+              You have successfully collected this note!
             </div>
             <div style="margin-bottom: 10px; font-size: 110%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-              <a href={makeTransactionUrl(transactionHash())} target="_blank">
-                View transaction {transactionHash()}
-              </a>
-            </div>
-            <div style="margin-bottom: 10px; font-size: 110%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+              Check it out on{' '}
               <a
                 href={makeOpenseaUrl(contractAddress, xNoteId().id)}
                 target="_blank"
               >
-                View NFT on OpenSea
+                OpenSea
               </a>
+              .
+            </div>
+            <div style="margin-bottom: 10px; font-size: 90%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+              View transaction on{' '}
+              <a href={makeTransactionUrl(transactionHash())} target="_blank">
+                etherscan
+              </a>
+              .
             </div>
           </Match>
           <Match when={xNoteId()}>
             <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-              Approve the transaction to mint your NFT.
+              Approve the transaction in Metamask to collect the note.
             </div>
             <FCLoader />
           </Match>
           <Match when={true}>
             <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-              Creating a new NFT collection for this note...
+              Creating a new collection for this note...
             </div>
             <FCLoader />
           </Match>

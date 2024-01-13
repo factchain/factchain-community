@@ -22,7 +22,7 @@ jobs:
       - name: Commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: '[extension] update build folder'
+          commit_message: '[auto][extension] update build folder'
           file_pattern: ./fc-community-extension/factchain-extension-build/*
           commit_user_name: Factchain Bot
           commit_user_email: bot@factchain.tech
