@@ -104,8 +104,9 @@ program
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
+  .option("-r, --rating <number>", "Final rating")
   .action(async (options: any) => {
-    await mintNote(options.text, options.url, options.creator);
+    await mintNote(options.text, options.url, options.creator, options.rating);
   });
 
 program
