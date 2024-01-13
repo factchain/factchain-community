@@ -2,7 +2,7 @@ import { getNotes } from './utils/backend';
 
 let cache = {
   postUrl: '',
-  notes: [],
+  note: null,
   noteUrl: '',
   content: '',
 };
@@ -36,10 +36,9 @@ const mainHandler = async (message, sendResponse) => {
     const notes = await getNotes({ postUrl: message.postUrl });
     console.log('Retrieved notes', notes);
     sendResponse(notes);
-  } else if (message.type === 'fc-rate-notes') {
-    console.log('Rating notes', message.notes);
-    cache.postUrl = message.notes[0].postUrl;
-    cache.notes = message.notes;
+  } else if (message.type === 'fc-rate-note') {
+    console.log('Rating note', message.note);
+    cache.note = message.note;
 
     chrome.windows.create({
       url: 'rateNotes.html',
