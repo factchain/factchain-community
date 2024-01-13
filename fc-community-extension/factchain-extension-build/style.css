@@ -1,25 +1,25 @@
 body {
   font-family: 'Space Mono';
   background-color: #222831;
-  color: #EEEEEE;
+  color: #eeeeee;
 }
 
 button {
   font-family: 'Space Mono';
   background-color: #222831;
-  color: #00ADB5;
-  border: 1px solid #00ADB5;
+  color: #00adb5;
+  border: 1px solid #00adb5;
   cursor: pointer;
   border-radius: 8px;
 }
 
 button:hover:enabled {
-  background: #00ADB5;
-  color: #EEEEEE;
+  background: #00adb5;
+  color: #eeeeee;
 }
 
 button:disabled,
-button[disabled]{
+button[disabled] {
   border: 1px solid #777777;
   color: #777777;
 }
@@ -34,30 +34,30 @@ button[disabled]{
 }
 
 .tab.selected {
-  background: #00ADB5;
+  background: #00adb5;
 }
 
 .tab:hover {
-  background: #00ADB5;
+  background: #00adb5;
 }
 
 .link {
-  color: #00ADB5;
+  color: #00adb5;
   cursor: pointer;
 }
 
 a:link {
-  color: #00ADB5;
+  color: #00adb5;
 }
 a:visited {
-  color: #00ADB5;
+  color: #00adb5;
 }
 
 .loader {
   width: 48px;
   height: 48px;
-  border: 5px solid #393E46;
-  border-bottom-color: #00ADB5;
+  border: 5px solid #393e46;
+  border-bottom-color: #00adb5;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -71,4 +71,4 @@ a:visited {
   100% {
     transform: rotate(360deg);
   }
-} 
+}
