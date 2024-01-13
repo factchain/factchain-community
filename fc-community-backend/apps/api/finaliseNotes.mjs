@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { FactChainBackend } from "../src/factchain-core/web3";
-import { NoteService } from "../src/factchain-core/noteService";
-import { config } from "../src/factchain-core/env";
+import { FactChainBackend } from "./src/factchain-core/web3";
+import { NoteService } from "./src/factchain-core/noteService";
+import { config } from "./src/factchain-core/env";
 
 const LOOKBACK_DAYS = 2
 const MINIMUM_RATING = 1
