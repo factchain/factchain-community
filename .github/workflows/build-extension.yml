@@ -2,10 +2,11 @@ name: Build Extension
 on:
   push:
     branches: [ main ]
-    paths: [ fc-community-extension/** ]
 jobs:
-  code-checks:
+  build-extension:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: ./fc-community-extension
