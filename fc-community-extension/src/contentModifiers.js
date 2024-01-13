@@ -172,12 +172,10 @@ const makeFactchainHtmlNote = (isAuthor, content, rateNoteButtonID) => {
   return noteHTML;
 };
 
-const addNote = async (mainArticle, note) => {
-  const { address } = await chrome.runtime.sendMessage({
-    type: 'fc-get-address',
-  });
+const addNote = async (mainArticle, note, userAddress) => {
   const isAuthor =
-    address && address.toLowerCase() === note.creatorAddress.toLowerCase();
+    userAddress &&
+    userAddress.toLowerCase() === note.creatorAddress.toLowerCase();
   const rateNoteButtonID =
     !note.finalRating && !isAuthor
       ? `#rateNoteButton-${note.creatorAddress}`
@@ -214,8 +212,11 @@ export const alterMainArticle = async (mainArticle) => {
   });
   logger.log('received notes', notes);
   if (notes.length > 0) {
+    const { address } = await chrome.runtime.sendMessage({
+      type: 'fc-get-address',
+    });
     for (const note of notes) {
-      await addNote(mainArticle, note);
+      await addNote(mainArticle, note, address);
     }
   }
 };
