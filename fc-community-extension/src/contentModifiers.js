@@ -178,7 +178,7 @@ const addNote = async (mainArticle, note, userAddress) => {
     userAddress.toLowerCase() === note.creatorAddress.toLowerCase();
   const rateNoteButtonID =
     !note.finalRating && !isAuthor
-      ? `#rateNoteButton-${note.creatorAddress}`
+      ? `rateNoteButton-${note.creatorAddress}`
       : null;
   const htmlNote = makeFactchainHtmlNote(
     isAuthor,
@@ -193,12 +193,12 @@ const addNote = async (mainArticle, note, userAddress) => {
 
   if (rateNoteButtonID) {
     mainArticle
-      .querySelector(rateNoteButtonID)
+      .querySelector(`#${rateNoteButtonID}`)
       .addEventListener('click', () => {
         logger.log('Rating note', note);
         chrome.runtime.sendMessage({
-          type: 'fc-rate-notes',
-          notes: [note],
+          type: 'fc-rate-note',
+          note,
         });
       });
   }
