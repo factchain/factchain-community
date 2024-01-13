@@ -1,117 +1,111 @@
 import { render } from 'solid-js/web';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { logger } from '../utils/logging';
-import { FCHero } from './components';
+import { FCHero, FCLoader } from './components';
 import { createSignal } from 'solid-js';
+import { makeTransactionUrl } from '../utils/constants';
 
-function FCRateNote({ creator, content, currentAddress, rateNote }) {
+function FCRateNote({ note, rateNote }) {
   const [transaction, setTransaction] = createSignal(null);
+  const [submitting, setSubmitting] = createSignal(false);
+  const [rating, setRating] = createSignal(null);
   const [error, setError] = createSignal(null);
 
   const submit = async () => {
-    const { transaction, error } = await rateNote(
-      creator,
-      document.getElementById('rating').value
-    );
+    const rating = document.getElementById('rating').value;
+    setRating(rating);
+    setSubmitting(true);
+    setError(null);
+    setTransaction(null);
+    const { transaction, error } = await rateNote(note, rating);
     setTransaction(transaction);
     setError(error);
+    setSubmitting(false);
   };
 
   const transactionHash = () => {
     return transaction() ? transaction().hash : null;
   };
 
-  const transactionUrl = () => {
-    return `https://sepolia.etherscan.io/tx/${transactionHash()}`;
-  };
-
-  const isCreator = creator.toLowerCase() === currentAddress.toLowerCase();
-
-  return (
-    <li>
-      <div>
-        <div>
-          <p>{content}</p>
-        </div>
-        <div>
-          <input
-            id="rating"
-            type="range"
-            min="1"
-            step="1"
-            max="5"
-            disabled={isCreator || !!transactionHash()}
-          ></input>
-        </div>
-        <div>
-          <button onclick={submit} disabled={isCreator || !!transactionHash()}>
-            Submit
-          </button>
-        </div>
-        {transactionHash() ? (
-          <div>
-            Transaction: <a href={transactionUrl()}>{transactionHash()}</a>
-          </div>
-        ) : (
-          <div></div>
-        )}
-        {error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
-      </div>
-    </li>
-  );
-}
-
-function FCRateNotes({ postUrl, notes, rateNote, currentAddress }) {
   return (
     <div>
-      <FCHero></FCHero>
-      <h1>Rate Notes</h1>
-      <div>Post URL: {postUrl}</div>
-      <For each={notes}>
-        {(note) => (
-          <FCRateNote
-            creator={note.creatorAddress}
-            content={note.content}
-            currentAddress={currentAddress}
-            rateNote={rateNote}
-          />
-        )}
-      </For>
+      <FCHero />
+
+      <h1>Rate Factchain Note</h1>
+      <div>
+        <div>
+          <div style="font-size: 120%">
+            Rate the level of helpfulness of this note:
+          </div>
+          <p style="margin: 30px;">{note.content}</p>
+          <div>
+            <input
+              id="rating"
+              type="range"
+              min="1"
+              step="1"
+              max="5"
+              disabled={transactionHash() || submitting()}
+            ></input>
+          </div>
+        </div>
+
+        <Switch>
+          <Match when={transactionHash()}>
+            <div>
+              <div style="margin-top: 50px; margin-bottom: 20px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+                Your rating of {rating()}/5 was successfully submitted!
+              </div>
+              <div style="margin-bottom: 10px; font-size: 90%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+                View transaction on{' '}
+                <a href={makeTransactionUrl(transactionHash())} target="_blank">
+                  etherscan
+                </a>
+                .
+              </div>
+            </div>
+          </Match>
+          <Match when={submitting()}>
+            <div>
+              <FCLoader />
+            </div>
+          </Match>
+          <Match when={true}>
+            <div>
+              <button onclick={submit}>Submit rating</button>
+            </div>
+          </Match>
+        </Switch>
+      </div>
+      {error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
     </div>
   );
 }
 
-const provider = await createFactchainProvider();
-const address = await provider.requestAddress();
-logger.log('Rater address', address);
-const postUrl = await chrome.runtime.sendMessage({
+const note = await chrome.runtime.sendMessage({
   type: 'fc-get-from-cache',
-  target: 'postUrl',
+  target: 'note',
 });
-logger.log('Post URL', postUrl);
-const notes = await chrome.runtime.sendMessage({
-  type: 'fc-get-from-cache',
-  target: 'notes',
-});
-logger.log('Notes', notes);
+logger.log('Note to rate', note);
 
-const rateNote = async (noteCreatorAddress, rating) => {
+const rateNote = async (note, rating) => {
+  const provider = await createFactchainProvider();
+  const address = await provider.requestAddress();
+  logger.log(
+    `Address ${address} rating note ${note.postUrl}-${note.creatorAddress} as ${rating}/5`
+  );
+
   const contract = await provider.getFCContract();
   return await makeTransactionCall(
     contract,
     async (c) =>
-      await c.rateNote(postUrl, noteCreatorAddress, rating, { value: 10_000 })
+      await c.rateNote(note.postUrl, note.creatorAddress, rating, {
+        value: 10_000,
+      })
   );
 };
 
 render(
-  () => (
-    <FCRateNotes
-      postUrl={postUrl}
-      notes={notes}
-      rateNote={rateNote}
-      currentAddress={address}
-    />
-  ),
+  () => <FCRateNote note={note} rateNote={rateNote} />,
   document.getElementById('app')
 );

@@ -16,7 +16,8 @@ export const getNotes = async (queryparams) => {
       },
     });
     const data = await response.json();
-    return data.notes;
+    // Reverse the notes to have them in ascending age (most recent first).
+    return data.notes.reverse();
   } catch (error) {
     console.error('Error fetching notes:', error);
     throw error;
