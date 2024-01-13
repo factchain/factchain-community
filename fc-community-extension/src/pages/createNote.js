@@ -7,11 +7,11 @@ import { FCHero, FCLoader } from './components';
 
 export function FCCreateNote({ postUrl, createNote }) {
   const [transaction, setTransaction] = createSignal(null);
-  const [submitted, setSubmitted] = createSignal(false);
+  const [submitting, setSubmitting] = createSignal(false);
   const [error, setError] = createSignal(null);
 
   const submit = async () => {
-    setSubmitted(true);
+    setSubmitting(true);
     setError(null);
     setTransaction(null);
     const { transaction, error } = await createNote(
@@ -19,7 +19,7 @@ export function FCCreateNote({ postUrl, createNote }) {
     );
     setTransaction(transaction);
     setError(error);
-    setSubmitted(false);
+    setSubmitting(false);
   };
 
   const transactionHash = () => {
@@ -39,7 +39,7 @@ export function FCCreateNote({ postUrl, createNote }) {
         <div>
           <textarea
             id="content"
-            disabled={!!transactionHash() || submitted()}
+            disabled={transactionHash() || submitting()}
             rows="10"
             cols="60"
             maxlength="500"
@@ -48,19 +48,26 @@ export function FCCreateNote({ postUrl, createNote }) {
         <Switch>
           <Match when={transactionHash()}>
             <div>
-              <a href={makeTransactionUrl(transactionHash())} target="_blank">
-                View transaction {transactionHash()}
-              </a>
+              <div style="margin-top: 50px; margin-bottom: 20px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+                Your note was successfully submitted!
+              </div>
+              <div style="margin-bottom: 10px; font-size: 90%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+                View transaction on{' '}
+                <a href={makeTransactionUrl(transactionHash())} target="_blank">
+                  etherscan
+                </a>
+                .
+              </div>
             </div>
           </Match>
-          <Match when={submitted()}>
+          <Match when={submitting()}>
             <div>
               <FCLoader />
             </div>
           </Match>
           <Match when={true}>
             <div>
-              <button onclick={submit}>Submit Note</button>
+              <button onclick={submit}>Submit note</button>
             </div>
           </Match>
         </Switch>
@@ -70,9 +77,6 @@ export function FCCreateNote({ postUrl, createNote }) {
   );
 }
 
-const provider = await createFactchainProvider();
-const address = await provider.requestAddress();
-logger.log('Creator address', address);
 const postUrl = await chrome.runtime.sendMessage({
   type: 'fc-get-from-cache',
   target: 'postUrl',
@@ -80,6 +84,9 @@ const postUrl = await chrome.runtime.sendMessage({
 logger.log('Post URL', postUrl);
 
 const createNote = async (content) => {
+  const provider = await createFactchainProvider();
+  const address = await provider.requestAddress();
+  logger.log('Creator address', address);
   const contract = await provider.getFCContract();
   return await makeTransactionCall(
     contract,
