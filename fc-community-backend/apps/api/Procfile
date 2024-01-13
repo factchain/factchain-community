@@ -1,1 +1,3 @@
 web: yarn run start:prod
+worker: node scripts/finaliseNotes.ts
+clock: node scripts/clock.ts
