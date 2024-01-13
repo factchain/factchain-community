@@ -1,0 +1,28 @@
+name: Build Extension
+on:
+  push:
+    branches: [ main ]
+    paths: [ fc-community-extension/** ]
+jobs:
+  code-checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./fc-community-extension
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build extension
+        run: yarn run build
+
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: '[extension] update build folder'
+          file_pattern: ./fc-community-extension/factchain-extension-build/*
+          commit_user_name: Factchain Bot
+          commit_user_email: bot@factchain.tech
+          commit_author: Factchain Bot <bot@factchain.tech>
