@@ -2,17 +2,15 @@
 
 import { FactChainBackend } from "../src/factchain-core/web3";
 import { NoteService } from "../src/factchain-core/noteService";
-import { Note } from "../src/factchain-core/types";
 import { config } from "../src/factchain-core/env";
-import { ContractTransactionResponse } from "ethers";
 
 const LOOKBACK_DAYS = 2
 const MINIMUM_RATING = 1
   
 const finaliseNotes = async (
-    from: number,
-    minimumRatingsPerNote: number,
-  ): Promise<ContractTransactionResponse[]> => {
+    from,
+    minimumRatingsPerNote,
+  ) => {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);
     // select notes created within the time period and with enough ratings
@@ -29,7 +27,7 @@ const finaliseNotes = async (
         await finaliseNoteHelper(note);
       responses.push(finaliseTransactionResponse);
       const mintTransactionResponse = await mintNote(
-        note.content!,
+        note.content,
         note.postUrl,
         note.creatorAddress,
         finalRating,
@@ -42,13 +40,13 @@ const finaliseNotes = async (
   };
 
 const finaliseNoteHelper = async (
-    note: Note,
-  ): Promise<[number, ContractTransactionResponse]> => {
+    note,
+  ) => {
     const fc = new FactChainBackend(config);
     // Rocket Science factchain scoring algorithm!
     // Half Round Down Average
     const finalRating = ~~(
-      note.ratings!.reduce((a, b) => a + Number(b), 0) / note.ratings!.length
+      note.ratings.reduce((a, b) => a + Number(b), 0) / note.ratings.length
     );
     console.log(
       `Final Rating of note on ${note.postUrl} created by ${note.creatorAddress} is ${finalRating}`,
@@ -62,11 +60,11 @@ const finaliseNoteHelper = async (
   };
 
 const mintNote = async (
-    text: string,
-    postUrl: string,
-    creator: string,
-    finalRating: number,
-  ): Promise<ContractTransactionResponse> => {
+    text,
+    postUrl,
+    creator,
+    finalRating,
+  ) => {
     const fc = new FactChainBackend(config);
     return await fc.mintNote721({
       postUrl,
