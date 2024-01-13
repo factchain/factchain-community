@@ -74,9 +74,9 @@ const mainHandler = async (message, sendResponse) => {
     console.log(`Address set to ${message.address} in storage`);
     sendResponse(true);
   } else if (message.type === 'fc-get-address') {
-    const address = (await chrome.storage.local.get(["address"])).address || '';
+    const address = (await chrome.storage.local.get(['address'])).address || '';
     console.log(`Retrieved address ${address} from storage`);
-    sendResponse({address});
+    sendResponse({ address });
   }
   /// For now we deactivate notifications
   ///

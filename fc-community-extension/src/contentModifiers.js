@@ -173,12 +173,11 @@ const makeFactchainHtmlNote = (isAuthor, content, rateNoteButtonID) => {
 };
 
 const addNote = async (mainArticle, note) => {
-  const {address} = await chrome.runtime.sendMessage({
+  const { address } = await chrome.runtime.sendMessage({
     type: 'fc-get-address',
   });
   const isAuthor =
-    address &&
-    address.toLowerCase() === note.creatorAddress.toLowerCase();
+    address && address.toLowerCase() === note.creatorAddress.toLowerCase();
   const rateNoteButtonID =
     !note.finalRating && !isAuthor
       ? `#rateNoteButton-${note.creatorAddress}`

@@ -15,11 +15,11 @@ export const cutText = (text, maxLength) => {
   return text.length < maxLength ? text : `${text.slice(0, maxLength)}...`;
 };
 export const elipseText = (text, maxLength) => {
-  return (
-    text.length < maxLength ?
-    text :
-    `${text.slice(0, Math.floor(maxLength / 2))}...${text.slice(text.length - Math.floor(maxLength / 2))}`
-  );
+  return text.length < maxLength
+    ? text
+    : `${text.slice(0, Math.floor(maxLength / 2))}...${text.slice(
+        text.length - Math.floor(maxLength / 2)
+      )}`;
 };
 export const makeTransactionUrl = (transactionHash) =>
   `https://sepolia.etherscan.io/tx/${transactionHash}`;
