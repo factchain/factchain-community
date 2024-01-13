@@ -4,7 +4,7 @@ import { createFactchainProvider } from '../utils/web3';
 import { FCHero, FCLoader } from './components';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
-import { cutText } from '../utils/constants';
+import { cutText, elipseText } from '../utils/constants';
 
 function FCProfile(props) {
   function StatCard(props) {
@@ -23,7 +23,7 @@ function FCProfile(props) {
           Account
         </div>
         <div style="font-size: 110%; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;">
-          {props.loggedIn ? props.address : '0x?'}
+          {props.loggedIn ? elipseText(props.address, 20) : '0x?'}
         </div>
         <div style="margin-top: 40px; margin: 30px; display: flex; flex-direction: row; justify-content: space-between;">
           <StatCard name="Notes" value={props.numberNotes} />
@@ -143,16 +143,17 @@ function FCPopup({ provider }) {
   const loggedIn = () => !!address();
 
   const changeConnectionState = async () => {
+    setSelectedTab('Profile');
     if (loggedIn()) {
       await provider.disconnect();
+      await chrome.runtime.sendMessage({
+        type: 'fc-set-address',
+        address: '',
+      });
       setAddress('');
     } else {
       await provider.requestAddress().then(setAddress);
     }
-  };
-  const connectWallet = async () => {
-    setSelectedTab('Profile');
-    await provider.requestAddress().then(setAddress);
   };
   const getUserStats = async (address) => {
     console.log(`address: ${address}`);
@@ -203,14 +204,14 @@ function FCPopup({ provider }) {
           <FCNotes
             loggedIn={loggedIn()}
             queryparams={{ creatorAddress: address() }}
-            connectWallet={connectWallet}
+            connectWallet={changeConnectionState}
           />
         </Match>
         <Match when={selectedTab() === 'Ratings'}>
           <FCNotes
             loggedIn={loggedIn()}
             queryparams={{ awaitingRatingBy: address() }}
-            connectWallet={connectWallet}
+            connectWallet={changeConnectionState}
           />
         </Match>
       </Switch>

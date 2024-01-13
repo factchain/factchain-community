@@ -37,24 +37,6 @@ export const makeTransactionCall = async (contract, transactionCall) => {
   return { transaction, error };
 };
 
-export const mintXNote = async (noteId, value, hash, signature) => {
-  logger.log('Minting X note', noteId, value, hash, signature);
-  const provider = await createFactchainProvider();
-  const contract = await provider.getFC1155Contract();
-
-  return await makeTransactionCall(
-    contract,
-    async (c) =>
-      await c.mint(
-        noteId,
-        value,
-        hash.startsWith('0x') ? hash : `0x${hash}`,
-        signature,
-        { value: value * 1_000_000 }
-      )
-  );
-};
-
 export const createFactchainProvider = async () => {
   try {
     let currentMetaMaskId = METAMASK_ID;
@@ -77,26 +59,36 @@ export const createFactchainProvider = async () => {
       ],
     });
 
+    const getAccounts = async (requestAccess) => {
+      logger.log(`Get accounts, requestAccess=${requestAccess}`);
+      const method = requestAccess ? 'eth_requestAccounts' : 'eth_accounts';
+      const accounts = await provider.request({ method });
+      logger.log('Received accounts', accounts);
+      await chrome.runtime.sendMessage({
+        type: 'fc-set-address',
+        address: accounts[0],
+      });
+      return accounts;
+    };
+    const getContract = async (contractName, contractAbi) => {
+      const ethersProvider = new ethers.BrowserProvider(provider);
+      const signer = await ethersProvider.getSigner();
+      const contractAddress = (await getContracts())[contractName];
+      return new ethers.Contract(contractAddress, contractAbi, signer);
+    };
+    const onContractEvents = async (contractName, topics, callback) => {
+      const contractAddress = (await getContracts())[contractName];
+      filter = {
+        address: contractAddress,
+        topics: topics.map(utils.id),
+      };
+      provider.on(filter, callback);
+    };
+
     return {
-      getAddress: async () => {
-        logger.log('Getting accounts');
-        const accounts = await provider.request({ method: 'eth_accounts' });
-        logger.log('Received accounts', accounts);
-        return accounts[0];
-      },
-      requestAddress: async () => {
-        logger.log('Requesting access to accounts');
-        const accounts = await provider.request({
-          method: 'eth_requestAccounts',
-        });
-        logger.log('Received accounts', accounts);
-        return accounts[0];
-      },
-      onAddressChange: (handler) => {
-        provider.on('accountsChanged', (accounts) => {
-          handler(accounts.length === 0 ? null : accounts[0]);
-        });
-      },
+      getAddresses: async () => await getAccounts(false),
+      getAddress: async () => (await getAccounts(false))[0],
+      requestAddress: async () => (await getAccounts(true))[0],
       disconnect: async () => {
         return provider.request({
           method: 'wallet_revokePermissions',
@@ -107,38 +99,13 @@ export const createFactchainProvider = async () => {
           ],
         });
       },
-      getFCContract: async () => {
-        const ethersProvider = new ethers.BrowserProvider(provider);
-        const signer = await ethersProvider.getSigner();
-        const fcContractAddress = (await getContracts()).main;
-        return new ethers.Contract(fcContractAddress, FC_CONTRACT_ABI, signer);
-      },
-      onFCEvents: async (topics, callback) => {
-        const fcContractAddress = (await getContracts()).main;
-        filter = {
-          address: fcContractAddress,
-          topics: topics.map(utils.id),
-        };
-        provider.on(filter, callback);
-      },
-      getFC1155Contract: async () => {
-        const ethersProvider = new ethers.BrowserProvider(provider);
-        const signer = await ethersProvider.getSigner();
-        const fc1155ContractAddress = (await getContracts()).nft1155;
-        return new ethers.Contract(
-          fc1155ContractAddress,
-          FC_1155_CONTRACT_ABI,
-          signer
-        );
-      },
-      onFC1155Events: async (topics, callback) => {
-        const fc1155ContractAddress = (await getContracts()).nft1155;
-        filter = {
-          address: fc1155ContractAddress,
-          topics: topics.map(utils.id),
-        };
-        provider.on(filter, callback);
-      },
+      getFCContract: async () => getContract('main', FC_CONTRACT_ABI),
+      onFCEvents: async (topics, callback) =>
+        onContractEvents('main', topics, callback),
+      getFC1155Contract: async () =>
+        getContract('nft1155', FC_1155_CONTRACT_ABI),
+      onFC1155Events: async (topics, callback) =>
+        onContractEvents('nft1155', topics, callback),
     };
   } catch (e) {
     console.error(`Metamask connect error `, e);

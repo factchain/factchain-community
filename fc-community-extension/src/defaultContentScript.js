@@ -5,6 +5,7 @@ import {
   alterMainPageTwitterNote,
 } from './contentModifiers';
 import { xSelectors } from './utils/selectors';
+import { createFactchainProvider } from './utils/web3';
 
 let observer = new MutationObserver(async (mutations) => {
   for (let mutation of mutations) {
@@ -45,4 +46,5 @@ let observer = new MutationObserver(async (mutations) => {
     }
   }
 });
+
 observer.observe(document, { childList: true, subtree: true });
