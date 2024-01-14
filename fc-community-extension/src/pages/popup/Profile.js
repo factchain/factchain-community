@@ -1,3 +1,5 @@
+import { elipseText } from '@/utils/constants';
+
 function FCProfile(props) {
   function StatCard(props) {
     return (
@@ -13,7 +15,7 @@ function FCProfile(props) {
       <div className="flex flex-col items-center space-y-2">
         <div className="text-xl font-bold text-center">Account</div>
         <div className="text-neutral-400">
-          {props.loggedIn ? props.address : '0x?'}
+          {props.loggedIn ? elipseText(props.address, 20) : '0x?'}
         </div>
       </div>
       <div className="flex items-center justify-between bg-gray-700 rounded-3xl">

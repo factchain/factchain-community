@@ -21,17 +21,19 @@ function FCPopup({ provider }) {
   };
 
   const changeConnectionState = async () => {
+    setSelectedTab('Profile');
     if (checkIfLoggedIn()) {
       await provider.disconnect();
+      await chrome.runtime.sendMessage({
+        type: 'fc-set-address',
+        address: '',
+      });
       setAddress('');
     } else {
       await provider.requestAddress().then(setAddress);
     }
   };
-  const connectWallet = async () => {
-    setSelectedTab('Profile');
-    await provider.requestAddress().then(setAddress);
-  };
+
   const getUserStats = async (address) => {
     console.log(`address: ${address}`);
     if (address) {
@@ -85,14 +87,14 @@ function FCPopup({ provider }) {
             <Notes
               loggedIn={checkIfLoggedIn()}
               queryparams={{ creatorAddress: address() }}
-              connectWallet={connectWallet}
+              connectWallet={changeConnectionState}
             />
           </Match>
           <Match when={selectedTab() === 'Ratings'}>
             <Notes
               loggedIn={checkIfLoggedIn()}
               queryparams={{ awaitingRatingBy: address() }}
-              connectWallet={connectWallet}
+              connectWallet={changeConnectionState}
             />
           </Match>
         </Switch>
