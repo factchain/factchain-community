@@ -1,4 +1,4 @@
-const BACKEND_URL = 'https://fc-community-backend-15f6c753d352.herokuapp.com';
+const BACKEND_URL = 'https://api.factchain.tech';
 
 export const getNotes = async (queryparams) => {
   let fullUrl = `${BACKEND_URL}/notes`;
