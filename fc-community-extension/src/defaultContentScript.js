@@ -4,13 +4,17 @@ import {
   alterRatingPageTwitterNote,
   alterMainPageTwitterNote,
 } from './contentModifiers';
-import { xSelectors } from './utils/selectors';
+import {
+  approvedNotesSelector,
+  dropdownSelector,
+  ratingStatusSelector,
+} from './xHtml';
 
 let observer = new MutationObserver(async (mutations) => {
   for (let mutation of mutations) {
     for (let addedNode of mutation.addedNodes) {
       if (addedNode && typeof addedNode.querySelector === 'function') {
-        const dropdown = addedNode.querySelector(xSelectors.dropdown);
+        const dropdown = addedNode.querySelector(dropdownSelector());
         if (dropdown) {
           // Triggered whenever the user opens a dropdown on an article.
           logger.log('New dropdown', dropdown);
@@ -18,7 +22,7 @@ let observer = new MutationObserver(async (mutations) => {
         }
 
         const ratingStatuses = Array.from(
-          addedNode.querySelectorAll(xSelectors.ratingStatus)
+          addedNode.querySelectorAll(ratingStatusSelector)
         );
         // Only keep the rating statuses that are for helpful notes.
         const helpfulRatings = ratingStatuses.filter(
@@ -34,7 +38,7 @@ let observer = new MutationObserver(async (mutations) => {
           alterRatingPageTwitterNote(helpfulNote);
         }
 
-        const twitterNote = addedNode.querySelector(xSelectors.approvedNotes);
+        const twitterNote = addedNode.querySelector(approvedNotesSelector());
         if (twitterNote) {
           // Triggered whenever an approved note is displayed, on any page
           // but mostly on the main feed.
