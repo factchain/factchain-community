@@ -47,8 +47,9 @@ program
   .command("get-notes")
   .description("get factchain notes for a given post")
   .option("-u, --url <url>", "Post url")
+  .option("-f, --from <number>", "lookback days")
   .action(async (options: any) => {
-    await getNotes(options.url);
+    await getNotes(options.url, options.from);
   });
 
 program

@@ -80,31 +80,19 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
     const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
+    const blockPeriods = timePeriodToBlockPeriods(from, today, currentBlockNumber);
+
     console.log(`getting notes between ${from} and ${today}`);
-
-    const block_periods = timePeriodToBlockPeriods(
-      from,
-      today,
-      currentBlockNumber,
-    );
-
-    let notePromises: Promise<Note>[] = [];
-    for (const period of block_periods) {
+    const notePromises = blockPeriods.flatMap(async (period) => {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
-      const relatedEvents = events.filter((e) =>
-        predicate(e.args[0], e.args[1]),
+      const relatedEvents = events.filter((e) => predicate(e.args[0], e.args[1]));
+      return Promise.all(
+        relatedEvents.map((event) => this.getNote(event.args[0], event.args[1])
+        )
       );
-
-      if (relatedEvents) {
-        notePromises = notePromises.concat(
-          relatedEvents.map(async (event) => {
-            return await this.getNote(event.args[0], event.args[1]);
-          }),
-        );
-      }
-    }
+    });
     const notes = await Promise.all(notePromises);
-    return notes;
+    return notes.flat();
   };
 
   getRating = async (
@@ -124,23 +112,20 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
     const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
-    const block_periods = timePeriodToBlockPeriods(
-      from,
-      today,
-      currentBlockNumber,
-    );
-    var ratings: Array<Rating> = [];
-    for (const period of block_periods) {
+    const blockPeriods = timePeriodToBlockPeriods(from, today, currentBlockNumber);
+
+    const eventsPromises = blockPeriods.map(async (period) => {
       const events = await this.getEvents("NoteRated", period[0], period[1]);
-      ratings = ratings.concat(
-        events.map((event) => ({
-          postUrl: event.args[0],
-          noteCreatorAddress: event.args[1],
-          raterAddress: event.args[2],
-          value: event.args[3],
-        })),
-      );
-    }
+      return events.map((event) => ({
+        postUrl: event.args[0],
+        noteCreatorAddress: event.args[1],
+        raterAddress: event.args[2],
+        value: event.args[3],
+      }));
+    });
+
+    const ratingsArrays = await Promise.all(eventsPromises);
+    const ratings = ratingsArrays.flat();
     return ratings;
   };
 
