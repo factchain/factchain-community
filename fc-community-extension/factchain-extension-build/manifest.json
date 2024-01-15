@@ -26,9 +26,7 @@
     }
   ],
   "permissions": ["storage"],
-  "host_permissions": [
-    "https://fc-community-backend-15f6c753d352.herokuapp.com/*"
-  ],
+  "host_permissions": ["https://api.factchain.tech/*"],
   "background": {
     "service_worker": "serviceWorker.js"
   },
