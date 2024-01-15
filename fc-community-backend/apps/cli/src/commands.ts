@@ -34,10 +34,13 @@ export const getNote = async (
   return note;
 };
 
-export const getNotes = async (postUrl: string): Promise<Note[]> => {
+export const getNotes = async (
+  postUrl: string,
+  from: number,
+): Promise<Note[]> => {
   const fc = new FactChainBackend(config);
   const ns = new NoteService(fc, fc);
-  const notes = await ns.getNotes((_postUrl, _) => _postUrl === postUrl);
+  const notes = await ns.getNotes((_postUrl, _) => _postUrl === postUrl, from);
   console.log(notes);
   return notes;
 };
