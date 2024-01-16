@@ -34,6 +34,7 @@ interface IXCommunityNotes is IXCommunityNotesEvents {
 /// @notice
 /// @dev
 contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
+
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
