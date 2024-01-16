@@ -89,6 +89,9 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
     /// It costs an extra 20k gas per call to createNote/rateNote
     mapping(address => UserStats) public userStats;
 
+    /// @notice Mapping of note identifier (postUrl + creatorAddress) to NFT
+    mapping(string => mapping(address => uint256)) public nftIDs;
+
     /// @notice Instantiate a new contract and set its owner
     /// @param _owner Owner of the contract
     constructor(address _owner) Ownable(_owner) {}
