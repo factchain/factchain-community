@@ -1,76 +1,87 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.20;
 
-import {ERC1155URIStorage} from "openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import {Ownable} from "./utils/Ownable.sol";
 
 import {Arrays} from "openzeppelin-contracts/contracts/utils/Arrays.sol";
 
-interface IFactchainSFTEvents {
-    event FactchainNFTContractUpdated(address factchainNFTContract);
+
+interface IFactChainSFTEvents {
+    event FactchainMainContractUpdated(address factchain_main_contract);
     event FactchainBuildersRewarded(uint256 amount);
     event CreatorRewarded(address creator, uint256 amount);
 }
 
-interface IFactchainSFT is IFactchainSFTEvents {
+interface IFactChainSFT is IFactChainSFTEvents {
     // Errors
     error SupplyExhausted();
     error ValueError();
     error BadMintPrice();
     error NegativeBalance();
     error FailedToReward();
-    error ReservedToFactchain();
+    error ReservedToFactChain();
 }
 
-contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
-    address public FACTCHAIN_NFT_CONTRACT;
+
+contract FactChainSFT is Ownable, ERC1155, IFactChainSFT {
+
+    address FACTCHAIN_MAIN_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
 
-    mapping(uint256 => uint256) private _supply;
-
-    /// @notice Mapping of creators's addresses to NFT
-    mapping(uint256 => address) private _creatorsNFT;
+    mapping(uint256 id => string ipfsHash) private _metadata;
+    mapping(uint256 id => uint256) private _supply;
 
     using Arrays for address[];
 
-    constructor(address _owner) Ownable(_owner) ERC1155("https://gateway.pinata.cloud/ipfs/") {
-        _setBaseURI("https://gateway.pinata.cloud/ipfs/");
-    }
-
-    function setFactchainNFTContract(address _factchainNFTContract) public onlyOwner {
-        FACTCHAIN_NFT_CONTRACT = _factchainNFTContract;
-        emit FactchainNFTContractUpdated(_factchainNFTContract);
-    }
-
-    function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
-        if (msg.sender != FACTCHAIN_NFT_CONTRACT) {
-            revert ReservedToFactchain();
+    constructor(address _owner, address _factchain_main_contract)
+        Ownable(_owner)
+        ERC1155("https://gateway.pinata.cloud/ipfs/") {
+            FACTCHAIN_MAIN_CONTRACT = _factchain_main_contract;
         }
+
+    function setFactchainMainContract(address _factchain_main_contract) public onlyOwner {
+          FACTCHAIN_MAIN_CONTRACT = _factchain_main_contract;
+          emit FactchainMainContractUpdated(_factchain_main_contract);
+    }
+
+    function mint(
+        address[] memory raters,
+        string memory ipfsHash,
+        uint256 id
+    ) public returns (uint256) {
+
+        if (msg.sender != FACTCHAIN_MAIN_CONTRACT) {
+             revert ReservedToFactChain();
+        } 
+
         _supply[id] = FACTCHAINERS_MINT_SUPPLY;
-        _creatorsNFT[id] = creator;
-        _setURI(id, ipfsHash);
+        _metadata[id] = ipfsHash;
         for (uint256 i = 0; i < raters.length; ++i) {
-            _mint(raters.unsafeMemoryAccess(i), id, 1, "");
-        }
+             _mint(raters.unsafeMemoryAccess(i), id, 1, "");
+         }
         return id;
     }
 
-    function mint(uint256 id, uint256 value) external payable {
+    function mint(uint256 id, uint256 value, address creator) external payable {
         if (msg.value != MINT_PRICE * value) revert BadMintPrice();
         if (value <= 0) revert ValueError();
         if (value > _supply[id]) {
             revert SupplyExhausted();
         }
         _supply[id] -= value;
-        address creator = _creatorsNFT[id];
-        uint256 reward = msg.value / 2;
+        uint256 reward =  msg.value / 2;
         (bool result,) = payable(creator).call{value: reward}("");
         if (!result) revert FailedToReward();
         emit FactchainBuildersRewarded(reward);
         emit CreatorRewarded(creator, reward);
         _mint(msg.sender, id, value, "");
+    }
+
+
+    function uri(uint256 id) public override view virtual returns (string memory) {
+        return string.concat(_uri, _metadata[id]);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, Ownable) returns (bool) {
