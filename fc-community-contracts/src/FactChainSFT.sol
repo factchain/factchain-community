@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.20;
 
+import {ERC1155URIStorage} from "openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
 import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
 import {Ownable} from "./utils/Ownable.sol";
 
@@ -22,12 +23,11 @@ interface IFactChainSFT is IFactChainSFTEvents {
     error ReservedToFactChain();
 }
 
-contract FactChainSFT is Ownable, ERC1155, IFactChainSFT {
+contract FactChainSFT is Ownable, ERC1155URIStorage, IFactChainSFT {
     address FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
 
-    mapping(uint256 id => string ipfsHash) private _metadata;
     mapping(uint256 id => uint256) private _supply;
 
     using Arrays for address[];
@@ -36,6 +36,7 @@ contract FactChainSFT is Ownable, ERC1155, IFactChainSFT {
         Ownable(_owner)
         ERC1155("https://gateway.pinata.cloud/ipfs/")
     {
+        _setBaseURI("https://gateway.pinata.cloud/ipfs/");
         FACTCHAIN_NFT_CONTRACT = _factchainMainContract;
     }
 
@@ -49,7 +50,7 @@ contract FactChainSFT is Ownable, ERC1155, IFactChainSFT {
             revert ReservedToFactChain();
         }
         _supply[id] = FACTCHAINERS_MINT_SUPPLY;
-        _metadata[id] = ipfsHash;
+        _setURI(id, ipfsHash);
         for (uint256 i = 0; i < raters.length; ++i) {
             _mint(raters.unsafeMemoryAccess(i), id, 1, "");
         }
@@ -69,10 +70,6 @@ contract FactChainSFT is Ownable, ERC1155, IFactChainSFT {
         emit FactchainBuildersRewarded(reward);
         emit CreatorRewarded(creator, reward);
         _mint(msg.sender, id, value, "");
-    }
-
-    function uri(uint256 id) public view virtual override returns (string memory) {
-        return string.concat(_uri, _metadata[id]);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, Ownable) returns (bool) {
