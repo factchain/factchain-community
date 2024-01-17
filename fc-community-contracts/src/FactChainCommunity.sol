@@ -145,7 +145,7 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
             // (address(this).balance) < MINIMUM_STAKE_PER_NOTE - slash
             (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE - slash}("");
             if (!result) revert FailedToSlash();
-            
+
             userStats[_creator].ethSlashed += slash;
             emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: MINIMUM_STAKE_PER_NOTE});
         }

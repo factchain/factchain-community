@@ -67,7 +67,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
     }
 
     function test_createNote() public {
-        (uint32 originalNumberNotes, , , ) = tmCommunity.userStats(player1);
+        (uint32 originalNumberNotes,,,) = tmCommunity.userStats(player1);
         hoax(player1);
         vm.expectEmit();
         emit NoteCreated("https://twitter.com/something", player1, MINIMUM_STAKE_PER_NOTE);
@@ -75,7 +75,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-        (uint32 newNumberNotes, , , ) = tmCommunity.userStats(player1);
+        (uint32 newNumberNotes,,,) = tmCommunity.userStats(player1);
         assert(newNumberNotes == originalNumberNotes + 1);
     }
 
@@ -182,7 +182,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
             _content: "Something something something"
         });
 
-        ( , uint32 originalNumberRatings, , ) = tmCommunity.userStats(rater1);
+        (, uint32 originalNumberRatings,,) = tmCommunity.userStats(rater1);
         vm.expectEmit();
         emit NoteRated("https://twitter.com/something", player1, rater1, 1, MINIMUM_STAKE_PER_RATING);
         hoax(rater1);
@@ -191,7 +191,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
             _creator: player1,
             _rating: 1
         });
-        ( , uint32 newNumberRatings, , ) = tmCommunity.userStats(rater1);
+        (, uint32 newNumberRatings,,) = tmCommunity.userStats(rater1);
         assert(newNumberRatings == originalNumberRatings + 1);
     }
 
@@ -278,8 +278,8 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
     }
 
     function test_rewardAndSlashRaters() public {
-        ( , , uint96 rater1OldRewards, ) = tmCommunity.userStats(rater1);
-        ( , , , uint96 rater2OldSlash) = tmCommunity.userStats(rater2);
+        (,, uint96 rater1OldRewards,) = tmCommunity.userStats(rater1);
+        (,,, uint96 rater2OldSlash) = tmCommunity.userStats(rater2);
 
         hoax(player1);
         tmCommunity.createNote{value: MINIMUM_STAKE_PER_NOTE}({
@@ -314,16 +314,16 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         vm.prank(owner);
         tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
-        ( , , uint96 rater1NewRewards, ) = tmCommunity.userStats(rater1);
+        (,, uint96 rater1NewRewards,) = tmCommunity.userStats(rater1);
         assert(rater1.balance == rater1OriginalBalance + 2);
         assert(rater1NewRewards == rater1OldRewards + 2);
-        ( , , , uint96 rater2NewSlash) = tmCommunity.userStats(rater2);
+        (,,, uint96 rater2NewSlash) = tmCommunity.userStats(rater2);
         assert(rater2.balance == rater2OriginalBalance - 2);
         assert(rater2NewSlash == rater2OldSlash + 2);
     }
 
     function test_rewardCreator() public {
-        ( , , uint96 oldRewards, ) = tmCommunity.userStats(player1);
+        (,, uint96 oldRewards,) = tmCommunity.userStats(player1);
 
         hoax(player1);
         uint256 player1OriginalBalance = player1.balance;
@@ -338,12 +338,12 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
 
         assert(player1.balance == player1OriginalBalance + 30);
-        ( , , uint96 newRewards, ) = tmCommunity.userStats(player1);
+        (,, uint96 newRewards,) = tmCommunity.userStats(player1);
         assert(newRewards == oldRewards + 30);
     }
 
     function test_slashCreator() public {
-        ( , , , uint96 oldSlash) = tmCommunity.userStats(player1);
+        (,,, uint96 oldSlash) = tmCommunity.userStats(player1);
 
         hoax(player1);
         uint256 player1OriginalBalance = player1.balance;
@@ -357,7 +357,7 @@ contract FactChainCommunityTest is Test, IFactChainCommunity, IOwnable {
         tmCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         assert(player1.balance == player1OriginalBalance - 10);
-        ( , , , uint96 newSlash) = tmCommunity.userStats(player1);
+        (,,, uint96 newSlash) = tmCommunity.userStats(player1);
         assert(newSlash == oldSlash + 10);
     }
 

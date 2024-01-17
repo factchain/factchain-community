@@ -34,7 +34,6 @@ interface IXCommunityNotes is IXCommunityNotesEvents {
 /// @notice
 /// @dev
 contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
-
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
@@ -82,7 +81,7 @@ contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
             uint256 amount = (value - supplyCache) * MINT_PRICE;
             // use call rather than transfer
             // to support Smart Contract Wallets.
-            (bool result, ) = payable(msg.sender).call{value: amount}("");
+            (bool result,) = payable(msg.sender).call{value: amount}("");
             if (!result) revert FailedToRefund();
             emit MintWithAdjustedValue(id, supplyCache);
             emit Refunded(msg.sender, amount);
