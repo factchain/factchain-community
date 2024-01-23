@@ -133,7 +133,7 @@ program
 
 program
   .command("set-sft")
-  .description("set factchain main contract in factchain SFT")
+  .description("set factchain NFT contract in factchain SFT")
   .option("-a, --address <address>", "Factchain main contract address")
   .action(async (options: any) => {
     await setNFTContractInSFT(options.address);
