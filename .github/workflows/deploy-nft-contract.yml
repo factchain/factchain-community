@@ -27,7 +27,7 @@ jobs:
           chain-id: '11155111'
           rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
-          constructor-args: '${{ vars.OWNER_ADDRESS }} ${{ vars.FACTCHAINSFT_ADDRESS }} https://gateway.pinata.cloud/ipfs/'
+          constructor-args: '${{ vars.OWNER_ADDRESS }} $ {{ vars.FACTCHAINSFT_ADDRESS }} https://gateway.pinata.cloud/ipfs/'
           verify: true
           etherscan-url: 'https://sepolia.etherscan.io'
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}

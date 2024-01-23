@@ -75,6 +75,25 @@ export class NoteService {
     return notesToFinalise;
   };
 
+  // This function shouldn't exist
+  // We should rely on the noteRaters generated getter of FactChainCommunity contract
+  // Sadly, the abi is wrongly generated for noteRaters
+  // see getNoteRaters in web3.ts
+  // I don't know how to make it work ....
+
+  // TODO: find the probleme and remove this function
+  getNoteRaters = async (
+    postUrl: string,
+    creator: string,
+    lookBackDays: number,
+  ): Promise<Array<Rating>> => {
+    const eligibleRatings = await this.reader.getRatings(lookBackDays);
+    return eligibleRatings.filter(
+      (rating) =>
+        rating.postUrl == postUrl && rating.noteCreatorAddress == creator,
+    );
+  };
+
   getNotesAwaitingRatingBy = async (
     predicate: (postUrl: string, creator: string) => boolean,
     byAddress: string,

@@ -12,6 +12,8 @@ import {
   getEligibleNotes,
   mintNote,
   createXCommunityNoteNFTMetadata,
+  setNFTContractInSFT,
+  getNoteRaters,
 } from "./commands";
 
 import { FactChainEvent } from "./factchain-core/types";
@@ -128,4 +130,22 @@ program
   .action(async (options: any) => {
     await getRating(options.url, options.creator, options.rater);
   });
+
+program
+  .command("set-sft")
+  .description("set factchain main contract in factchain SFT")
+  .option("-a, --address <address>", "Factchain main contract address")
+  .action(async (options: any) => {
+    await setNFTContractInSFT(options.address);
+  })
+
+program
+  .command("get-note-raters")
+  .description("get factchain note raters")
+  .option("-u, --url <url>", "Post url")
+  .option("-c, --creator <address>", "Creator Address")
+  .action(async (options: any) => {
+    await getNoteRaters(options.url, options.creator)
+  })
+
 program.parse();

@@ -16,6 +16,7 @@ import { getNoteSignature, timePeriodToBlockPeriods } from "./utils";
 import {
   FC_COMMUNITY_JSON_ABI,
   FC_NFT_JSON_ABI,
+  FC_SFT_JSON_ABI,
   MINIMUM_STAKE_PER_NOTE,
   MINIMUM_STAKE_PER_RATING,
 } from "./contractsAbi";
@@ -26,6 +27,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   private _provider: ethers.AbstractProvider;
   private _fcCommunity: ethers.Contract;
   private _fcNFT: ethers.Contract;
+  private _fcSFT: ethers.Contract;
 
   constructor(config: Config) {
     this._config = config;
@@ -36,12 +38,26 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       FC_COMMUNITY_JSON_ABI,
       wallet,
     );
+    // main NFT (ERC-721) contract
+    // given to the creator of a factchain note
     this._fcNFT = new ethers.Contract(
       this._config.NFT_721_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       wallet,
     );
+    // semi-fungible SFT (ERC-1155)
+    // copies of orginal NFT to available in openmint
+    // and given to all the raters
+    this._fcSFT = new ethers.Contract(
+      this._config.FACTCHAIN_SFT_CONTRACT_ADDRESS,
+      FC_SFT_JSON_ABI,
+      wallet,
+    );
   }
+
+  setNFTContractInSFT = async (addr: string) => {
+    return await this._fcSFT.setFactchainNFTContract(addr);
+  };
 
   getBlockNumber = async (): Promise<number> => {
     return await this._provider.getBlockNumber();
@@ -73,6 +89,13 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     };
   };
 
+  getNoteRaters = async (
+    postUrl: string,
+    creator: string,
+  ): Promise<String[]> => {
+    return await this._fcCommunity.noteRaters(postUrl, creator);
+  };
+
   getNotes = async (
     predicate: (postUrl: string, creator: string) => boolean,
     lookBackDays: number,
@@ -80,31 +103,26 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
     const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
-    console.log(`getting notes between ${from} and ${today}`);
-
-    const block_periods = timePeriodToBlockPeriods(
+    const blockPeriods = timePeriodToBlockPeriods(
       from,
       today,
       currentBlockNumber,
     );
 
-    let notePromises: Promise<Note>[] = [];
-    for (const period of block_periods) {
+    console.log(`getting notes between ${from} and ${today}`);
+    const notePromises = blockPeriods.flatMap(async (period) => {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
       const relatedEvents = events.filter((e) =>
         predicate(e.args[0], e.args[1]),
       );
-
-      if (relatedEvents) {
-        notePromises = notePromises.concat(
-          relatedEvents.map(async (event) => {
-            return await this.getNote(event.args[0], event.args[1]);
-          }),
-        );
-      }
-    }
+      return Promise.all(
+        relatedEvents.map((event) =>
+          this.getNote(event.args[0], event.args[1]),
+        ),
+      );
+    });
     const notes = await Promise.all(notePromises);
-    return notes;
+    return notes.flat();
   };
 
   getRating = async (
@@ -124,23 +142,24 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     const currentBlockNumber = await this._provider.getBlockNumber();
     const today = new Date();
     const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
-    const block_periods = timePeriodToBlockPeriods(
+    const blockPeriods = timePeriodToBlockPeriods(
       from,
       today,
       currentBlockNumber,
     );
-    var ratings: Array<Rating> = [];
-    for (const period of block_periods) {
+
+    const eventsPromises = blockPeriods.map(async (period) => {
       const events = await this.getEvents("NoteRated", period[0], period[1]);
-      ratings = ratings.concat(
-        events.map((event) => ({
-          postUrl: event.args[0],
-          noteCreatorAddress: event.args[1],
-          raterAddress: event.args[2],
-          value: event.args[3],
-        })),
-      );
-    }
+      return events.map((event) => ({
+        postUrl: event.args[0],
+        noteCreatorAddress: event.args[1],
+        raterAddress: event.args[2],
+        value: event.args[3],
+      }));
+    });
+
+    const ratingsArrays = await Promise.all(eventsPromises);
+    const ratings = ratingsArrays.flat();
     return ratings;
   };
 
@@ -194,12 +213,17 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   };
 
   mintNote721 = async (note: Note): Promise<ContractTransactionResponse> => {
+    const raters = this.getNoteRaters(note.postUrl, note.creatorAddress);
     const metadataIpfsHash = await createNFT721DataFromNote(
       note,
       this._config.REPLICATE_API_TOKEN,
       this._config.PINATA_JWT,
     );
-    return await this._fcNFT.mint(note.creatorAddress, metadataIpfsHash);
+    return await this._fcNFT.mint(
+      note.creatorAddress,
+      raters,
+      metadataIpfsHash,
+    );
   };
 
   getXNoteID = async (note: XCommunityNote): Promise<XSignedNoteIDResponse> => {

@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { ContractAddresses, Note, XSignedNoteIDResponse } from "./factchain-core/types";
+import {
+  ContractAddresses,
+  Note,
+  XSignedNoteIDResponse,
+} from "./factchain-core/types";
 import { FactChainBackend } from "./factchain-core/web3";
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";

@@ -8,7 +8,7 @@ import {Ownable} from "./utils/Ownable.sol";
 import {Arrays} from "openzeppelin-contracts/contracts/utils/Arrays.sol";
 
 interface IFactChainSFTEvents {
-    event FactchainMainContractUpdated(address FACTCHAIN_NFT_CONTRACT);
+    event FactchainNFTContractUpdated(address factchainNFTContract);
     event FactchainBuildersRewarded(uint256 amount);
     event CreatorRewarded(address creator, uint256 amount);
 }
@@ -24,7 +24,7 @@ interface IFactChainSFT is IFactChainSFTEvents {
 }
 
 contract FactChainSFT is Ownable, ERC1155URIStorage, IFactChainSFT {
-    address FACTCHAIN_NFT_CONTRACT;
+    address public FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
 
@@ -32,17 +32,16 @@ contract FactChainSFT is Ownable, ERC1155URIStorage, IFactChainSFT {
 
     using Arrays for address[];
 
-    constructor(address _owner, address _factchainMainContract)
+    constructor(address _owner)
         Ownable(_owner)
         ERC1155("https://gateway.pinata.cloud/ipfs/")
     {
         _setBaseURI("https://gateway.pinata.cloud/ipfs/");
-        FACTCHAIN_NFT_CONTRACT = _factchainMainContract;
     }
 
-    function setFactchainMainContract(address _factchainMainContract) public onlyOwner {
-        FACTCHAIN_NFT_CONTRACT = _factchainMainContract;
-        emit FactchainMainContractUpdated(_factchainMainContract);
+    function setFactchainNFTContract(address _factchainNFTContract) public onlyOwner {
+        FACTCHAIN_NFT_CONTRACT = _factchainNFTContract;
+        emit FactchainNFTContractUpdated(_factchainNFTContract);
     }
 
     function mint(address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
