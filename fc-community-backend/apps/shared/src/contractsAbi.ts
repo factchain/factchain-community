@@ -440,6 +440,30 @@ export const FC_COMMUNITY_JSON_ABI = [
     inputs: [
       {
         internalType: "string",
+        name: "_postUrl",
+        type: "string",
+      },
+      {
+        internalType: "address",
+        name: "_creator",
+        type: "address",
+      },
+    ],
+    name: "getNoteRaters",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
         name: "",
         type: "string",
       },

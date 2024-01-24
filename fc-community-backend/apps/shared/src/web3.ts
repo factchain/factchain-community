@@ -93,7 +93,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     postUrl: string,
     creator: string,
   ): Promise<String[]> => {
-    return await this._fcCommunity.noteRaters(postUrl, creator);
+    return await this._fcCommunity.getNoteRaters(postUrl, creator);
   };
 
   getNotes = async (
@@ -108,8 +108,6 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       today,
       currentBlockNumber,
     );
-
-    console.log(`getting notes between ${from} and ${today}`);
     const notePromises = blockPeriods.flatMap(async (period) => {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
       const relatedEvents = events.filter((e) =>
@@ -213,7 +211,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   };
 
   mintNote721 = async (note: Note): Promise<ContractTransactionResponse> => {
-    const raters = this.getNoteRaters(note.postUrl, note.creatorAddress);
+    const raters = await this.getNoteRaters(note.postUrl, note.creatorAddress);
     const metadataIpfsHash = await createNFT721DataFromNote(
       note,
       this._config.REPLICATE_API_TOKEN,

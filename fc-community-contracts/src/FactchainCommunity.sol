@@ -108,6 +108,11 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
     /// Helper functions
     ////////////////////////////////////////////////////////////////////////
 
+
+    function getNoteRaters(string memory _postUrl, address _creator) public view virtual returns(address[] memory) {
+        return noteRaters[_postUrl][_creator];
+    }
+
     function isPostUrlValid(bytes memory _postUrl) internal pure returns (bool) {
         return _postUrl.length > 0 && _postUrl.length <= POST_URL_MAX_LENGTH;
     }

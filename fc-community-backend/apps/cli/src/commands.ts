@@ -201,15 +201,16 @@ export const getNoteRaters = async (
   creator: string,
 ): Promise<String[]> => {
   const fc = new FactChainBackend(config);
-  const raters = fc.getNoteRaters(postUrl, creator);
+  const raters = await fc.getNoteRaters(postUrl, creator);
   console.log(raters);
   return raters;
-}
+};
 
-
-export const setNFTContractInSFT = async (NFTContractAddress: string): Promise<ContractTransactionResponse> => {
+export const setNFTContractInSFT = async (
+  NFTContractAddress: string,
+): Promise<ContractTransactionResponse> => {
   const fc = new FactChainBackend(config);
   const response = await fc.setNFTContractInSFT(NFTContractAddress);
   console.log(response);
   return response;
-}
+};

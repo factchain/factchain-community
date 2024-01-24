@@ -137,7 +137,7 @@ program
   .option("-a, --address <address>", "Factchain main contract address")
   .action(async (options: any) => {
     await setNFTContractInSFT(options.address);
-  })
+  });
 
 program
   .command("get-note-raters")
@@ -145,7 +145,7 @@ program
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Creator Address")
   .action(async (options: any) => {
-    await getNoteRaters(options.url, options.creator)
-  })
+    await getNoteRaters(options.url, options.creator);
+  });
 
 program.parse();
