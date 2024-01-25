@@ -7,8 +7,6 @@ import {
   getRating,
   createNote,
   rateNote,
-  finaliseNote,
-  finaliseNotes,
   getEligibleNotes,
   mintNote,
   createXCommunityNoteNFTMetadata,
@@ -71,25 +69,6 @@ program
   .option("-r, --rating <number>", "Note Rating", parseInt, 0)
   .action(async (options: any) => {
     await rateNote(options.url, options.creator, options.rating);
-  });
-
-program
-  .command("finalise-note")
-  .description("set factchain note final rating")
-  .option("-u, --url <url>", "Post url")
-  .option("-c, --creator <address>", "Note creator")
-  .option("-m, --minimum <number>", "minimum note ratings", 1)
-  .action(async (options: any) => {
-    await finaliseNote(options.url, options.creator, options.minimum);
-  });
-
-program
-  .command("finalise-notes")
-  .description("set to all eligible factchain notes their final rating")
-  .option("-f, --from <number>", "lookback days")
-  .option("-m, --minimum <number>", "minimum note ratings", 1)
-  .action(async (options: any) => {
-    await finaliseNotes(options.from, options.minimum);
   });
 
 program

@@ -2,7 +2,8 @@ import { Config } from "./types";
 
 const DEFAULT_CONFIG: Config = {
   LOOKBACK_DAYS: "5",
-  OWNER_PKEY: "",
+  MAIN_CONTRACT_OWNER_PKEY: "",
+  NFT_CONTRACT_OWNER_PKEY: "",
   INFRA_RPC_URL: "",
   MAIN_CONTRACT_ADDRESS: "",
   NFT_721_CONTRACT_ADDRESS: "",

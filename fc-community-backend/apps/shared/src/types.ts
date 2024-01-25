@@ -3,7 +3,7 @@ import { ContractTransactionResponse } from "ethers";
 export type Config = {
   LOOKBACK_DAYS: string;
   // chain vars
-  OWNER_PKEY: string;
+  MAIN_CONTRACT_OWNER_PKEY: string;
   INFRA_RPC_URL: string;
   MAIN_CONTRACT_ADDRESS: string;
   NFT_721_CONTRACT_ADDRESS: string;
@@ -102,7 +102,8 @@ export interface NoteWriter {
     postUrl: string,
     creator: string,
     rating: number,
+    nonce?: number,
   ) => Promise<ContractTransactionResponse>;
-  mintNote721: (note: Note) => Promise<ContractTransactionResponse>;
+  mintNote721: (note: Note, nonce?: number) => Promise<ContractTransactionResponse>;
   createXNoteMetadata: (note: XCommunityNote) => Promise<XSignedNoteIDResponse>;
 }
