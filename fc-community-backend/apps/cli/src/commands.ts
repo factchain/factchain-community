@@ -9,6 +9,7 @@ import {
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
+
 export const getEvents = async (
   eventType: FactChainEvent,
   fromBlock: number,

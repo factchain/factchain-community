@@ -15,11 +15,13 @@ import {
 import { getNoteSignature, timePeriodToBlockPeriods } from "./utils";
 import {
   FC_COMMUNITY_JSON_ABI,
-  FC_NFT_JSON_ABI,
-  FC_SFT_JSON_ABI,
   MINIMUM_STAKE_PER_NOTE,
   MINIMUM_STAKE_PER_RATING,
-} from "./contractsAbi";
+} from "./contractsABIs/main";
+
+import { FC_SFT_JSON_ABI } from "./contractsABIs/sft";
+import { FC_NFT_JSON_ABI } from "./contractsABIs/nft";
+
 import { Config, XSignedNoteIDResponse } from "./types";
 
 export class FactChainBackend implements NoteReader, NoteWriter {
@@ -39,15 +41,15 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       wallet,
     );
     // main NFT (ERC-721) contract
-    // given to the creator of a factchain note
+    // given to the author of a factchain note
     this._fcNFT = new ethers.Contract(
       this._config.NFT_721_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       wallet,
     );
     // semi-fungible SFT (ERC-1155)
-    // copies of orginal NFT to available in openmint
-    // and given to all the raters
+    // copies of the orginal NFT to rewards raters
+    // factchainers as well can mint to support the author
     this._fcSFT = new ethers.Contract(
       this._config.FACTCHAIN_SFT_CONTRACT_ADDRESS,
       FC_SFT_JSON_ABI,
@@ -93,7 +95,8 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     postUrl: string,
     creator: string,
   ): Promise<String[]> => {
-    return await this._fcCommunity.getNoteRaters(postUrl, creator);
+    const raters = await this._fcCommunity.getNoteRaters(postUrl, creator);
+    return Array.from(raters);
   };
 
   getNotes = async (

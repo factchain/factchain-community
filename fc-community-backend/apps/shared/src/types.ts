@@ -53,10 +53,14 @@ export type NotesResponse = {
   notes: Array<Note>;
 };
 
-export type ContractsResponse = {
+export type ContractAddresses = {
   main: string;
   nft721: string;
   nft1155: string;
+};
+
+export type ContractsResponse = {
+  contracts: ContractAddresses;
 };
 
 export type FactChainEvent =

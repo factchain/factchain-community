@@ -37,6 +37,7 @@ const finaliseNotes = async () => {
 
 const mintNotes = async () => {
   const notesWithFinalRating = await finaliseNotes();
+  console.log("Finalisation terminated!");
   for (const note of notesWithFinalRating) {
     const transactionResponse =  await fc.mintNote721(note);
     console.log(transactionResponse);
