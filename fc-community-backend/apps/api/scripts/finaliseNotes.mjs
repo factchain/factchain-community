@@ -18,8 +18,8 @@ const finaliseNotes = async () => {
     LOOKBACK_DAYS,
     MINIMUM_RATING,
   );
-  let nonce = nonces.mainWalletNonce
-  console.log(`Finalise all notes (${notesToFinalise.length}) from ${LOOKBACK_DAYS} days ago  with more than ${MINIMUM_RATING} ratings`)
+  let nonce = nonces.mainWalletNonce;
+  console.log(`Finalise all notes (${notesToFinalise.length}) from ${LOOKBACK_DAYS} days ago  with more than ${MINIMUM_RATING} ratings`);
   for (const note of notesToFinalise) {
     console.log(
       `finalising note on ${note.postUrl} created by ${note.creatorAddress}`,
@@ -32,7 +32,7 @@ const finaliseNotes = async () => {
       note.creatorAddress,
       note.finalRating,
       nonce++,
-    )
+    );
     console.log(transactionResponse);
   }
   return notesToFinalise;
@@ -40,7 +40,7 @@ const finaliseNotes = async () => {
 
 const mintNotes = async () => {
   const notesWithFinalRating = await finaliseNotes();
-  let nonce = nonces.nftWalletNonce
+  let nonce = nonces.nftWalletNonce;
   console.log("Finalisation terminated!");
   for (const note of notesWithFinalRating) {
     const transactionResponse =  await fc.mintNote721(note, nonce++);

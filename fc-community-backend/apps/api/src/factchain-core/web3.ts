@@ -1,8 +1,4 @@
-import {
-  EventLog,
-  ethers,
-  ContractTransactionResponse,
-} from "ethers";
+import { EventLog, ethers, ContractTransactionResponse } from "ethers";
 import {
   Note,
   XCommunityNote,
@@ -56,7 +52,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     // main NFT (ERC-721) contract
     // given to the author of a factchain note
     this._fcNFT = new ethers.Contract(
-      this._config.NFT_721_CONTRACT_ADDRESS,
+      this._config.NFT_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       this._nftWallet,
     );
@@ -248,6 +244,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     const mintOptions = nonce !== undefined ? { nonce } : {};
     return await this._fcNFT.mint(
       note.creatorAddress,
+      note.postUrl,
       raters,
       metadataIpfsHash,
       mintOptions,

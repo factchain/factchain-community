@@ -202,6 +202,19 @@ export const FC_NFT_JSON_ABI = [
     inputs: [
       {
         indexed: false,
+        internalType: "address",
+        name: "factsLithography",
+        type: "address",
+      },
+    ],
+    name: "FactchainSFTContractUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "uint256",
         name: "_tokenId",
         type: "uint256",
@@ -342,6 +355,11 @@ export const FC_NFT_JSON_ABI = [
         type: "address",
       },
       {
+        internalType: "string",
+        name: "postUrl",
+        type: "string",
+      },
+      {
         internalType: "address[]",
         name: "raters",
         type: "address[]",
@@ -371,6 +389,30 @@ export const FC_NFT_JSON_ABI = [
         internalType: "string",
         name: "",
         type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "noteIds",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -486,6 +528,19 @@ export const FC_NFT_JSON_ABI = [
       },
     ],
     name: "setBaseURI",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_factsLitography",
+        type: "address",
+      },
+    ],
+    name: "setFactchainSFTContract",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

@@ -36,8 +36,14 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   constructor(config: Config) {
     this._config = config;
     this._provider = new ethers.JsonRpcProvider(this._config.INFRA_RPC_URL);
-    this._mainWallet = new ethers.Wallet(config.MAIN_CONTRACT_OWNER_PKEY, this._provider);
-    this._nftWallet = new ethers.Wallet(config.NFT_CONTRACT_OWNER_PKEY, this._provider);
+    this._mainWallet = new ethers.Wallet(
+      config.MAIN_CONTRACT_OWNER_PKEY,
+      this._provider,
+    );
+    this._nftWallet = new ethers.Wallet(
+      config.NFT_CONTRACT_OWNER_PKEY,
+      this._provider,
+    );
     this._fcCommunity = new ethers.Contract(
       this._config.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,
@@ -46,7 +52,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     // main NFT (ERC-721) contract
     // given to the author of a factchain note
     this._fcNFT = new ethers.Contract(
-      this._config.NFT_721_CONTRACT_ADDRESS,
+      this._config.NFT_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       this._nftWallet,
     );
@@ -60,13 +66,12 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     );
   }
 
-
   getNonces = async () => {
     return {
       mainWalletNonce: await this._mainWallet.getNonce(),
       nftWalletNonce: await this._nftWallet.getNonce(),
     };
-  }
+  };
 
   setNFTContractInSFT = async (addr: string) => {
     return await this._fcSFT.setFactchainNFTContract(addr);
@@ -218,10 +223,18 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       throw new Error("Bad rating!");
     }
     const finaliseOptions = nonce !== undefined ? { nonce } : {};
-    return await this._fcCommunity.finaliseNote(postUrl, creator, rating, finaliseOptions);
+    return await this._fcCommunity.finaliseNote(
+      postUrl,
+      creator,
+      rating,
+      finaliseOptions,
+    );
   };
 
-  mintNote721 = async (note: Note, nonce?: number): Promise<ContractTransactionResponse> => {
+  mintNote721 = async (
+    note: Note,
+    nonce?: number,
+  ): Promise<ContractTransactionResponse> => {
     const raters = await this.getNoteRaters(note.postUrl, note.creatorAddress);
     const metadataIpfsHash = await createNFT721DataFromNote(
       note,
@@ -229,7 +242,13 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.PINATA_JWT,
     );
     const mintOptions = nonce !== undefined ? { nonce } : {};
-    return await this._fcNFT.mint(note.creatorAddress, raters, metadataIpfsHash, mintOptions);
+    return await this._fcNFT.mint(
+      note.creatorAddress,
+      note.postUrl,
+      raters,
+      metadataIpfsHash,
+      mintOptions,
+    );
   };
 
   getXNoteID = async (note: XCommunityNote): Promise<XSignedNoteIDResponse> => {

@@ -6,8 +6,8 @@ export type Config = {
   MAIN_CONTRACT_OWNER_PKEY: string;
   INFRA_RPC_URL: string;
   MAIN_CONTRACT_ADDRESS: string;
-  NFT_721_CONTRACT_ADDRESS: string;
-  NFT_1155_CONTRACT_ADDRESS: string;
+  NFT_CONTRACT_ADDRESS: string;
+  X_CONTRACT_ADDRESS: string;
   // AI image generation
   REPLICATE_API_TOKEN: string;
   // ipfs vars
@@ -104,6 +104,9 @@ export interface NoteWriter {
     rating: number,
     nonce?: number,
   ) => Promise<ContractTransactionResponse>;
-  mintNote721: (note: Note, nonce?: number) => Promise<ContractTransactionResponse>;
+  mintNote721: (
+    note: Note,
+    nonce?: number,
+  ) => Promise<ContractTransactionResponse>;
   createXNoteMetadata: (note: XCommunityNote) => Promise<XSignedNoteIDResponse>;
 }

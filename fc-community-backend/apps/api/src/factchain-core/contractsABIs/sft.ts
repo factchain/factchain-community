@@ -134,7 +134,7 @@ export const FC_SFT_JSON_ABI = [
   },
   {
     inputs: [],
-    name: "ReservedToFactChain",
+    name: "ReservedToFactchain",
     type: "error",
   },
   {
@@ -210,11 +210,11 @@ export const FC_SFT_JSON_ABI = [
       {
         indexed: false,
         internalType: "address",
-        name: "FACTCHAIN_NFT_CONTRACT",
+        name: "factchainNFTContract",
         type: "address",
       },
     ],
-    name: "FactchainMainContractUpdated",
+    name: "FactchainNFTContractUpdated",
     type: "event",
   },
   {
@@ -420,6 +420,40 @@ export const FC_SFT_JSON_ABI = [
     inputs: [
       {
         internalType: "address",
+        name: "creator",
+        type: "address",
+      },
+      {
+        internalType: "address[]",
+        name: "raters",
+        type: "address[]",
+      },
+      {
+        internalType: "string",
+        name: "ipfsHash",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+    ],
+    name: "initialMint",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "account",
         type: "address",
       },
@@ -443,35 +477,6 @@ export const FC_SFT_JSON_ABI = [
   {
     inputs: [
       {
-        internalType: "address[]",
-        name: "raters",
-        type: "address[]",
-      },
-      {
-        internalType: "string",
-        name: "ipfsHash",
-        type: "string",
-      },
-      {
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-    ],
-    name: "mint",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint256",
         name: "id",
         type: "uint256",
@@ -480,11 +485,6 @@ export const FC_SFT_JSON_ABI = [
         internalType: "uint256",
         name: "value",
         type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "creator",
-        type: "address",
       },
     ],
     name: "mint",
@@ -593,7 +593,7 @@ export const FC_SFT_JSON_ABI = [
     inputs: [
       {
         internalType: "address",
-        name: "_factchainMainContract",
+        name: "_factchainNFTContract",
         type: "address",
       },
     ],
