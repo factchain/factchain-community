@@ -7,35 +7,35 @@ import {Ownable} from "./utils/Ownable.sol";
 
 import {Arrays} from "openzeppelin-contracts/contracts/utils/Arrays.sol";
 
-interface IFactChainSFTEvents {
+interface IFactchainSFTEvents {
     event FactchainNFTContractUpdated(address factchainNFTContract);
     event FactchainBuildersRewarded(uint256 amount);
     event CreatorRewarded(address creator, uint256 amount);
 }
 
-interface IFactChainSFT is IFactChainSFTEvents {
+interface IFactchainSFT is IFactchainSFTEvents {
     // Errors
     error SupplyExhausted();
     error ValueError();
     error BadMintPrice();
     error NegativeBalance();
     error FailedToReward();
-    error ReservedToFactChain();
+    error ReservedToFactchain();
 }
 
-contract FactChainSFT is Ownable, ERC1155URIStorage, IFactChainSFT {
+contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
     address public FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
 
-    mapping(uint256 id => uint256) private _supply;
+    mapping(uint256 => uint256) private _supply;
+
+    /// @notice Mapping of creators's addresses to NFT
+    mapping(uint256 => address) private _creatorsNFT;
 
     using Arrays for address[];
 
-    constructor(address _owner)
-        Ownable(_owner)
-        ERC1155("https://gateway.pinata.cloud/ipfs/")
-    {
+    constructor(address _owner) Ownable(_owner) ERC1155("https://gateway.pinata.cloud/ipfs/") {
         _setBaseURI("https://gateway.pinata.cloud/ipfs/");
     }
 
@@ -44,11 +44,12 @@ contract FactChainSFT is Ownable, ERC1155URIStorage, IFactChainSFT {
         emit FactchainNFTContractUpdated(_factchainNFTContract);
     }
 
-    function mint(address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
+    function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
         if (msg.sender != FACTCHAIN_NFT_CONTRACT) {
-            revert ReservedToFactChain();
+            revert ReservedToFactchain();
         }
         _supply[id] = FACTCHAINERS_MINT_SUPPLY;
+        _creatorsNFT[id] = creator;
         _setURI(id, ipfsHash);
         for (uint256 i = 0; i < raters.length; ++i) {
             _mint(raters.unsafeMemoryAccess(i), id, 1, "");
@@ -56,13 +57,14 @@ contract FactChainSFT is Ownable, ERC1155URIStorage, IFactChainSFT {
         return id;
     }
 
-    function mint(uint256 id, uint256 value, address creator) external payable {
+    function mint(uint256 id, uint256 value) external payable {
         if (msg.value != MINT_PRICE * value) revert BadMintPrice();
         if (value <= 0) revert ValueError();
         if (value > _supply[id]) {
             revert SupplyExhausted();
         }
         _supply[id] -= value;
+        address creator = _creatorsNFT[id];
         uint256 reward = msg.value / 2;
         (bool result,) = payable(creator).call{value: reward}("");
         if (!result) revert FailedToReward();
