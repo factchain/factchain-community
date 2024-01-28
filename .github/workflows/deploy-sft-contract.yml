@@ -19,7 +19,7 @@ jobs:
           chain-id: '11155111'
           rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
-          constructor-args: '${{ vars.OWNER_ADDRESS ${{ vars.FACTCHAIN_COMMUNITY_ADDRESS}}'
+          constructor-args: '${{ vars.OWNER_ADDRESS }}'
           verify: true
           etherscan-url: 'https://sepolia.etherscan.io'
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
