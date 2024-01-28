@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {stdMath} from "forge-std/StdMath.sol";
 import "./utils/Ownable.sol";
 
-interface IFactChainCommunityEvents {
+interface IFactchainCommunityEvents {
     /// @dev This emits when a the Owner funds the reserve
     event ReserveFunded(uint256 amount);
     /// @dev This emits when a new Note is created
@@ -25,12 +25,12 @@ interface IFactChainCommunityEvents {
     event NoteFinalised(string postUrl, address indexed creator, uint8 indexed finalRating);
 }
 
-interface IFactChainCommunity is IFactChainCommunityEvents {
+interface IFactchainCommunity is IFactchainCommunityEvents {
     /// @notice Note structure
     /// @param postUrl URL of the post targeted by this Note
     /// @param content Content of the Note
     /// @param creator Address of the Note's creator
-    /// @param finalRating Final rating attributed by FactChain
+    /// @param finalRating Final rating attributed by Factchain
     struct Note {
         string postUrl;
         string content;
@@ -42,7 +42,7 @@ interface IFactChainCommunity is IFactChainCommunityEvents {
     /// @param postUrl URL of the post targeted by this Note
     /// @param content Content of the Note
     /// @param creator Address of the Note's creator
-    /// @param finalRating Final rating attributed by FactChain
+    /// @param finalRating Final rating attributed by Factchain
     struct UserStats {
         uint32 numberNotes;
         uint32 numberRatings;
@@ -64,11 +64,11 @@ interface IFactChainCommunity is IFactChainCommunityEvents {
     error InsufficientStake();
 }
 
-/// @title FactChain Community
+/// @title Factchain Community
 /// @author Yacine B. Badiss, Pierre HAY
 /// @notice
 /// @dev
-contract FactChainCommunity is Ownable, IFactChainCommunity {
+contract FactchainCommunity is Ownable, IFactchainCommunity {
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
     uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
@@ -92,6 +92,14 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
     /// @notice Instantiate a new contract and set its owner
     /// @param _owner Owner of the contract
     constructor(address _owner) Ownable(_owner) {}
+
+    ////////////////////////////////////////////////////////////////////////
+    /// Getter functions
+    ////////////////////////////////////////////////////////////////////////
+
+    function getNoteRaters(string memory _postUrl, address _creator) public view virtual returns (address[] memory) {
+        return noteRaters[_postUrl][_creator];
+    }
 
     ////////////////////////////////////////////////////////////////////////
     /// Helper functions
@@ -142,7 +150,7 @@ contract FactChainCommunity is Ownable, IFactChainCommunity {
             // (address(this).balance) < MINIMUM_STAKE_PER_NOTE - slash
             (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE - slash}("");
             if (!result) revert FailedToSlash();
-            
+
             userStats[_creator].ethSlashed += slash;
             emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: MINIMUM_STAKE_PER_NOTE});
         }

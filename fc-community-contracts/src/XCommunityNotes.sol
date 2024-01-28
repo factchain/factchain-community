@@ -9,7 +9,7 @@ import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 
 import {Ownable} from "./utils/Ownable.sol";
 
-interface IFactChain1155Events {
+interface IXCommunityNotesEvents {
     // Events
     event NewToken(uint256 tokenId, uint256 tokenSupply);
     event MintWithProvidedValue(uint256 tokenId, uint256 value);
@@ -18,7 +18,7 @@ interface IFactChain1155Events {
     event Refunded(address sender, uint256 amount);
 }
 
-interface IFactChain1155 is IFactChain1155Events {
+interface IXCommunityNotes is IXCommunityNotesEvents {
     // Errors
     error SupplyExhausted();
     error ValueError();
@@ -33,8 +33,7 @@ interface IFactChain1155 is IFactChain1155Events {
 /// @author Pierre HAY
 /// @notice
 /// @dev
-contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
-
+contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
@@ -82,7 +81,7 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
             uint256 amount = (value - supplyCache) * MINT_PRICE;
             // use call rather than transfer
             // to support Smart Contract Wallets.
-            (bool result, ) = payable(msg.sender).call{value: amount}("");
+            (bool result,) = payable(msg.sender).call{value: amount}("");
             if (!result) revert FailedToRefund();
             emit MintWithAdjustedValue(id, supplyCache);
             emit Refunded(msg.sender, amount);
@@ -127,7 +126,7 @@ contract FactChain1155 is Ownable, ERC1155, IFactChain1155 {
     //     // Since the supply is random for any token, `setTokenSupply`
     //     // is useful for testing but obviously not acceptable in production.
     //     // Uncomment the following function to activate following tests
-    //     // testMintWithAdjustedValue, testMintWithProvidedValue from test/FactChain1155.sol
+    //     // testMintWithAdjustedValue, testMintWithProvidedValue from test/XCommunityNotes.sol
     //     supply[id] = _supply;
     // }
 }
