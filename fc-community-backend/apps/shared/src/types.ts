@@ -7,6 +7,7 @@ export type Config = {
   INFRA_RPC_URL: string;
   MAIN_CONTRACT_ADDRESS: string;
   NFT_CONTRACT_ADDRESS: string;
+  SFT_CONTRACT_ADDRESS: string;
   X_CONTRACT_ADDRESS: string;
   // AI image generation
   REPLICATE_API_TOKEN: string;
@@ -55,8 +56,9 @@ export type NotesResponse = {
 
 export type ContractAddresses = {
   main: string;
-  nft721: string;
-  nft1155: string;
+  nft: string;
+  sft: string;
+  x: string;
 };
 
 export type ContractsResponse = {

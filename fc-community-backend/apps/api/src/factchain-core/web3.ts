@@ -60,7 +60,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     // copies of the orginal NFT to reward raters
     // factchainers as well can mint to support the author
     this._fcSFT = new ethers.Contract(
-      this._config.FACTCHAIN_SFT_CONTRACT_ADDRESS,
+      this._config.SFT_CONTRACT_ADDRESS,
       FC_SFT_JSON_ABI,
       this._nftWallet,
     );

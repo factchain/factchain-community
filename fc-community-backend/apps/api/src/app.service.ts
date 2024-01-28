@@ -23,8 +23,9 @@ export class AppService {
   getContracts(): ContractAddresses {
     return {
       main: config.MAIN_CONTRACT_ADDRESS,
-      nft721: config.NFT_721_CONTRACT_ADDRESS,
-      nft1155: config.NFT_1155_CONTRACT_ADDRESS,
+      nft: config.NFT_CONTRACT_ADDRESS,
+      sft: config.SFT_CONTRACT_ADDRESS,
+      x: config.X_CONTRACT_ADDRESS,
     };
   }
 
