@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import {FactChain1155, IFactChain1155} from "../src/FactChain1155.sol";
+import {XCommunityNotes, IXCommunityNotes} from "../src/XCommunityNotes.sol";
 
-contract FactChain1155Test is Test, IFactChain1155 {
-    FactChain1155 collection;
+contract XCommunityNotesTest is Test, IXCommunityNotes {
+    XCommunityNotes collection;
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
@@ -20,7 +20,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
     address public backend = address(0x90bfaBa1671799a249fD2EAb12ff67de59a588ce);
 
     function setUp() public {
-        collection = new FactChain1155(owner, backend);
+        collection = new XCommunityNotes(owner, backend);
         vm.deal(recipient, 100 ether);
         vm.deal(other, 100 ether);
     }
@@ -29,7 +29,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         // Should not be able to mint unknown tokens
         // To mint a token for the first time
         // provide a token ID signed by the backend
-        vm.expectRevert(IFactChain1155.UnknownToken.selector);
+        vm.expectRevert(IXCommunityNotes.UnknownToken.selector);
         collection.mint{value: MINT_PRICE}(123, 1);
     }
 
@@ -53,7 +53,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         assertEq(res1, 424273286);
         uint256 res2 = collection.getTokenID("https://twitter.com/i/birdwatch/n/1727720872138391787");
         assertEq(res2, 2742163345);
-        vm.expectRevert(IFactChain1155.NoTokenAssociated.selector);
+        vm.expectRevert(IXCommunityNotes.NoTokenAssociated.selector);
         collection.getTokenID("https://twitter.com/i/birdwatch/n/notMinted");
     }
 
@@ -125,7 +125,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
             hex"fccfdfb298d4f8ec3e534fe76a074f6aa30c0237a20f6375cf1315f370ab816b5133193ecd9ecc89b3359d8c5cc45660fcb2c32e05712a3a4a00c6c012556a961b"
         );
 
-        vm.expectRevert(IFactChain1155.SupplyExhausted.selector);
+        vm.expectRevert(IXCommunityNotes.SupplyExhausted.selector);
         collection.mint{value: MINT_PRICE}(123, 1);
     }
 
@@ -137,7 +137,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
-        vm.expectRevert(IFactChain1155.NotAllowed.selector);
+        vm.expectRevert(IXCommunityNotes.NotAllowed.selector);
         collection.mint{value: MINT_PRICE}(
             123,
             1,
@@ -151,7 +151,7 @@ contract FactChain1155Test is Test, IFactChain1155 {
 
     function testVerifyHash() public {
         collection.verifyHash("4242", hex"4eb414e5f218735a9e5b97a6c7e857d97a6a95052baed384e4cc91216e62d1d1");
-        vm.expectRevert(IFactChain1155.ValueError.selector);
+        vm.expectRevert(IXCommunityNotes.ValueError.selector);
         collection.verifyHash("424", hex"4eb414e5f218735a9e5b97a6c7e857d97a6a95052baed384e4cc91216e62d1d1");
     }
 

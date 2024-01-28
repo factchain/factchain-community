@@ -1,9 +1,9 @@
-name: Deploy FactChain1155 contract
+name: Deploy XCommunityNotes contract
 on:
   push:
     branches: [ main ]
     paths:
-      - fc-community-contracts/src/FactChain1155.sol
+      - fc-community-contracts/src/XCommunityNotes.sol
       - fc-community-contracts/src/utils/Ownable.sol
   workflow_dispatch:
 jobs:
@@ -14,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: YBadiss/deploy-contract@v1
         with:
-          contract-name: 'FactChain1155'
+          contract-name: 'XCommunityNotes'
           parent-dir: 'fc-community-contracts'
           chain-id: '11155111'
           rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
