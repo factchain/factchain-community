@@ -7,11 +7,11 @@ import {
   getRating,
   createNote,
   rateNote,
-  finaliseNote,
-  finaliseNotes,
   getEligibleNotes,
   mintNote,
   createXCommunityNoteNFTMetadata,
+  setNFTContractInSFT,
+  getNoteRaters,
 } from "./commands";
 
 import { FactChainEvent } from "./factchain-core/types";
@@ -72,25 +72,6 @@ program
   });
 
 program
-  .command("finalise-note")
-  .description("set factchain note final rating")
-  .option("-u, --url <url>", "Post url")
-  .option("-c, --creator <address>", "Note creator")
-  .option("-m, --minimum <number>", "minimum note ratings", 1)
-  .action(async (options: any) => {
-    await finaliseNote(options.url, options.creator, options.minimum);
-  });
-
-program
-  .command("finalise-notes")
-  .description("set to all eligible factchain notes their final rating")
-  .option("-f, --from <number>", "lookback days")
-  .option("-m, --minimum <number>", "minimum note ratings", 1)
-  .action(async (options: any) => {
-    await finaliseNotes(options.from, options.minimum);
-  });
-
-program
   .command("get-eligible-notes")
   .description("get factchain notes to finalised")
   .option("-f, --from <number>", "lookback days")
@@ -128,4 +109,22 @@ program
   .action(async (options: any) => {
     await getRating(options.url, options.creator, options.rater);
   });
+
+program
+  .command("set-sft")
+  .description("set factchain NFT contract in factchain SFT")
+  .option("-a, --address <address>", "Factchain main contract address")
+  .action(async (options: any) => {
+    await setNFTContractInSFT(options.address);
+  });
+
+program
+  .command("get-note-raters")
+  .description("get factchain note raters")
+  .option("-u, --url <url>", "Post url")
+  .option("-c, --creator <address>", "Creator Address")
+  .action(async (options: any) => {
+    await getNoteRaters(options.url, options.creator);
+  });
+
 program.parse();

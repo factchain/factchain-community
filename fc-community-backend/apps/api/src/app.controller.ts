@@ -7,7 +7,11 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { AppService } from "./app.service";
-import { NotesResponse, XSignedNoteIDResponse, ContractsResponse } from "./factchain-core/types";
+import {
+  NotesResponse,
+  XSignedNoteIDResponse,
+  ContractsResponse,
+} from "./factchain-core/types";
 
 @Controller()
 export class AppController {
@@ -47,8 +51,9 @@ export class AppController {
 
     // Double Query Params
     if (postUrl && awaitingRatingBy) {
-
-      console.log(`Get all notes awaiting for rating by ${awaitingRatingBy} on ${postUrl}`);
+      console.log(
+        `Get all notes awaiting for rating by ${awaitingRatingBy} on ${postUrl}`,
+      );
       notes = await this.appService.getNotesAwaitingRatingByOnGivenPost(
         postUrl,
         awaitingRatingBy,

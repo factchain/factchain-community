@@ -96,9 +96,9 @@ const uploadMetadataToPinata = async (
         description: note.content,
         attributes: [
           {
-            "display_type": "number",
-            "trait_type": "Final Rating",
-            "value": note.finalRating!,
+            display_type: "number",
+            trait_type: "Final Rating",
+            value: note.finalRating!,
           },
         ],
         external_url: "https://gateway.pinata.cloud/ipfs/",
