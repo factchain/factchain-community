@@ -29,6 +29,12 @@ export class AppService {
     };
   }
 
+  filterUsefulNotes(notes: Array<Note>): Array<Note> {
+    return notes.filter(
+      (note) => note.finalRating! >= parseInt(config.USEFUL_NOTE_THRESHOLD),
+    );
+  }
+
   async getNotesByPost(postUrl: string, from: number): Promise<Array<Note>> {
     const fc = new FactChainBackend(config);
     const ns = new NoteService(fc, fc);

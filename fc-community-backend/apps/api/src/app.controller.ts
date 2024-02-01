@@ -13,6 +13,7 @@ import {
   ContractsResponse,
 } from "./factchain-core/types";
 
+import { ParseBoolPipe, DefaultValuePipe } from "@nestjs/common";
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -38,6 +39,8 @@ export class AppController {
     @Query("from") from: number,
     @Query("creatorAddress") creatorAddress: string,
     @Query("awaitingRatingBy") awaitingRatingBy: string,
+    @Query("onlyUseful", new DefaultValuePipe(false), ParseBoolPipe)
+    onlyUseful: boolean,
   ): Promise<NotesResponse> {
     let notes = [];
     if (from) {
@@ -79,7 +82,12 @@ export class AppController {
       console.log(`Get all notes`);
       notes = await this.appService.getAllNotesFrom(from);
     }
-    return { notes };
+
+    // final generic QueryParam
+    // let's go live <3
+    return onlyUseful
+      ? { notes: this.appService.filterUsefulNotes(notes) }
+      : { notes };
   }
 
   @Get("/x/note/id")
