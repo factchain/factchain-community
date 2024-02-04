@@ -113,7 +113,7 @@ export const awaitOpenSeaUrl = async (openseaUrl) => {
     }
     retry--;
     // sleep 1sec
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise((r) => setTimeout(r, 1000));
   }
   return false;
-}
+};

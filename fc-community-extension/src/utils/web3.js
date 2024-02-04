@@ -2,11 +2,7 @@ import { logger } from './logging';
 import { initializeProvider } from '@metamask/providers';
 import PortStream from 'extension-port-stream';
 import { ethers, utils } from 'ethers';
-import {
-  METAMASK_ID,
-  FC_CONTRACT_ABI,
-  FC_X_CONTRACT_ABI,
-} from './constants';
+import { METAMASK_ID, FC_CONTRACT_ABI, FC_X_CONTRACT_ABI } from './constants';
 import { getContracts } from './backend';
 import abiDecoder from 'abi-decoder';
 
@@ -102,8 +98,7 @@ export const createFactchainProvider = async () => {
       getFCContract: async () => getContract('main', FC_CONTRACT_ABI),
       onFCEvents: async (topics, callback) =>
         onContractEvents('main', topics, callback),
-      getFC1155Contract: async () =>
-        getContract('x', FC_X_CONTRACT_ABI),
+      getFC1155Contract: async () => getContract('x', FC_X_CONTRACT_ABI),
       onFC1155Events: async (topics, callback) =>
         onContractEvents('x', topics, callback),
     };
