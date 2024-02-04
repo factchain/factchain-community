@@ -22,7 +22,7 @@ let observer = new MutationObserver(async (mutations) => {
         }
 
         const ratingStatuses = Array.from(
-          addedNode.querySelectorAll(ratingStatusSelector)
+          addedNode.querySelectorAll(ratingStatusSelector())
         );
         // Only keep the rating statuses that are for helpful notes.
         const helpfulRatings = ratingStatuses.filter(
