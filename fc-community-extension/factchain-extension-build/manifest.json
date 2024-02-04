@@ -26,7 +26,10 @@
     }
   ],
   "permissions": ["storage"],
-  "host_permissions": ["https://api.factchain.tech/*"],
+  "host_permissions": [
+    "https://api.factchain.tech/*",
+    "https://testnets.opensea.io/*"
+  ],
   "background": {
     "service_worker": "serviceWorker.js"
   },
