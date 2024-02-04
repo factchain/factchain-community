@@ -93,3 +93,27 @@ export const getContracts = async () => {
     throw error;
   }
 };
+
+export const awaitOpenSeaUrl = async (openseaUrl) => {
+  console.log('Waiting for opensea url to be ok', openseaUrl);
+  let retry = 10;
+  while (retry > 0) {
+    try {
+      const response = await fetch(openseaUrl, {
+        method: 'GET',
+      });
+      if (response.ok) {
+        console.log('Opensea url is ok', openseaUrl);
+        return true;
+      } else {
+        console.log('Opensea url is not ok', response.status);
+      }
+    } catch (error) {
+      console.error('Error checking opensea url:', error);
+    }
+    retry--;
+    // sleep 1sec
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  return false;
+}

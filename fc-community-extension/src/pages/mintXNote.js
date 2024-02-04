@@ -1,6 +1,6 @@
 import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
-import { getXNoteId, createXNoteId } from '../utils/backend';
+import { getXNoteId, createXNoteId, awaitOpenSeaUrl } from '../utils/backend';
 import { makeOpenseaUrl, makeTransactionUrl } from '../utils/constants';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { FCHero, FCLoader } from './components';
@@ -8,6 +8,7 @@ import { FCHero, FCLoader } from './components';
 export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
   const [xNoteId, setXNoteId] = createSignal(null);
   const [transaction, setTransaction] = createSignal(null);
+  const [openseaUrl, setOpenseaUrl] = createSignal(null);
   const [error, setError] = createSignal(null);
   createResource(async () => {
     try {
@@ -24,6 +25,11 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
       console.log('mintResult', transaction, error);
       setTransaction(transaction);
       setError(error);
+
+      const url = makeOpenseaUrl(contractAddress, xNoteId().id);
+      const openseaRes = await awaitOpenSeaUrl(url);
+      console.log('awaitOpenSeaUrl result: ', openseaRes);
+      setOpenseaUrl(url);
     } catch (error) {
       setError(error);
     }
@@ -46,7 +52,7 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
               {JSON.stringify(error())}
             </div>
           </Match>
-          <Match when={transaction() && xNoteId()}>
+          <Match when={transaction() && xNoteId() && openseaUrl()}>
             <div style="margin-bottom: 50px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               You have successfully collected this note!
             </div>
@@ -67,6 +73,12 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
               </a>
               .
             </div>
+          </Match>
+          <Match when={transaction() && xNoteId()}>
+            <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+              Transaction sent, awaiting confirmation...
+            </div>
+            <FCLoader />
           </Match>
           <Match when={xNoteId()}>
             <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
