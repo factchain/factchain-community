@@ -96,11 +96,12 @@ const rateNote = async (note, rating) => {
   );
 
   const contract = await provider.getMainContract();
+  const minimumStakePerRating = await contract.minimumStakePerRating();
   return await makeTransactionCall(
     contract,
     async (c) =>
       await c.rateNote(note.postUrl, note.creatorAddress, rating, {
-        value: 10_000,
+        value: minimumStakePerRating,
       })
   );
 };

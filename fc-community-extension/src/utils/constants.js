@@ -177,6 +177,32 @@ export const FC_MAIN_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'minimumStakePerNote',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'minimumStakePerRating',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'noteRaters',
     inputs: [
       {
@@ -239,6 +265,32 @@ export const FC_MAIN_CONTRACT_ABI = [
     ],
     outputs: [],
     stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'setMinimumStakePerNote',
+    inputs: [
+      {
+        name: '_miniumStakePerNote',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'setMinimumStakePerRating',
+    inputs: [
+      {
+        name: '_minimumStakePerRating',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -655,19 +707,6 @@ export const FC_X_CONTRACT_ABI = [
   },
   {
     type: 'function',
-    name: 'MINT_PRICE',
-    inputs: [],
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-        internalType: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     name: 'SUPPLY_EXHAUSTED',
     inputs: [],
     outputs: [
@@ -831,6 +870,19 @@ export const FC_X_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'mintPrice',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'owner',
     inputs: [],
     outputs: [
@@ -934,6 +986,19 @@ export const FC_X_CONTRACT_ABI = [
         name: '_backend',
         type: 'address',
         internalType: 'address',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'setMintPrice',
+    inputs: [
+      {
+        name: '_mintPrice',
+        type: 'uint256',
+        internalType: 'uint256',
       },
     ],
     outputs: [],
@@ -2117,19 +2182,6 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'function',
-    name: 'MINT_PRICE',
-    inputs: [],
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-        internalType: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     name: 'balanceOf',
     inputs: [
       {
@@ -2254,6 +2306,19 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'mintPrice',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'owner',
     inputs: [],
     outputs: [
@@ -2361,6 +2426,38 @@ export const FC_SFT_CONTRACT_ABI = [
     ],
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'setMintPrice',
+    inputs: [
+      {
+        name: '_mintPrice',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'supply',
+    inputs: [
+      {
+        name: '',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
   },
   {
     type: 'function',

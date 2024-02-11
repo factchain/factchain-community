@@ -113,6 +113,7 @@ console.log(`contract address ${contract.target}`);
 const mintXNote = async (xNoteId) => {
   const value = 1;
   console.log('Minting X Note');
+  const mintPrice = await contract.mintPrice();
   return await makeTransactionCall(
     contract,
     async (c) =>
@@ -121,7 +122,7 @@ const mintXNote = async (xNoteId) => {
         value,
         xNoteId.hash.startsWith('0x') ? xNoteId.hash : `0x${xNoteId.hash}`,
         xNoteId.signature,
-        { value: value * 1_000_000 }
+        { value: value * mintPrice }
       )
   );
 };

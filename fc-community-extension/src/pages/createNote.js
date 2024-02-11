@@ -88,9 +88,11 @@ const createNote = async (content) => {
   const address = await provider.requestAddress();
   logger.log('Creator address', address);
   const contract = await provider.getMainContract();
+  const minimumStakePerNote = await contract.minimumStakePerNote();
   return await makeTransactionCall(
     contract,
-    async (c) => await c.createNote(postUrl, content, { value: 100_000 })
+    async (c) =>
+      await c.createNote(postUrl, content, { value: minimumStakePerNote })
   );
 };
 
