@@ -35,8 +35,8 @@ interface IXCommunityNotes is IXCommunityNotesEvents {
 /// @dev
 contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
-    uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
+    uint256 public mintPrice = 1_000_000_000_000_000;
 
     address public backend;
     mapping(uint256 id => uint256) public supply;
@@ -58,6 +58,10 @@ contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
         emit NewBackend(backend);
     }
 
+    function setMintPrice(uint256 _mintPrice) public onlyOwner {
+        mintPrice = _mintPrice;
+    }
+
     function getTokenID(string memory url) public view returns (uint256) {
         // the token ID is a 9 to 10 digits number calculated from
         // the url hash by converting to decimal its first 8 hex characters.
@@ -71,14 +75,14 @@ contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
 
     function mint(uint256 id, uint256 value) public payable {
         if (value <= 0) revert ValueError();
-        if (msg.value != MINT_PRICE * value) revert BadMintPrice();
+        if (msg.value != mintPrice * value) revert BadMintPrice();
         if (supply[id] == SUPPLY_EXHAUSTED) revert SupplyExhausted();
         if (supply[id] == 0) revert UnknownToken();
         if (value > supply[id]) {
             uint256 supplyCache = supply[id];
             supply[id] = SUPPLY_EXHAUSTED;
             _mint(msg.sender, id, supplyCache, "");
-            uint256 amount = (value - supplyCache) * MINT_PRICE;
+            uint256 amount = (value - supplyCache) * mintPrice;
             // use call rather than transfer
             // to support Smart Contract Wallets.
             (bool result,) = payable(msg.sender).call{value: amount}("");
