@@ -2,11 +2,17 @@ import { logger } from './logging';
 import { initializeProvider } from '@metamask/providers';
 import PortStream from 'extension-port-stream';
 import { ethers, utils } from 'ethers';
-import { METAMASK_ID, FC_CONTRACT_ABI, FC_X_CONTRACT_ABI } from './constants';
+import {
+  METAMASK_ID,
+  FC_MAIN_CONTRACT_ABI,
+  FC_X_CONTRACT_ABI,
+  FC_NFT_CONTRACT_ABI,
+  FC_SFT_CONTRACT_ABI,
+} from './constants';
 import { getContracts } from './backend';
 import abiDecoder from 'abi-decoder';
 
-abiDecoder.addABI(FC_CONTRACT_ABI);
+abiDecoder.addABI(FC_MAIN_CONTRACT_ABI);
 abiDecoder.addABI(FC_X_CONTRACT_ABI);
 
 export const decodeError = (abiError) => {
@@ -95,15 +101,24 @@ export const createFactchainProvider = async () => {
           ],
         });
       },
-      getFCContract: async () => getContract('main', FC_CONTRACT_ABI),
-      onFCEvents: async (topics, callback) =>
+      getMainContract: async () => getContract('main', FC_MAIN_CONTRACT_ABI),
+      onMainEvents: async (topics, callback) =>
         onContractEvents('main', topics, callback),
-      getFC1155Contract: async () => getContract('x', FC_X_CONTRACT_ABI),
-      onFC1155Events: async (topics, callback) =>
+      getXContract: async () => getContract('x', FC_X_CONTRACT_ABI),
+      onXEvents: async (topics, callback) =>
         onContractEvents('x', topics, callback),
+      getNftContract: async () => getContract('nft', FC_NFT_CONTRACT_ABI),
+      onNftEvents: async (topics, callback) =>
+        onContractEvents('nft', topics, callback),
+      getSftContract: async () => getContract('sft', FC_SFT_CONTRACT_ABI),
+      onSftEvents: async (topics, callback) =>
+        onContractEvents('sft', topics, callback),
     };
   } catch (e) {
     console.error(`Metamask connect error `, e);
     throw e;
   }
 };
+
+window.makeTransactionCall = makeTransactionCall;
+window.createFactchainProvider = createFactchainProvider;

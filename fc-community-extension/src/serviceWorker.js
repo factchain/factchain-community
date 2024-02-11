@@ -2,6 +2,7 @@ import { getNotes } from './utils/backend';
 
 let cache = {
   postUrl: '',
+  creatorAddress: '',
   note: null,
   noteUrl: '',
   content: '',
@@ -52,15 +53,29 @@ const mainHandler = async (message, sendResponse) => {
   } else if (message.type === 'fc-get-from-cache') {
     console.log(`Get ${message.target} from cache`, cache);
     sendResponse(cache[message.target]);
-  } else if (message.type === 'fc-mint-twitter-note') {
+  } else if (message.type === 'fc-mint-x-note') {
     console.log(
-      `Mint twitter note '${message.noteUrl}' with content '${message.content}'`
+      `Mint X note '${message.noteUrl}' with content '${message.content}'`
     );
     cache.noteUrl = message.noteUrl;
     cache.content = message.content;
 
     chrome.windows.create({
       url: 'mintXNote.html',
+      type: 'popup',
+      focused: true,
+      width: 400,
+      height: 600,
+      top: 0,
+      left: 0,
+    });
+  } else if (message.type === 'fc-mint-factchain-note') {
+    console.log('Mint Factchain note', message.note);
+    cache.postUrl = message.note.postUrl;
+    cache.creatorAddress = message.note.creatorAddress;
+
+    chrome.windows.create({
+      url: 'mintFactchainNote.html',
       type: 'popup',
       focused: true,
       width: 400,

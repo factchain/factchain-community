@@ -95,7 +95,7 @@ const rateNote = async (note, rating) => {
     `Address ${address} rating note ${note.postUrl}-${note.creatorAddress} as ${rating}/5`
   );
 
-  const contract = await provider.getFCContract();
+  const contract = await provider.getMainContract();
   return await makeTransactionCall(
     contract,
     async (c) =>

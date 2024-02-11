@@ -13,32 +13,27 @@ import {
 /// Birdwatch content modifiers
 /// ---------------------------
 
-export const alterRatingPageTwitterNote = (twitterNote) => {
-  if (twitterNote.classList.contains('factchain-1.0')) {
-    // Add a special class to avoid re-processing the same twitter note multiple times
-    // this seems to happen because we are modifying the twitter note, and the modification
+export const alterRatingPageXNote = (xNote) => {
+  if (xNote.classList.contains('factchain-1.0')) {
+    // Add a special class to avoid re-processing the same X note multiple times
+    // this seems to happen because we are modifying the X note, and the modification
     // is caught by the observer below.
-    logger.log('Twitter note already processed');
+    logger.log('X note already processed');
   } else {
-    // First time we see this twitter note let's do something with it
-    twitterNote.classList.add('factchain-1.0');
-    twitterNote.insertAdjacentHTML(
-      'afterend',
-      makeMintXNoteOnDetailsPageHtml()
-    );
+    // First time we see this X note let's do something with it
+    xNote.classList.add('factchain-1.0');
+    xNote.insertAdjacentHTML('afterend', makeMintXNoteOnDetailsPageHtml());
 
     const noteUrl = parseUrl(document.URL, NOTE_URL_REGEX);
-    twitterNote.parentNode
+    xNote.parentNode
       .querySelector('#mintNoteButton')
       .addEventListener('click', async () => {
-        const content = twitterNote.querySelector(
-          noteContentSelector()
-        ).textContent;
+        const content = xNote.querySelector(noteContentSelector()).textContent;
         logger.log(
-          `Minting twitter from rating page note ${noteUrl} and content '${content}'`
+          `Minting X note from rating page with ${noteUrl} and content '${content}'`
         );
         chrome.runtime.sendMessage({
-          type: 'fc-mint-twitter-note',
+          type: 'fc-mint-x-note',
           noteUrl,
           content,
         });
@@ -46,16 +41,16 @@ export const alterRatingPageTwitterNote = (twitterNote) => {
   }
 };
 
-export const alterMainPageTwitterNote = (twitterNote) => {
-  if (twitterNote.classList.contains('factchain-1.0')) {
-    // Add a special class to avoid re-processing the same twitter note multiple times
-    // this seems to happen because we are modifying the twitter note, and the modification
+export const alterMainPageXNote = (xNote) => {
+  if (xNote.classList.contains('factchain-1.0')) {
+    // Add a special class to avoid re-processing the same X note multiple times
+    // this seems to happen because we are modifying the X note, and the modification
     // is caught by the observer below.
-    logger.log('Twitter note already processed');
+    logger.log('X note already processed');
   } else {
-    // First time we see this twitter note let's do something with it
-    twitterNote.classList.add('factchain-1.0');
-    twitterNote.insertAdjacentHTML('beforeend', makeMintXNoteOnMainPageHtml());
+    // First time we see this X note let's do something with it
+    xNote.classList.add('factchain-1.0');
+    xNote.insertAdjacentHTML('beforeend', makeMintXNoteOnMainPageHtml());
   }
 };
 
@@ -104,10 +99,14 @@ const addNote = async (mainArticle, note, userAddress) => {
     !note.finalRating && !isAuthor
       ? `rateNoteButton-${note.creatorAddress}`
       : null;
+  const mintSFTButtonID = note.finalRating
+    ? `mintSFTButton-${note.creatorAddress}`
+    : null;
   const htmlNote = makeFactchainNoteHtml(
     isAuthor,
     note.content,
-    rateNoteButtonID
+    rateNoteButtonID,
+    mintSFTButtonID
   );
   const tempDiv = mainArticle.children[0].children[0];
   const afterThisDiv = [].slice
@@ -122,6 +121,17 @@ const addNote = async (mainArticle, note, userAddress) => {
         logger.log('Rating note', note);
         chrome.runtime.sendMessage({
           type: 'fc-rate-note',
+          note,
+        });
+      });
+  }
+  if (mintSFTButtonID) {
+    mainArticle
+      .querySelector(`#${mintSFTButtonID}`)
+      .addEventListener('click', () => {
+        logger.log('Minting SFT for note', note);
+        chrome.runtime.sendMessage({
+          type: 'fc-mint-factchain-note',
           note,
         });
       });

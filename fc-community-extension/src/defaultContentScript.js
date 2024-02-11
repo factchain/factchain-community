@@ -1,11 +1,11 @@
 import { logger } from './utils/logging';
 import {
   alterDropdown,
-  alterRatingPageTwitterNote,
-  alterMainPageTwitterNote,
+  alterRatingPageXNote,
+  alterMainPageXNote,
 } from './contentModifiers';
 import {
-  approvedNotesSelector,
+  approvedXNotesSelector,
   dropdownSelector,
   ratingStatusSelector,
 } from './xHtml';
@@ -35,15 +35,15 @@ let observer = new MutationObserver(async (mutations) => {
           // which is the full note.
           const helpfulNote = helpfulRatings[0].parentNode.parentNode;
           logger.log('Found helpful note', helpfulNote);
-          alterRatingPageTwitterNote(helpfulNote);
+          alterRatingPageXNote(helpfulNote);
         }
 
-        const twitterNote = addedNode.querySelector(approvedNotesSelector());
-        if (twitterNote) {
+        const xNote = addedNode.querySelector(approvedXNotesSelector());
+        if (xNote) {
           // Triggered whenever an approved note is displayed, on any page
           // but mostly on the main feed.
-          logger.log('Found twitter note', twitterNote);
-          alterMainPageTwitterNote(twitterNote);
+          logger.log('Found X note', xNote);
+          alterMainPageXNote(xNote);
         }
       }
     }

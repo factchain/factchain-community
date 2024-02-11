@@ -158,7 +158,7 @@ function FCPopup({ provider }) {
   const getUserStats = async (address) => {
     console.log(`address: ${address}`);
     if (address) {
-      const contract = await provider.getFCContract();
+      const contract = await provider.getMainContract();
       const stats = await contract.userStats(address);
       console.log(`User stats: ${stats}`);
       const earnings = `${Math.max(Number(stats[2] - stats[3]), 0)}`;
