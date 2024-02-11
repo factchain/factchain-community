@@ -2,38 +2,34 @@
 
 [![Contracts Code Checks](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml) [![Extension Code Checks](https://github.com/factchain/factchain-community/actions/workflows/extension-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/extension-code-checks.yml) [![Extension Build](https://github.com/factchain/factchain-community/actions/workflows/build-extension.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/build-extension.yml) 
 
-# factchain-community
+# Factchain
 
-See [Factchain Pitch Deck](https://docs.google.com/presentation/d/1SVDxzgBY_GsQRAT_anoVA7sfMu26-kKfJJI6M455bC0/edit?usp=sharing)
+Decentralized notes, decentralized rewards. A collaborative approach to combating misinformation, one block at a time.
 
-Decentralized notes, decentralized rewards. A collaborative approach to combating misinformation, block by block.
-
-Contributors to Factchain Community can record notes about any social media post on the blockchain. If enough contributors from different viewpoints rate a note as helpful on the blockchain, the note will be displayed on factchain.tech, and on the Factchain browser extension.
+Factchainers can record notes about any social media post on the blockchain. If enough contributors from different viewpoints rate a note as helpful, Factchain browser extension will use it to enrich the social media website.
 
 - Notes & votes are permissionless. No central authority to trust.
 - Transparent incentives for note writers & voters. Factchain rewards writers who create helpful notes & voters who identify helpful/misleading notes
 - Factchain's truth layer works for any social media platform:
-  - Factchain's browser extension adds FactChain notes on top of social media posts
+  - Factchain's browser extension adds Factchain notes on top of social media posts
   - Anyone can query the Factchain API for notes on social media posts
 
 ## Links
-
-- [Pitch Deck](https://docs.google.com/presentation/d/1SVDxzgBY_GsQRAT_anoVA7sfMu26-kKfJJI6M455bC0/edit?usp=sharing)
-- [Demo of the PoC](https://drive.google.com/file/d/1tJgjMYLVi_VUSCHalCxqlsctuYiVFX4W/view?usp=share_link).
-- The contract is deployed at https://sepolia.etherscan.io/address/0xb912368c62D3037F7E86C2e95D9B5F4FC86c9428.
+- [Manifesto](https://factchain.tech/)
+- [PoC Demo](https://drive.google.com/file/d/1tJgjMYLVi_VUSCHalCxqlsctuYiVFX4W/view?usp=share_link)
+- [Deployed Contracts](https://factchain.tech/about/)
 
 ## Using Factchain
 
 ### Requirements
 
 - Desktop only
-- Google Chrome
+- Google Chrome or Brave
 - Metamask
-- Sepolia account some ETH (https://sepoliafaucet.com/ to get some)
+- funded Sepolia account. You can get some ETH [here](https://sepoliafaucet.com/)
 
 ### Installation
-- Install the [Factchain extension](./fc-community-extension/) by loading the [factchain-extension-build](./fc-community-extension/factchain-extension-build) into `chrome://extensions`.
-You need to activate the Developer mode and click "Load unpacked".
+- Download the Factchain browser extension
 - Open the extension so it can connect to your Metamask account
 - Open Twitter which will also connect to your Metamask account
 
@@ -51,7 +47,3 @@ You need to activate the Developer mode and click "Load unpacked".
 - Click on `Rate it` and go through the steps
 
 ![Rate note](./rate.gif)
-
-## Project Architecture
-
-![Architecture Diagram](./factchain_archi.png)
