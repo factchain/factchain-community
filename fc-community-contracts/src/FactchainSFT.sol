@@ -26,7 +26,7 @@ interface IFactchainSFT is IFactchainSFTEvents {
 contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
     address public FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
-    uint256 public constant MINT_PRICE = 1_000_000;
+    uint256 public mintPrice = 1_000_000_000_000_000;
 
     mapping(uint256 => uint256) private _supply;
 
@@ -44,6 +44,10 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
         emit FactchainNFTContractUpdated(_factchainNFTContract);
     }
 
+    function setMintPrice(uint256 _mintPrice) public onlyOwner {
+        mintPrice = _mintPrice;
+    }
+
     function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
         if (msg.sender != FACTCHAIN_NFT_CONTRACT) {
             revert ReservedToFactchain();
@@ -58,7 +62,7 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
     }
 
     function mint(uint256 id, uint256 value) external payable {
-        if (msg.value != MINT_PRICE * value) revert BadMintPrice();
+        if (msg.value != mintPrice * value) revert BadMintPrice();
         if (value <= 0) revert ValueError();
         if (value > _supply[id]) {
             revert SupplyExhausted();

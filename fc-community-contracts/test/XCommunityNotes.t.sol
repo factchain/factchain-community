@@ -3,11 +3,11 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {XCommunityNotes, IXCommunityNotes} from "../src/XCommunityNotes.sol";
+import {IOwnable} from "../src/utils/Ownable.sol";
 
-contract XCommunityNotesTest is Test, IXCommunityNotes {
+contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
     XCommunityNotes collection;
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
-    uint256 public constant MINT_PRICE = 1_000_000;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
     address public owner = address(1);
     address public recipient = address(2);
@@ -26,23 +26,25 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
     }
 
     function testMintUnkownToken() public {
+        uint256 mintPrice = collection.mintPrice();
         // Should not be able to mint unknown tokens
         // To mint a token for the first time
         // provide a token ID signed by the backend
         vm.expectRevert(IXCommunityNotes.UnknownToken.selector);
-        collection.mint{value: MINT_PRICE}(123, 1);
+        collection.mint{value: mintPrice}(123, 1);
     }
 
     function testGetTokenID() public {
+        uint256 mintPrice = collection.mintPrice();
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE * 3}(
+        collection.mint{value: mintPrice * 3}(
             424273286,
             3,
             hex"84fac280d097e9c99d8522dd6adb8fcb46d9c1d0798d309b3abfd511d24e43b8",
             hex"4d27fe7200c3628938070a426865303178724b6165088e1de049e4c6a94ba0f73b73ea6636c85494ae5b516c0f1094f51d751738ab0d383ba254c5ade08a99fb1b"
         );
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE * 3}(
+        collection.mint{value: mintPrice * 3}(
             2742163345,
             3,
             hex"a683622ff02d5db7693fc088d7382b73f03bf1656a4cc771f2410e30d521bb87", // keccak(bytes("2742163345", "utf-8")).hex()
@@ -58,10 +60,11 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
     }
 
     function testMintBalanceUpdate() public {
+        uint256 mintPrice = collection.mintPrice();
         // Mint 3 tokens of ID 123 for the first time
         // provide signature of "123"
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE * 3}(
+        collection.mint{value: mintPrice * 3}(
             123,
             3,
             // keccak(bytes("123", "utf-8")).hex()
@@ -74,7 +77,7 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         assertEq(balanceAfterMint, 3, "Recipient should have 3 tokens after minting");
         // Check the contract balance
         assertEq(
-            address(collection).balance, MINT_PRICE * 3, "Contract Balance should have been increased by MintPrice"
+            address(collection).balance, mintPrice * 3, "Contract Balance should have been increased by MintPrice"
         );
 
         uint256 balanceBefore = address(recipient).balance;
@@ -84,16 +87,17 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         // see worstRandEver contract function.
         // in this test: we've already minted 3 quantiy of token 123 in the above mint call
         // remaining supply *should be* = 23
-        emit Refunded(recipient, (MAX_TOKEN_SUPPLY - 23) * MINT_PRICE);
-        collection.mint{value: MINT_PRICE * MAX_TOKEN_SUPPLY}(123, MAX_TOKEN_SUPPLY);
-        assertEq(address(recipient).balance, balanceBefore - (23 * MINT_PRICE));
+        emit Refunded(recipient, (MAX_TOKEN_SUPPLY - 23) * mintPrice);
+        collection.mint{value: mintPrice * MAX_TOKEN_SUPPLY}(123, MAX_TOKEN_SUPPLY);
+        assertEq(address(recipient).balance, balanceBefore - (23 * mintPrice));
     }
 
     function testMintSupplyDecrease() public {
+        uint256 mintPrice = collection.mintPrice();
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE * 3}(
+        collection.mint{value: mintPrice * 3}(
             123,
             3,
             // keccak(bytes("123", "utf-8")).hex()
@@ -106,17 +110,18 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         vm.startPrank(other);
         // second mint, token already created
         // mint only requires token id and quantity
-        collection.mint{value: MINT_PRICE * 3}(123, 3);
+        collection.mint{value: mintPrice * 3}(123, 3);
         uint256 supplyBeforeMint = collection.supply(123);
-        collection.mint{value: MINT_PRICE}(123, 1);
+        collection.mint{value: mintPrice}(123, 1);
         assertEq(collection.supply(123), supplyBeforeMint - 1, "Supply should have been decreased!");
     }
 
     function testMintSupplyExhausted() public {
+        uint256 mintPrice = collection.mintPrice();
         // First Mint of token 123
         // needs token hash and backend signature
         vm.prank(recipient);
-        collection.mint{value: MINT_PRICE * MAX_TOKEN_SUPPLY}(
+        collection.mint{value: mintPrice * MAX_TOKEN_SUPPLY}(
             123,
             MAX_TOKEN_SUPPLY,
             // keccak(bytes("123", "utf-8")).hex()
@@ -126,10 +131,11 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         );
 
         vm.expectRevert(IXCommunityNotes.SupplyExhausted.selector);
-        collection.mint{value: MINT_PRICE}(123, 1);
+        collection.mint{value: mintPrice}(123, 1);
     }
 
     function testMintNotAllowed() public {
+        uint256 mintPrice = collection.mintPrice();
         vm.prank(owner);
         // set new backend
         // following signatures should be wrong!
@@ -138,7 +144,7 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         // needs token hash and backend signature
         vm.prank(recipient);
         vm.expectRevert(IXCommunityNotes.NotAllowed.selector);
-        collection.mint{value: MINT_PRICE}(
+        collection.mint{value: mintPrice}(
             123,
             1,
             // keccak(bytes("123", "utf-8")).hex()
@@ -171,44 +177,15 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         collection.setBackend(backend);
     }
 
-    // function testMintWithAdjustedValue() public {
-    //     vm.startPrank(owner);
-    //     collection.setTokenSupply(42, 24);
-    //     vm.startPrank(other);
-    //     vm.expectEmit();
-    //     emit MintWithAdjustedValue(42, 24);
-    //     // value should be adjusted to 24
-    //     collection.mint{value: MINT_PRICE * 26}(
-    //         42,
-    //         26,
-    //         // keccak(bytes("123", "utf-8")).hex()
-    //         hex"64e604787cbf194841e7b68d7cd28786f6c9a0a3ab9f8b0a0e87cb4387ab0107",
-    //         // sign(bytes(b'\x19Ethereum Signed Message:\n32' + keccak(bytes("123","utf-8")).hex())
-    //         // SIGNED WITH BACKEND PRIVATE KEY
-    //         hex"fccfdfb298d4f8ec3e534fe76a074f6aa30c0237a20f6375cf1315f370ab816b5133193ecd9ecc89b3359d8c5cc45660fcb2c32e05712a3a4a00c6c012556a961b"
-    //     );
-    // }
+    function test_setMintPrice() public {
+        vm.prank(owner);
+        collection.setMintPrice(123);
+        assert(collection.mintPrice() == 123);
+    }
 
-    // function testMintWithProvidedValue() public {
-    //     vm.startPrank(owner);
-    //     collection.setTokenSupply(42, 24);
-    //     vm.startPrank(other);
-    //     vm.expectEmit();
-
-    //     emit MintWithProvidedValue(42, 12);
-    //     collection.mint{value: MINT_PRICE * 12}(
-    //         42,
-    //         12,
-    //         // keccak(bytes("123", "utf-8")).hex()
-    //         hex"64e604787cbf194841e7b68d7cd28786f6c9a0a3ab9f8b0a0e87cb4387ab0107",
-    //         // sign(bytes(b'\x19Ethereum Signed Message:\n32' + keccak(bytes("123","utf-8")).hex())
-    //         // SIGNED WITH BACKEND PRIVATE KEY
-    //         hex"fccfdfb298d4f8ec3e534fe76a074f6aa30c0237a20f6375cf1315f370ab816b5133193ecd9ecc89b3359d8c5cc45660fcb2c32e05712a3a4a00c6c012556a961b"
-    //     );
-    //     assertEq(collection.supply(42), 12, "Supply should have been decreased by 12!");
-    //     vm.expectEmit();
-    //     emit MintWithProvidedValue(42, 12);
-    //     collection.mint{value: MINT_PRICE * 12}(42, 12);
-    //     assertEq(collection.supply(42), SUPPLY_EXHAUSTED, "Supply should be exhausted!");
-    // }
+    function test_setMintPrice_RevertIf_notOwner() public {
+        vm.expectRevert(IOwnable.NotOwner.selector);
+        vm.prank(recipient);
+        collection.setMintPrice(123);
+    }
 }
