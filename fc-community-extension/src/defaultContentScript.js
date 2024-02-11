@@ -5,7 +5,7 @@ import {
   alterMainPageXNote,
 } from './contentModifiers';
 import {
-  approvedNotesSelector,
+  approvedXNotesSelector,
   dropdownSelector,
   ratingStatusSelector,
 } from './xHtml';
@@ -38,7 +38,7 @@ let observer = new MutationObserver(async (mutations) => {
           alterRatingPageXNote(helpfulNote);
         }
 
-        const xNote = addedNode.querySelector(approvedNotesSelector());
+        const xNote = addedNode.querySelector(approvedXNotesSelector());
         if (xNote) {
           // Triggered whenever an approved note is displayed, on any page
           // but mostly on the main feed.

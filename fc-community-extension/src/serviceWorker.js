@@ -2,6 +2,7 @@ import { getNotes } from './utils/backend';
 
 let cache = {
   postUrl: '',
+  creatorAddress: '',
   note: null,
   noteUrl: '',
   content: '',
@@ -61,6 +62,20 @@ const mainHandler = async (message, sendResponse) => {
 
     chrome.windows.create({
       url: 'mintXNote.html',
+      type: 'popup',
+      focused: true,
+      width: 400,
+      height: 600,
+      top: 0,
+      left: 0,
+    });
+  } else if (message.type === 'fc-mint-factchain-note') {
+    console.log('Mint Factchain note', message.note);
+    cache.postUrl = message.note.postUrl;
+    cache.creatorAddress = message.note.creatorAddress;
+
+    chrome.windows.create({
+      url: 'mintFactchainNote.html',
       type: 'popup',
       focused: true,
       width: 400,

@@ -12,6 +12,8 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
   const [error, setError] = createSignal(null);
   createResource(async () => {
     try {
+      setError(null);
+      setTransaction(null);
       let res = await getXNoteId(noteUrl);
       if (!res) {
         res = await createXNoteId(noteUrl, content);
@@ -19,12 +21,12 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
       console.log('Retrieved xNoteId', res);
       setXNoteId(res);
 
-      setError(null);
-      setTransaction(null);
       const { transaction, error } = await mintXNote(res);
       console.log('mintResult', transaction, error);
       setTransaction(transaction);
-      setError(error);
+      if (error) {
+        throw new Error(`Transaction failed: ${JSON.stringify(error)}`);
+      }
 
       const url = makeOpenseaUrl(contractAddress, xNoteId().id);
       const openseaRes = await awaitOpenSeaUrl(url);
@@ -58,10 +60,7 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
             </div>
             <div style="margin-bottom: 10px; font-size: 110%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               Check it out on{' '}
-              <a
-                href={makeOpenseaUrl(contractAddress, xNoteId().id)}
-                target="_blank"
-              >
+              <a href={openseaUrl()} target="_blank">
                 OpenSea
               </a>
               .
@@ -107,7 +106,7 @@ const content = await chrome.runtime.sendMessage({
   target: 'content',
 });
 const provider = await createFactchainProvider();
-const contract = await provider.getFC1155Contract();
+const contract = await provider.getXContract();
 console.log(`contract`, contract);
 console.log(`contract address ${contract.target}`);
 

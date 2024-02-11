@@ -99,8 +99,9 @@ const addNote = async (mainArticle, note, userAddress) => {
     !note.finalRating && !isAuthor
       ? `rateNoteButton-${note.creatorAddress}`
       : null;
-  const mintSFTButtonID =
-    note.finalRating || true ? `mintSFTButton-${note.creatorAddress}` : null;
+  const mintSFTButtonID = note.finalRating
+    ? `mintSFTButton-${note.creatorAddress}`
+    : null;
   const htmlNote = makeFactchainNoteHtml(
     isAuthor,
     note.content,
@@ -129,10 +130,10 @@ const addNote = async (mainArticle, note, userAddress) => {
       .querySelector(`#${mintSFTButtonID}`)
       .addEventListener('click', () => {
         logger.log('Minting SFT for note', note);
-        // chrome.runtime.sendMessage({
-        //   type: 'fc-rate-note',
-        //   note,
-        // });
+        chrome.runtime.sendMessage({
+          type: 'fc-mint-factchain-note',
+          note,
+        });
       });
   }
 };

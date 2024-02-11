@@ -245,7 +245,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     );
     const mintOptions = nonce !== undefined ? { nonce } : {};
     const runnerAddress = await (this._fcNFT.runner as ethers.Signer).getAddress();
-    console.log(`Finalising note ${note.creatorAddress}:${note.postUrl} using ${runnerAddress}`, mintOptions);
+    console.log(`Minting note ${note.creatorAddress}:${note.postUrl} using ${runnerAddress}`, mintOptions);
     return await this._fcNFT.mint(
       note.creatorAddress,
       note.postUrl,

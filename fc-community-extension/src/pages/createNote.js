@@ -87,7 +87,7 @@ const createNote = async (content) => {
   const provider = await createFactchainProvider();
   const address = await provider.requestAddress();
   logger.log('Creator address', address);
-  const contract = await provider.getFCContract();
+  const contract = await provider.getMainContract();
   return await makeTransactionCall(
     contract,
     async (c) => await c.createNote(postUrl, content, { value: 100_000 })

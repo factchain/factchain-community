@@ -106,7 +106,7 @@ const htmlBuilders = {
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-a023e6 r-rjixqe r-16dba41 r-1e081e0" style="text-overflow: unset; color: rgb(247, 249, 249);">
         <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;"><span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">${content}</span></span>
       </div>
-      ${actionHtml}
+      ${actionHtml || '<br/>'}
     </div>`,
     dropdownNoteCreationButton: (logoHtml) =>
       `<a role="menuitem" class="css-175oi2r r-18u37iz r-ymttw5 r-1f1sjgu r-13qz1uu r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" data-testid="fc-note">
@@ -180,7 +180,7 @@ const htmlBuilders = {
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-a023e6 r-rjixqe r-16dba41 r-1e081e0" style="text-overflow: unset; color: rgb(247, 249, 249);">
         <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;"><span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">${content}</span></span>
       </div>
-      ${actionHtml}
+      ${actionHtml || '<br/>'}
     </div>`,
     dropdownNoteCreationButton: (logoHtml) =>
       `<a role="menuitem" class="css-175oi2r r-18u37iz r-ymttw5 r-1f1sjgu r-13qz1uu r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" data-testid="fc-note">
@@ -254,7 +254,7 @@ const htmlBuilders = {
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-a023e6 r-rjixqe r-16dba41 r-1e081e0" style="text-overflow: unset; color: rgb(15, 20, 25);">
         <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;"><span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">${content}</span></span>
       </div>
-      ${actionHtml}
+      ${actionHtml || '<br/>'}
     </div>`,
     dropdownNoteCreationButton: (logoHtml) =>
       `<a role="menuitem" class="css-175oi2r r-18u37iz r-ymttw5 r-1f1sjgu r-13qz1uu r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" data-testid="fc-note">
