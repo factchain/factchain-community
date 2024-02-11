@@ -19,22 +19,36 @@ export const ratingStatusSelector = () => "div[data-testid='ratingStatus']";
 export const noteContentSelector = () =>
   'div.css-175oi2r.r-1471scf.r-18u37iz.r-iphfwy.r-1h8ys4a';
 
-export const approvedNotesSelector = () => {
+export const approvedXNotesSelector = () => {
   const colorScheme = getColorScheme();
   const htmlBuilder = htmlBuilders[colorScheme];
-  return removeWhitespaces(htmlBuilder.approvedNotes);
+  return removeWhitespaces(htmlBuilder.approvedXNotes);
 };
 
-export const makeFactchainNoteHtml = (isAuthor, content, rateNoteButtonID) => {
+export const makeFactchainNoteHtml = (
+  isAuthor,
+  content,
+  rateNoteButtonID,
+  mintSFTButtonID
+) => {
   const colorScheme = getColorScheme();
   const htmlBuilder = htmlBuilders[colorScheme];
-  const actionHtml = rateNoteButtonID
-    ? htmlBuilder.action(
-        'Do you find this helpful?',
-        rateNoteButtonID,
-        'Rate it'
-      )
-    : '';
+  let actionHtml = '';
+  if (rateNoteButtonID) {
+    actionHtml += htmlBuilder.action(
+      'Do you find this helpful?',
+      rateNoteButtonID,
+      'Rate it'
+    );
+  }
+  if (mintSFTButtonID) {
+    actionHtml += htmlBuilder.action(
+      'Like this Factchain note?',
+      mintSFTButtonID,
+      'Mint it'
+    );
+  }
+
   const title = `${isAuthor ? 'You' : 'Factchain users'} added context`;
   return removeWhitespaces(
     htmlBuilder.note(title, content, htmlBuilder.logo, actionHtml)
@@ -133,7 +147,7 @@ const htmlBuilders = {
         </div>
       </div>
     </div>`,
-    approvedNotes:
+    approvedXNotes:
       "div[data-testid='birdwatch-pivot'].css-175oi2r.r-18bvks7.r-1udh08x.r-g6ijar.r-1mhqjh3.r-5kkj8d.r-1va55bh.r-1mnahxq.r-o7ynqc.r-6416eg.r-1ny4l3l.r-1loqt21",
   },
   dark: {
@@ -207,7 +221,7 @@ const htmlBuilders = {
         </div>
       </div>
     </div>`,
-    approvedNotes:
+    approvedXNotes:
       "div[data-testid='birdwatch-pivot'].css-175oi2r.r-1kqtdi0.r-1udh08x.r-g2wdr4.r-1mhqjh3.r-5kkj8d.r-1va55bh.r-1mnahxq.r-o7ynqc.r-6416eg.r-1ny4l3l.r-1loqt21",
   },
   light: {
@@ -281,7 +295,7 @@ const htmlBuilders = {
         </div>
       </div>
     </div>`,
-    approvedNotes:
+    approvedXNotes:
       "div[data-testid='birdwatch-pivot'].css-175oi2r.r-1ets6dv.r-1udh08x.r-x572qd.r-1mhqjh3.r-5kkj8d.r-1va55bh.r-1mnahxq.r-o7ynqc.r-6416eg.r-1ny4l3l.r-1loqt21",
   },
 };

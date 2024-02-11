@@ -52,9 +52,9 @@ const mainHandler = async (message, sendResponse) => {
   } else if (message.type === 'fc-get-from-cache') {
     console.log(`Get ${message.target} from cache`, cache);
     sendResponse(cache[message.target]);
-  } else if (message.type === 'fc-mint-twitter-note') {
+  } else if (message.type === 'fc-mint-x-note') {
     console.log(
-      `Mint twitter note '${message.noteUrl}' with content '${message.content}'`
+      `Mint X note '${message.noteUrl}' with content '${message.content}'`
     );
     cache.noteUrl = message.noteUrl;
     cache.content = message.content;
