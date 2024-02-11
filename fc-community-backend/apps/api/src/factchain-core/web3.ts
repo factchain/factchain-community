@@ -223,6 +223,8 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       throw new Error("Bad rating!");
     }
     const finaliseOptions = nonce !== undefined ? { nonce } : {};
+    const runnerAddress = (this._fcCommunity.runner as ethers.Signer).getAddress();
+    console.log(`Finalising note ${creator}:${postUrl} using ${runnerAddress}`, finaliseOptions);
     return await this._fcCommunity.finaliseNote(
       postUrl,
       creator,
@@ -242,6 +244,8 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.PINATA_JWT,
     );
     const mintOptions = nonce !== undefined ? { nonce } : {};
+    const runnerAddress = (this._fcNFT.runner as ethers.Signer).getAddress();
+    console.log(`Finalising note ${note.creatorAddress}:${note.postUrl} using ${runnerAddress}`, mintOptions);
     return await this._fcNFT.mint(
       note.creatorAddress,
       note.postUrl,

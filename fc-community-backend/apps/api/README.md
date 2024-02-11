@@ -8,9 +8,10 @@ $ yarn install
 
 ## Running the app
 
-You'll need to define the following env variables:
+You'll need to define the following env variables for the service to be able to do all of its actions:
 
-- `OWNER_PKEY`
+- `MAIN_CONTRACT_OWNER_PKEY`
+- `NFT_CONTRACT_OWNER_PKEY`
 - `INFRA_RPC_URL`
 - `MAIN_CONTRACT_ADDRESS`
 - `NFT_CONTRACT_ADDRESS`
@@ -18,6 +19,13 @@ You'll need to define the following env variables:
 - `X_CONTRACT_ADDRESS`
 - `REPLICATE_API_TOKEN`
 - `PINATA_JWT`
+- `AWS_ACCESS_KEY`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
+- `AWS_BUCKET`
+- `BACKEND_PKEY`
+
+See the [API's env module](./src/factchain-core/env.ts) for an always up to date list.
 
 then run
 
