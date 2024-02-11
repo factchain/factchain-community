@@ -4,14 +4,6 @@ import { makeOpenseaUrl, makeTransactionUrl } from '../utils/constants';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { FCHero, FCLoader } from './components';
 
-// TODO
-// 1. Find NFT id, if does not exist show error
-// 2. Get NFT image and Opensea URL
-// 3. If can still mint
-//    3.a. Create mint transaction
-//    3.b. Show success!
-// 4. Else, show a "sorry" message, and direct the user to buy from Opensea
-
 export function FCMintFactchainNote({
   postUrl,
   creatorAddress,
@@ -76,9 +68,9 @@ export function FCMintFactchainNote({
           </Match>
           <Match when={factchainNftId() && !nftSupply() && openseaUrl()}>
             <div style="margin-bottom: 50px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-              All NFTs have already been minted for this note
+              All NFTs have already been minted for this note.
             </div>
-            <div style="margin-bottom: 10px; font-size: 110%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+            <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               Head over to{' '}
               <a href={openseaUrl()} target="_blank">
                 OpenSea
@@ -132,7 +124,6 @@ const creatorAddress = await chrome.runtime.sendMessage({
   target: 'creatorAddress',
 });
 const provider = await createFactchainProvider();
-// TODO get correct contract
 const nftContract = await provider.getNftContract();
 console.log(`nftContract (${nftContract.target})`, nftContract);
 const sftContract = await provider.getSftContract();
@@ -141,18 +132,18 @@ console.log(`sftContract (${sftContract.target})`, sftContract);
 const getFactchainNftInfo = async (postUrl, creatorAddress) => {
   console.log('Getting factchain note info', postUrl, creatorAddress);
   const id = await nftContract.noteIds(postUrl, creatorAddress);
-  // TODO get supply from contract
-  const supply = 20;
+  const supply = await nftContract.supply(id);
   return { id, supply };
 };
 
 const mintFactchainNote = async (factchainNoteId) => {
   const value = 1;
   console.log('Minting Factchain Note');
+  const mintPrice = await sftContract.mintPrice();
   return await makeTransactionCall(
     sftContract,
     async (c) =>
-      await c.mint(factchainNoteId, value, { value: value * 1_000_000 })
+      await c.mint(factchainNoteId, value, { value: value * mintPrice })
   );
 };
 
