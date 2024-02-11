@@ -71,8 +71,8 @@ interface IFactchainCommunity is IFactchainCommunityEvents {
 contract FactchainCommunity is Ownable, IFactchainCommunity {
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
-    uint16 internal constant MINIMUM_STAKE_PER_RATING = 10_000;
-    uint32 internal constant MINIMUM_STAKE_PER_NOTE = 100_000;
+    uint64 public minimumStakePerNote = 1_000_000_000_000_000;
+    uint64 public minimumStakePerRating = 100_000_000_000_000;
 
     /// @notice Mapping of note identifier (postUrl + creatorAddress) to Note object
     mapping(string => mapping(address => Note)) public communityNotes;
@@ -138,21 +138,21 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
         if (finalRating >= 3) {
             uint96 reward = uint96(finalRating - 2) * 10;
             // This will revert if contract current balance
-            // (address(this).balance) < MINIMUM_STAKE_PER_NOTE + reward
-            (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE + reward}("");
+            // (address(this).balance) < minimumStakePerNote + reward
+            (bool result,) = payable(_creator).call{value: minimumStakePerNote + reward}("");
             if (!result) revert FailedToReward();
 
             userStats[_creator].ethRewarded += reward;
-            emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: MINIMUM_STAKE_PER_NOTE});
+            emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: minimumStakePerNote});
         } else if (finalRating < 2) {
             uint96 slash = finalRating * 10;
             // This will revert if contract current balance
-            // (address(this).balance) < MINIMUM_STAKE_PER_NOTE - slash
-            (bool result,) = payable(_creator).call{value: MINIMUM_STAKE_PER_NOTE - slash}("");
+            // (address(this).balance) < minimumStakePerNote - slash
+            (bool result,) = payable(_creator).call{value: minimumStakePerNote - slash}("");
             if (!result) revert FailedToSlash();
 
             userStats[_creator].ethSlashed += slash;
-            emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: MINIMUM_STAKE_PER_NOTE});
+            emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: minimumStakePerNote});
         }
     }
 
@@ -164,8 +164,8 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
             if (delta < 2) {
                 uint96 reward = 2 - delta;
                 // This will revert if contract current balance
-                // (address(this).balance) < MINIMUM_STAKE_PER_RATING + reward
-                (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING + reward}("");
+                // (address(this).balance) < minimumStakePerRating + reward
+                (bool result,) = payable(rater).call{value: minimumStakePerRating + reward}("");
                 if (!result) revert FailedToReward();
 
                 userStats[rater].ethRewarded += reward;
@@ -174,13 +174,13 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
                     creator: _creator,
                     rater: rater,
                     reward: reward,
-                    stake: MINIMUM_STAKE_PER_RATING
+                    stake: minimumStakePerRating
                 });
             } else if (delta > 2) {
                 uint96 slash = delta - 2;
                 // This will revert if contract current balance
-                // (address(this).balance) < MINIMUM_STAKE_PER_RATING - slash
-                (bool result,) = payable(rater).call{value: MINIMUM_STAKE_PER_RATING - slash}("");
+                // (address(this).balance) < minimumStakePerRating - slash
+                (bool result,) = payable(rater).call{value: minimumStakePerRating - slash}("");
                 if (!result) revert FailedToSlash();
 
                 userStats[rater].ethSlashed += slash;
@@ -189,7 +189,7 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
                     creator: _creator,
                     rater: rater,
                     slash: slash,
-                    stake: MINIMUM_STAKE_PER_RATING
+                    stake: minimumStakePerRating
                 });
             }
         }
@@ -201,7 +201,7 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
 
     /// @notice Create a new note
     function createNote(string memory _postUrl, string memory _content) external payable {
-        if (msg.value != MINIMUM_STAKE_PER_NOTE) revert InsufficientStake();
+        if (msg.value != minimumStakePerNote) revert InsufficientStake();
         if (!isPostUrlValid(bytes(_postUrl))) revert PostUrlInvalid();
         if (!isContentValid(bytes(_content))) revert ContentInvalid();
         if (noteExists(_postUrl, msg.sender)) revert NoteAlreadyExists();
@@ -210,12 +210,12 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
             Note({postUrl: _postUrl, content: _content, creator: msg.sender, finalRating: 0});
 
         userStats[msg.sender].numberNotes += 1;
-        emit NoteCreated({postUrl: _postUrl, creator: msg.sender, stake: MINIMUM_STAKE_PER_NOTE});
+        emit NoteCreated({postUrl: _postUrl, creator: msg.sender, stake: minimumStakePerNote});
     }
 
     /// @notice Rate an existing note
     function rateNote(string memory _postUrl, address _creator, uint8 _rating) external payable {
-        if (msg.value != MINIMUM_STAKE_PER_RATING) revert InsufficientStake();
+        if (msg.value != minimumStakePerRating) revert InsufficientStake();
         if (!isRatingValid(_rating)) revert RatingInvalid();
         if (_creator == msg.sender) revert CantRateOwnNote();
         if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
@@ -231,7 +231,7 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
             creator: _creator,
             rater: msg.sender,
             rating: _rating,
-            stake: MINIMUM_STAKE_PER_RATING
+            stake: minimumStakePerRating
         });
     }
 
@@ -254,5 +254,15 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
         rewardOrSlashCreator(_postUrl, _creator);
         rewardOrSlashRaters(_postUrl, _creator);
         emit NoteFinalised({postUrl: _postUrl, creator: _creator, finalRating: _finalRating});
+    }
+    
+    /// @notice Set minimum staking for note creation
+    function setMinimumStakePerNote(uint64 _miniumStakePerNote) external onlyOwner {
+        minimumStakePerNote = _miniumStakePerNote;
+    }
+    
+    /// @notice Set minimum staking for note rating
+    function setMinimumStakePerRating(uint64 _minimumStakePerRating) external onlyOwner {
+        minimumStakePerRating = _minimumStakePerRating;
     }
 }
