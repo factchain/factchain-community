@@ -29,7 +29,7 @@ Factchainers can record notes about any social media post on the blockchain. If 
 - funded Sepolia account. You can get some ETH [here](https://sepoliafaucet.com/)
 
 ### Installation
-- Download the Factchain browser extension
+- [Download the Factchain browser extension](https://chromewebstore.google.com/detail/factchain-community/emgjjedibkjlocjmcjgkeolfkbcicbpl)
 - Open the extension so it can connect to your Metamask account
 - Open Twitter which will also connect to your Metamask account
 
