@@ -1,43 +1,50 @@
 import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
 import { createFactchainProvider } from '../utils/web3';
-import { FCHero, FCLoader } from './components';
+import { FCHero, FCLoader, FCContainer, FCHeader } from './components';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
 import { cutText, elipseText } from '../utils/constants';
 
+import './style.css';
+
 function FCProfile(props) {
   function StatCard(props) {
     return (
-      <div style="text-align: center;">
-        <div style="font-size: 140%; font-weight: bold;">{props.value}</div>
-        <div style="font-size: 110%;">{props.name}</div>
+      <div className="text-center">
+        <div className="font-bold text-xl">{props.value}</div>
+        <div className="text-md opacity-50">{props.name}</div>
       </div>
     );
   }
 
   return (
-    <div style="height: 75%; overflow:auto;">
-      <div>
-        <div style="margin-top: 20px; padding: 10px; font-size: 200%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;">
-          Account
-        </div>
-        <div style="font-size: 110%; width: 100%; position: relative; left: 50%; transform: translateX(-50%); text-align: center;">
-          {props.loggedIn ? elipseText(props.address, 20) : '0x?'}
-        </div>
-        <div style="margin-top: 40px; margin: 30px; display: flex; flex-direction: row; justify-content: space-between;">
-          <StatCard name="Notes" value={props.numberNotes} />
-          <StatCard name="Ratings" value={props.numberRatings} />
-          <StatCard name="Earnings" value={props.earnings} />
+    <FCContainer>
+      <div className="space-y-8 min-h-full flex flex-col">
+        <div className="flex-grow space-y-8">
+          <div className="flex items-center w-5/6 mx-auto bg-neutral-950/30 py-2 px-4 rounded gap-4 shadow-md border border-neutral-950/40">
+            <div className="rounded-full w-[40px] h-[40px] bg-neutral-400/30 shadow"></div>
+            <div className="flex-grow">
+              <div className="font-semibold text-xl">Account</div>
+              <div className="opacity-70">
+                {props.loggedIn ? elipseText(props.address, 20) : '0x?'}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between bg-neutral-400/10 rounded-2xl px-10 py-6">
+            <StatCard name="Notes" value={props.numberNotes} />
+            <StatCard name="Ratings" value={props.numberRatings} />
+            <StatCard name="Earnings" value={props.earnings} />
+          </div>
         </div>
         <button
-          style="margin-top: 10px; padding: 8px; font-size: 140%; font-weight: bold; width: 100%; position: relative; left: 50%; transform: translateX(-50%);"
+          className="w-full p-4 font-semibold text-base btn"
           onclick={props.changeConnectionState}
         >
           {props.loggedIn ? 'Log out' : 'Connect a wallet'}
         </button>
       </div>
-    </div>
+    </FCContainer>
   );
 }
 
@@ -48,7 +55,7 @@ function FCNotes(props) {
     return (
       <div
         key={postUrl}
-        style="margin: 10px; background-color: #393E46; padding: 10px; border-radius: 10px;"
+        style="background-color: #393E46; padding: 10px; border-radius: 10px;"
       >
         <div>
           <a href={postUrl} target="_blank">
@@ -64,27 +71,29 @@ function FCNotes(props) {
   }
 
   return (
-    <div style="height: 75%; overflow:auto;">
+    <FCContainer>
       <Switch>
         <Match when={!props.loggedIn}>
-          <div style="font-size: 150%; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-            <div class="link" onclick={props.connectWallet}>
+          <div className="h-full flex flex-col justify-center items-center">
+            <div className="link text-lg" onclick={props.connectWallet}>
               Connect a wallet
             </div>
             <div>to view Factchain notes</div>
           </div>
         </Match>
         <Match when={notes() !== undefined}>
-          <For each={notes()}>
-            {(note) => (
-              <FCNote
-                key={note.postUrl}
-                postUrl={note.postUrl}
-                creator={note.creatorAddress}
-                content={note.content}
-              />
-            )}
-          </For>
+          <div className="space-y-2">
+            <For each={notes()}>
+              {(note) => (
+                <FCNote
+                  key={note.postUrl}
+                  postUrl={note.postUrl}
+                  creator={note.creatorAddress}
+                  content={note.content}
+                />
+              )}
+            </For>
+          </div>
         </Match>
         <Match when={true}>
           <div style="position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
@@ -92,7 +101,7 @@ function FCNotes(props) {
           </div>
         </Match>
       </Switch>
-    </div>
+    </FCContainer>
   );
 }
 
@@ -102,22 +111,17 @@ function FCFooter(props) {
     const classes = () => `tab ${selected() ? 'selected' : ''}`;
     const imgSrc = `./${props.name.toLowerCase()}.svg`;
     return (
-      <div
+      <button
         class={classes()}
         onclick={() => props.onClick(props.name)}
         title={props.name}
-        style="margin: 0 20px 0 20px"
       >
-        <img
-          src={imgSrc}
-          alt={props.name}
-          style="width: 18px; height:18px; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);"
-        ></img>
-      </div>
+        <img className="w-[18px] h-[18px]" src={imgSrc} alt={props.name}></img>
+      </button>
     );
   }
   return (
-    <div style="width: 100%; margin-top: 15px; padding: 10px; display: flex; flex-direction: row; justify-content: space-between; background-color: #393e46; position: relative; left: 50%; transform: translateX(-50%);">
+    <div className="flex items-center justify-between bg-fcGrey py-2 px-6">
       <FCFooterTab
         name="Profile"
         selectedTab={props.selectedTab}
@@ -186,10 +190,10 @@ function FCPopup({ provider }) {
   provider.getAddress().then(setAddress);
 
   return (
-    <div style="height:575px; width: 340px;">
-      <FCHero />
+    <div className="h-[575px] w-[375px] flex flex-col">
       <Switch>
         <Match when={selectedTab() === 'Profile'}>
+          <FCHero />
           <FCProfile
             provider={provider}
             loggedIn={loggedIn()}
@@ -201,6 +205,7 @@ function FCPopup({ provider }) {
           />
         </Match>
         <Match when={selectedTab() === 'Notes'}>
+          <FCHeader title="My notes" />
           <FCNotes
             loggedIn={loggedIn()}
             queryparams={{ creatorAddress: address() }}
@@ -208,6 +213,7 @@ function FCPopup({ provider }) {
           />
         </Match>
         <Match when={selectedTab() === 'Ratings'}>
+          <FCHeader title="Ratings" />
           <FCNotes
             loggedIn={loggedIn()}
             queryparams={{ awaitingRatingBy: address() }}

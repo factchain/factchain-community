@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Space Mono';
+  background-color: #222831;
+  color: #eeeeee;
+}
+
+.btn {
+  @apply border border-fcAccent rounded-md text-fcAccent
+  hover:text-fcGrey hover:bg-fcAccent;
+}
+
+/* button { */
+/*   font-family: 'Space Mono'; */
+/*   background-color: #222831; */
+/*   color: #00adb5; */
+/*   border: 1px solid #00adb5; */
+/*   cursor: pointer; */
+/*   border-radius: 8px; */
+/* } */
+
+/* button:hover:enabled { */
+/*   background: #00adb5; */
+/*   color: #eeeeee; */
+/* } */
+/**/
+/* button:disabled, */
+/* button[disabled] { */
+/*   border: 1px solid #777777; */
+/*   color: #777777; */
+/* } */
+
+.tab {
+  @apply flex items-center justify-center;
+  background-color: #393e46;
+  border: none;
+  cursor: pointer;
+  border-radius: 32px;
+  width: 48px;
+  height: 48px;
+}
+
+.tab.selected {
+  background: #00adb5;
+}
+
+.tab:hover {
+  background: #00adb5;
+}
+
+.link {
+  color: #00adb5;
+  cursor: pointer;
+}
+
+a:link {
+  color: #00adb5;
+}
+a:visited {
+  color: #00adb5;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #393e46;
+  border-bottom-color: #00adb5;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 0.75s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+*::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background: transparent;
+}
