@@ -48,7 +48,10 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
         mintPrice = _mintPrice;
     }
 
-    function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
+    function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id)
+        public
+        returns (uint256)
+    {
         if (msg.sender != FACTCHAIN_NFT_CONTRACT) {
             revert ReservedToFactchain();
         }

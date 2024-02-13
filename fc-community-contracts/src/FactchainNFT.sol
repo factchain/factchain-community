@@ -35,12 +35,10 @@ contract FactchainNFT is Ownable, ERC721URIStorage, IFactchainSFTEvents {
         factsLithography = FactchainSFT(_factsLitography);
     }
 
-
     function setFactchainSFTContract(address _factsLitography) public onlyOwner {
         factsLithography = FactchainSFT(_factsLitography);
         emit FactchainSFTContractUpdated(_factsLitography);
     }
-
 
     /// @notice mint a NFT
     /// @param creator destination address for the orginal fact (NFT-721)

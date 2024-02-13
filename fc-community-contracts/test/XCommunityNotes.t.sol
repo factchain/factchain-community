@@ -76,9 +76,7 @@ contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
         uint256 balanceAfterMint = collection.balanceOf(recipient, 123);
         assertEq(balanceAfterMint, 3, "Recipient should have 3 tokens after minting");
         // Check the contract balance
-        assertEq(
-            address(collection).balance, mintPrice * 3, "Contract Balance should have been increased by MintPrice"
-        );
+        assertEq(address(collection).balance, mintPrice * 3, "Contract Balance should have been increased by MintPrice");
 
         uint256 balanceBefore = address(recipient).balance;
         vm.prank(recipient);
