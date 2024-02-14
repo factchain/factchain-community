@@ -36,7 +36,9 @@ export function FCCreateNote({ postUrl, createNote }) {
       <div>
         <div style="font-size: 120%">
           Provide additional context for{' '}
-          <a href={postUrl}>{cutText(postUrl, 35)}</a>
+          <a className="link" href={postUrl}>
+            {cutText(postUrl, 35)}
+          </a>
         </div>
         <div>
           <textarea
@@ -55,7 +57,11 @@ export function FCCreateNote({ postUrl, createNote }) {
               </div>
               <div style="margin-bottom: 10px; font-size: 90%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
                 View transaction on{' '}
-                <a href={makeTransactionUrl(transactionHash())} target="_blank">
+                <a
+                  className="link"
+                  href={makeTransactionUrl(transactionHash())}
+                  target="_blank"
+                >
                   etherscan
                 </a>
                 .

@@ -56,10 +56,7 @@ body {
   cursor: pointer;
 }
 
-a:link {
-  color: #00adb5;
-}
-a:visited {
+a.link:visited {
   color: #00adb5;
 }
 

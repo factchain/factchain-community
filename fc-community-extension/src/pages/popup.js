@@ -2,11 +2,32 @@ import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
 import { createFactchainProvider } from '../utils/web3';
 import { FCHero, FCLoader, FCContainer, FCHeader } from './components';
+import FCNote from './components/FCNote';
+import FCEmptyState from './components/FCEmptyState';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
 import { cutText, elipseText } from '../utils/constants';
 
 import './style.css';
+
+const FCNetworks = () => (
+  <div className="grid grid-cols-[80px_80px_80px] gap-4 justify-center">
+    <img title="X" className="w-[80px] h-[80px]" src="/logos/x.png" />
+    <img
+      title="Warpcast"
+      className="w-[80px] h-[80px]"
+      src="/logos/warpcast.png"
+    />
+    <img
+      title="Lens protocol"
+      className="w-[80px] h-[80px]"
+      src="/logos/lens.png"
+    />
+    <div className="-mt-2 col-span-2 col-start-2 text-fcAccent text-center text-sm">
+      {'Coming soon!'}
+    </div>
+  </div>
+);
 
 function FCProfile(props) {
   function StatCard(props) {
@@ -20,8 +41,8 @@ function FCProfile(props) {
 
   return (
     <FCContainer>
-      <div className="space-y-8 min-h-full flex flex-col">
-        <div className="flex-grow space-y-8">
+      <div className="space-y-4 min-h-full flex flex-col">
+        <div className="flex-grow space-y-4">
           <div className="flex items-center w-5/6 mx-auto bg-neutral-950/30 py-2 px-4 rounded gap-4 shadow-md border border-neutral-950/40">
             <div className="rounded-full w-[40px] h-[40px] bg-neutral-400/30 shadow"></div>
             <div className="flex-grow">
@@ -31,11 +52,12 @@ function FCProfile(props) {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between bg-neutral-400/10 rounded-2xl px-10 py-6">
+          <div className="flex items-center justify-between bg-neutral-400/10 rounded-2xl px-10 py-6 shadow">
             <StatCard name="Notes" value={props.numberNotes} />
             <StatCard name="Ratings" value={props.numberRatings} />
             <StatCard name="Earnings" value={props.earnings} />
           </div>
+          {props.loggedIn && <FCNetworks />}
         </div>
         <button
           className="w-full p-4 font-semibold text-base btn"
@@ -50,26 +72,6 @@ function FCProfile(props) {
 
 function FCNotes(props) {
   const [notes] = createResource(() => getNotes(props.queryparams));
-
-  function FCNote({ postUrl, content, creator }) {
-    return (
-      <div
-        key={postUrl}
-        style="background-color: #393E46; padding: 10px; border-radius: 10px;"
-      >
-        <div>
-          <a href={postUrl} target="_blank">
-            {cutText(postUrl, 35)}
-          </a>
-        </div>
-        <div>{cutText(content, 115)}</div>
-        <div style="display: flex; justify-content: flex-end; font-style: italic;">
-          -- {creator}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <FCContainer>
       <Switch>
@@ -82,18 +84,25 @@ function FCNotes(props) {
           </div>
         </Match>
         <Match when={notes() !== undefined}>
-          <div className="space-y-2">
-            <For each={notes()}>
-              {(note) => (
-                <FCNote
-                  key={note.postUrl}
-                  postUrl={note.postUrl}
-                  creator={note.creatorAddress}
-                  content={note.content}
-                />
-              )}
-            </For>
-          </div>
+          <Switch>
+            <Match when={notes().length > 0}>
+              <div className="space-y-4">
+                <For each={notes()}>
+                  {(note) => (
+                    <FCNote
+                      key={note.postUrl}
+                      postUrl={note.postUrl}
+                      creator={note.creatorAddress}
+                      content={note.content}
+                    />
+                  )}
+                </For>
+              </div>
+            </Match>
+            <Match when={notes().length === 0}>
+              <FCEmptyState text={props.emptyText} />
+            </Match>
+          </Switch>
         </Match>
         <Match when={true}>
           <div style="position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
@@ -190,7 +199,7 @@ function FCPopup({ provider }) {
   provider.getAddress().then(setAddress);
 
   return (
-    <div className="h-[575px] w-[375px] flex flex-col">
+    <div className="h-[600px] w-[375px] flex flex-col">
       <Switch>
         <Match when={selectedTab() === 'Profile'}>
           <FCHero />
@@ -210,6 +219,7 @@ function FCPopup({ provider }) {
             loggedIn={loggedIn()}
             queryparams={{ creatorAddress: address() }}
             connectWallet={changeConnectionState}
+            emptyText="You don't have any notes yet."
           />
         </Match>
         <Match when={selectedTab() === 'Ratings'}>
@@ -218,6 +228,7 @@ function FCPopup({ provider }) {
             loggedIn={loggedIn()}
             queryparams={{ awaitingRatingBy: address() }}
             connectWallet={changeConnectionState}
+            emptyText="No ratings to do yet."
           />
         </Match>
       </Switch>

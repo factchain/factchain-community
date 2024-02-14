@@ -62,14 +62,18 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
             </div>
             <div style="margin-bottom: 10px; font-size: 110%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               Check it out on{' '}
-              <a href={openseaUrl()} target="_blank">
+              <a className="link" href={openseaUrl()} target="_blank">
                 OpenSea
               </a>
               .
             </div>
             <div style="margin-bottom: 10px; font-size: 90%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               View transaction on{' '}
-              <a href={makeTransactionUrl(transactionHash())} target="_blank">
+              <a
+                className="link"
+                href={makeTransactionUrl(transactionHash())}
+                target="_blank"
+              >
                 etherscan
               </a>
               .

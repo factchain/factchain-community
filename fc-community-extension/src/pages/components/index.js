@@ -25,34 +25,17 @@ export function FCContainer({ children }) {
 
 export function FCHeader({ title }) {
   return (
-    <div className="py-4 text-center relative">
+    <div className="py-4 text-center relative select-none">
       <div className="text-2xl text-fcAccent font-semibold">{title}</div>
       <div class="absolute inset-y-0 right-0 flex items-center justify-center pr-4">
-        <button className="text-fcAccent">
-          <SettingsIcon size={24} />
+        <button
+          className="text-fcAccent opacity-50"
+          disabled
+          title="Coming soon!"
+        >
+          <img src="/ui/icons/menu.png" />
         </button>
       </div>
     </div>
-  );
-}
-
-// yeah baptiste i know it's not the same icon
-// as in the design but i'm out of time lol
-export function SettingsIcon({ size = 16 }) {
-  return (
-    <svg
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      viewBox="0 0 24 24"
-      height={size}
-      width={size}
-    >
-      <path d="M20 7h-9M14 17H5" />
-      <path d="M20 17 A3 3 0 0 1 17 20 A3 3 0 0 1 14 17 A3 3 0 0 1 20 17 z" />
-      <path d="M10 7 A3 3 0 0 1 7 10 A3 3 0 0 1 4 7 A3 3 0 0 1 10 7 z" />
-    </svg>
   );
 }
