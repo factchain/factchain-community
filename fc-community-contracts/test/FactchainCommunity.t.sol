@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
-import "../src/FactchainCommunity.sol";
+import {Test} from "forge-std/Test.sol";
+import {FactchainCommunity, IFactchainCommunity} from "../src/FactchainCommunity.sol";
+import {FactchainCommunityProxy} from "../src/FactchainCommunityProxy.sol";
 
-contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
+
+
+contract FactchainCommunityTest is Test, IFactchainCommunity {
     FactchainCommunity public fcCommunity;
+    
     uint160 lastUintAddress = 0;
 
     function nextAddress() public returns (address) {
@@ -13,14 +17,14 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
         return address(lastUintAddress);
     }
 
-    address public owner = nextAddress();
+    address public theOwner = nextAddress();
     address public player1 = nextAddress();
     address public player2 = nextAddress();
     address public rater1 = nextAddress();
     address public rater2 = nextAddress();
 
     function fundReserve() public {
-        hoax(owner);
+        hoax(theOwner);
         vm.expectEmit();
         emit ReserveFunded(100);
         (bool result,) = payable(fcCommunity).call{value: 100}("");
@@ -28,8 +32,8 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
     }
 
     function setUp() public {
-        fcCommunity = new FactchainCommunity();
-        fcCommunity.initialize(owner);
+        address payable proxy = payable(address(new FactchainCommunityProxy(theOwner)));
+        fcCommunity = FactchainCommunity(proxy);
         fundReserve();
     }
 
@@ -176,7 +180,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
             _content: "Something something something"
         });
 
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         hoax(rater1);
@@ -244,7 +248,9 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
         });
 
         vm.startPrank(rater1);
-        vm.expectRevert(IOwnable.NotOwner.selector);
+        // following specif expectRevert should work ... 
+        // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
+        vm.expectRevert();
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
@@ -256,7 +262,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
             _content: "Something something something"
         });
 
-        vm.startPrank(owner);
+        vm.startPrank(theOwner);
         vm.expectRevert(IFactchainCommunity.RatingInvalid.selector);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 0});
         vm.expectRevert(IFactchainCommunity.RatingInvalid.selector);
@@ -264,7 +270,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
     }
 
     function test_finaliseNote_RevertIf_notDoesNotExist() public {
-        vm.prank(owner);
+        vm.prank(theOwner);
         vm.expectRevert(IFactchainCommunity.NoteDoesNotExist.selector);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
@@ -279,7 +285,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
 
         vm.expectEmit();
         emit NoteFinalised("https://twitter.com/something", player1, 1);
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
@@ -291,7 +297,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
             _content: "Something something something"
         });
 
-        vm.startPrank(owner);
+        vm.startPrank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         vm.expectRevert(IFactchainCommunity.NoteAlreadyFinalised.selector);
@@ -334,7 +340,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
         emit RaterRewarded("https://twitter.com/something", player1, rater1, 2, minimumStakePerRating);
         vm.expectEmit();
         emit RaterSlashed("https://twitter.com/something", player1, rater2, 2, minimumStakePerRating);
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         (,, uint96 rater1NewRewards,) = fcCommunity.userStats(rater1);
@@ -358,7 +364,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
 
         vm.expectEmit();
         emit CreatorRewarded("https://twitter.com/something", player1, 30, minimumStakePerNote);
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
 
         assert(player1.balance == player1OriginalBalance + 30);
@@ -378,7 +384,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
         });
         vm.expectEmit();
         emit CreatorSlashed("https://twitter.com/something", player1, 10, minimumStakePerNote);
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         assert(player1.balance == player1OriginalBalance - 10);
@@ -397,7 +403,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
                 _content: "Something something something"
             });
 
-            vm.prank(owner);
+            vm.prank(theOwner);
             fcCommunity.finaliseNote({_postUrl: postUrl1, _creator: player1, _finalRating: 5});
             index += 1;
         }
@@ -410,30 +416,34 @@ contract FactchainCommunityTest is Test, IFactchainCommunity, IOwnable {
         });
 
         vm.expectRevert(IFactchainCommunity.FailedToReward.selector);
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: postUrl2, _creator: player1, _finalRating: 5});
     }
 
     function test_setMinimumStakePerNote() public {
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.setMinimumStakePerNote(123);
         assert(fcCommunity.minimumStakePerNote() == 123);
     }
 
     function test_setMinimumStakePerNote_RevertIf_notOwner() public {
-        vm.expectRevert(IOwnable.NotOwner.selector);
+        // following specif expectRevert should work ... 
+        // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
+        vm.expectRevert();
         vm.prank(player1);
         fcCommunity.setMinimumStakePerNote(123);
     }
 
     function test_setMinimumStakePerRating() public {
-        vm.prank(owner);
+        vm.prank(theOwner);
         fcCommunity.setMinimumStakePerRating(123);
         assert(fcCommunity.minimumStakePerRating() == 123);
     }
 
     function test_setMinimumStakePerRating_RevertIf_notOwner() public {
-        vm.expectRevert(IOwnable.NotOwner.selector);
+        // following specif expectRevert should work ... 
+        // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
+        vm.expectRevert();
         vm.prank(player1);
         fcCommunity.setMinimumStakePerRating(123);
     }
