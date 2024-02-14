@@ -512,24 +512,57 @@ video {
 .right-0 {
   right: 0px;
 }
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+.col-start-2 {
+  grid-column-start: 2;
+}
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
 }
+.-mt-2 {
+  margin-top: -0.5rem;
+}
+.line-clamp-4 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+.block {
+  display: block;
+}
 .flex {
   display: flex;
+}
+.grid {
+  display: grid;
 }
 .h-\[105px\] {
   height: 105px;
 }
+.h-\[16px\] {
+  height: 16px;
+}
 .h-\[18px\] {
   height: 18px;
+}
+.h-\[24px\] {
+  height: 24px;
+}
+.h-\[32px\] {
+  height: 32px;
 }
 .h-\[40px\] {
   height: 40px;
 }
-.h-\[575px\] {
-  height: 575px;
+.h-\[600px\] {
+  height: 600px;
+}
+.h-\[80px\] {
+  height: 80px;
 }
 .h-auto {
   height: auto;
@@ -543,11 +576,20 @@ video {
 .w-5\/6 {
   width: 83.333333%;
 }
+.w-\[16px\] {
+  width: 16px;
+}
 .w-\[18px\] {
   width: 18px;
 }
 .w-\[200px\] {
   width: 200px;
+}
+.w-\[24px\] {
+  width: 24px;
+}
+.w-\[32px\] {
+  width: 32px;
 }
 .w-\[375px\] {
   width: 375px;
@@ -555,8 +597,14 @@ video {
 .w-\[40px\] {
   width: 40px;
 }
+.w-\[80px\] {
+  width: 80px;
+}
 .w-full {
   width: 100%;
+}
+.shrink-0 {
+  flex-shrink: 0;
 }
 .flex-grow {
   flex-grow: 1;
@@ -564,8 +612,19 @@ video {
 .transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
+.select-none {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.grid-cols-\[80px_80px_80px\] {
+  grid-template-columns: 80px 80px 80px;
+}
 .flex-col {
   flex-direction: column;
+}
+.items-start {
+  align-items: flex-start;
 }
 .items-center {
   align-items: center;
@@ -575,6 +634,12 @@ video {
 }
 .justify-between {
   justify-content: space-between;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
+.gap-2 {
+  gap: 0.5rem;
 }
 .gap-4 {
   gap: 1rem;
@@ -588,17 +653,22 @@ video {
   margin-bottom: calc(0.5rem * 0);
   margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
 }
-.space-y-8 > :not([hidden]) ~ :not([hidden]) {
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
-  margin-top: calc(2rem * (1 - 0));
-  margin-top: calc(2rem * (1 - var(--tw-space-y-reverse)));
-  margin-top: calc(2rem * calc(1 - 0));
-  margin-top: calc(2rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(2rem * 0);
-  margin-bottom: calc(2rem * var(--tw-space-y-reverse));
+  margin-top: calc(1rem * (1 - 0));
+  margin-top: calc(1rem * (1 - var(--tw-space-y-reverse)));
+  margin-top: calc(1rem * calc(1 - 0));
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * 0);
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
 }
 .overflow-y-scroll {
   overflow-y: scroll;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rounded {
   border-radius: 0.25rem;
@@ -628,6 +698,9 @@ video {
   background-color: rgba(57, 62, 70, 1);
   background-color: rgba(57, 62, 70, var(--tw-bg-opacity));
 }
+.bg-fcGrey\/70 {
+  background-color: rgba(57, 62, 70, 0.7);
+}
 .bg-neutral-400\/10 {
   background-color: rgba(163, 163, 163, 0.1);
 }
@@ -637,8 +710,17 @@ video {
 .bg-neutral-950\/30 {
   background-color: rgba(10, 10, 10, 0.3);
 }
+.bg-pink-400\/30 {
+  background-color: rgba(244, 114, 182, 0.3);
+}
+.p-2 {
+  padding: 0.5rem;
+}
 .p-4 {
   padding: 1rem;
+}
+.p-8 {
+  padding: 2rem;
 }
 .px-10 {
   padding-left: 2.5rem;
@@ -682,9 +764,17 @@ video {
   font-size: 1.125rem;
   line-height: 1.75rem;
 }
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
 .text-xl {
   font-size: 1.25rem;
   line-height: 1.75rem;
+}
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 .font-bold {
   font-weight: 700;
@@ -700,11 +790,20 @@ video {
   color: rgba(0, 173, 181, 1);
   color: rgba(0, 173, 181, var(--tw-text-opacity));
 }
+.opacity-10 {
+  opacity: 0.1;
+}
 .opacity-50 {
   opacity: 0.5;
 }
+.opacity-60 {
+  opacity: 0.6;
+}
 .opacity-70 {
   opacity: 0.7;
+}
+.opacity-90 {
+  opacity: 0.9;
 }
 .shadow {
   --tw-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
@@ -790,10 +889,7 @@ body {
   cursor: pointer;
 }
 
-a:link {
-  color: #00adb5;
-}
-a:visited {
+a.link:visited {
   color: #00adb5;
 }
 
@@ -838,6 +934,10 @@ a:visited {
 *::-webkit-scrollbar-track {
   border-radius: 5px;
   background: transparent;
+}
+
+.hover\:bg-fcGrey\/90:hover {
+  background-color: rgba(57, 62, 70, 0.9);
 }
 
 .hover\:text-fcGrey:hover {
