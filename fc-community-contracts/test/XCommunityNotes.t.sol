@@ -5,8 +5,6 @@ import "forge-std/Test.sol";
 import {XCommunityNotes, IXCommunityNotes} from "../src/XCommunityNotes.sol";
 import {XCommunityNotesProxy} from "../src/XCommunityNotesProxy.sol";
 
-import {IOwnable} from "../src/utils/Ownable.sol";
-
 contract XCommunityNotesTest is Test, IXCommunityNotes {
     XCommunityNotes collection;
     uint256 public constant MAX_TOKEN_SUPPLY = 42;

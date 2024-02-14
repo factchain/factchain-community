@@ -7,7 +7,5 @@ import {FactchainSFT} from "./FactchainSFT.sol";
 contract FactchainSFTProxy is ERC1967Proxy {
     FactchainSFT collection = new FactchainSFT();
 
-    constructor(address _owner)
-        ERC1967Proxy(address(collection), abi.encodeCall(collection.initialize, (_owner)))
-    {}
+    constructor(address _owner) ERC1967Proxy(address(collection), abi.encodeCall(collection.initialize, (_owner))) {}
 }

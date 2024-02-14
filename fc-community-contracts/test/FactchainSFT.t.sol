@@ -2,11 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import {IOwnable} from "../src/utils/Ownable.sol";
 import {FactchainSFT, IFactchainSFT} from "../src/FactchainSFT.sol";
 import {FactchainSFTProxy} from "../src/FactchainSFTProxy.sol";
 
-contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
+contract FactchainSFTTest is Test, IFactchainSFT {
     FactchainSFT collection;
 
     address public owner = address(1);
