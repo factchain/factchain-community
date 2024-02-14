@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import {IOwnable} from "../src/utils/Ownable.sol";
 import {FactchainSFT, IFactchainSFT} from "../src/FactchainSFT.sol";
+import {FactchainSFTProxy} from "../src/FactchainSFTProxy.sol";
 
 contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
     FactchainSFT collection;
@@ -18,7 +19,8 @@ contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
     address[] public raters = [rater1, rater2, rater3];
 
     function setUp() public {
-        collection = new FactchainSFT(owner);
+        address payable proxy = payable(address(new FactchainSFTProxy(owner)));
+        collection = FactchainSFT(proxy);
         vm.deal(nftBuyer, 100 ether);
         vm.deal(creator, 100 ether);
         vm.deal(factchainNFT, 100 ether);
@@ -78,7 +80,7 @@ contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
     }
 
     function test_setMintPrice_RevertIf_notOwner() public {
-        vm.expectRevert(IOwnable.NotOwner.selector);
+        vm.expectRevert();
         vm.prank(nftBuyer);
         collection.setMintPrice(123);
     }

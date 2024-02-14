@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.20;
 
-import {ERC1155URIStorage} from "openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
-import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
-import {Ownable} from "./utils/Ownable.sol";
+import {ERC1155URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {Arrays} from "openzeppelin-contracts/contracts/utils/Arrays.sol";
 
@@ -23,10 +24,10 @@ interface IFactchainSFT is IFactchainSFTEvents {
     error ReservedToFactchain();
 }
 
-contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
+contract FactchainSFT is OwnableUpgradeable, ERC1155URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFT {
     address public FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
-    uint256 public mintPrice = 1_000_000_000_000_000;
+    uint256 public mintPrice;
 
     mapping(uint256 => uint256) public supply;
 
@@ -35,9 +36,22 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
 
     using Arrays for address[];
 
-    constructor(address _owner) Ownable(_owner) ERC1155("https://gateway.pinata.cloud/ipfs/") {
+    // disable contract until initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address _owner) public initializer {
+        __ERC1155_init("https://gateway.pinata.cloud/ipfs/");
+        __ERC1155URIStorage_init();
+        __Ownable_init(_owner);
+        __UUPSUpgradeable_init();
+
+        mintPrice = 1_000_000_000_000_000;
         _setBaseURI("https://gateway.pinata.cloud/ipfs/");
     }
+
+    function _authorizeUpgrade(address /* newImplementation */ ) internal view override onlyOwner {}
 
     function setFactchainNFTContract(address _factchainNFTContract) public onlyOwner {
         FACTCHAIN_NFT_CONTRACT = _factchainNFTContract;
@@ -78,12 +92,5 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
         emit FactchainBuildersRewarded(reward);
         emit CreatorRewarded(creator, reward);
         _mint(msg.sender, id, value, "");
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, Ownable) returns (bool) {
-        // https://docs.soliditylang.org/en/develop/contracts.html#multiple-inheritance-and-linearization
-        // Solidity uses C3 linearization (like Python) but MRO is from right to left (unlike Python)
-        // We rewrite the Ownbale supportInterface check first to have it included in the call chain.
-        return interfaceId == 0x7f5828d0 || super.supportsInterface(interfaceId);
     }
 }
