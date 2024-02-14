@@ -95,7 +95,7 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
 
     // disable contract until initialization
     constructor() {
-       _disableInitializers();
+        _disableInitializers();
     }
 
     /// @notice Initialize the contract, setting its initial owner. Called only once.

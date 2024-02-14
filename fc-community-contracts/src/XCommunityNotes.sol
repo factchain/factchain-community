@@ -1,13 +1,12 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.20;
 
-import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
-import {SignatureChecker} from "openzeppelin-contracts/contracts/utils/cryptography/SignatureChecker.sol";
-import {MessageHashUtils} from "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
-
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
-
-import {Ownable} from "./utils/Ownable.sol";
+import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 interface IXCommunityNotesEvents {
     // Events
@@ -33,21 +32,30 @@ interface IXCommunityNotes is IXCommunityNotesEvents {
 /// @author Pierre HAY
 /// @notice
 /// @dev
-contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
+contract XCommunityNotes is OwnableUpgradeable, ERC1155Upgradeable, UUPSUpgradeable, IXCommunityNotes {
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
-    uint256 public mintPrice = 1_000_000_000_000_000;
+    uint256 public mintPrice;
 
     address public backend;
     mapping(uint256 id => uint256) public supply;
 
-    constructor(address _owner, address _backend)
-        Ownable(_owner)
-        ERC1155("https://factchain-community.s3.eu-west-3.amazonaws.com/{id}.json")
-    {
+    // disable contract until initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address _owner, address _backend) public initializer {
+        __Ownable_init(_owner);
+        __ERC1155_init("https://factchain-community.s3.eu-west-3.amazonaws.com/{id}.json");
+        __UUPSUpgradeable_init();
+
+        mintPrice = 1_000_000_000_000_000;
         backend = _backend;
         emit NewBackend(backend);
     }
+
+    function _authorizeUpgrade(address /* newImplementation */ ) internal view override onlyOwner {}
 
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
@@ -92,7 +100,7 @@ contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
         } else {
             emit MintWithProvidedValue(id, value);
             _mint(msg.sender, id, value, "");
-            supply[id] == value ? supply[id] = SUPPLY_EXHAUSTED : supply[id] -= value;
+            supply[id] = supply[id] == value ? SUPPLY_EXHAUSTED : supply[id] - value;
         }
     }
 
@@ -118,19 +126,4 @@ contract XCommunityNotes is Ownable, ERC1155, IXCommunityNotes {
     function worstRandEver() internal view returns (uint256) {
         return uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % MAX_TOKEN_SUPPLY;
     }
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, Ownable) returns (bool) {
-        // https://docs.soliditylang.org/en/develop/contracts.html#multiple-inheritance-and-linearization
-        // Solidity uses C3 linearization (like Python) but MRO is from right to left (unlike Python)
-        // We rewrite the Ownbale supportInterface check first to have it included in the call chain.
-        return interfaceId == 0x7f5828d0 || super.supportsInterface(interfaceId);
-    }
-
-    // function setTokenSupply(uint256 id, uint256 _supply) public onlyOwner {
-    //     // Since the supply is random for any token, `setTokenSupply`
-    //     // is useful for testing but obviously not acceptable in production.
-    //     // Uncomment the following function to activate following tests
-    //     // testMintWithAdjustedValue, testMintWithProvidedValue from test/XCommunityNotes.sol
-    //     supply[id] = _supply;
-    // }
 }

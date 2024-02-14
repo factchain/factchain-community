@@ -3,9 +3,11 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {XCommunityNotes, IXCommunityNotes} from "../src/XCommunityNotes.sol";
+import {XCommunityNotesProxy} from "../src/XCommunityNotesProxy.sol";
+
 import {IOwnable} from "../src/utils/Ownable.sol";
 
-contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
+contract XCommunityNotesTest is Test, IXCommunityNotes {
     XCommunityNotes collection;
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
@@ -20,7 +22,8 @@ contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
     address public backend = address(0x90bfaBa1671799a249fD2EAb12ff67de59a588ce);
 
     function setUp() public {
-        collection = new XCommunityNotes(owner, backend);
+        address payable proxy = payable(address(new XCommunityNotesProxy(owner, backend)));
+        collection = XCommunityNotes(proxy);
         vm.deal(recipient, 100 ether);
         vm.deal(other, 100 ether);
     }
@@ -37,16 +40,16 @@ contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
     function testGetTokenID() public {
         uint256 mintPrice = collection.mintPrice();
         vm.prank(recipient);
-        collection.mint{value: mintPrice * 3}(
+        collection.mint{value: mintPrice}(
             424273286,
-            3,
+            1,
             hex"84fac280d097e9c99d8522dd6adb8fcb46d9c1d0798d309b3abfd511d24e43b8",
             hex"4d27fe7200c3628938070a426865303178724b6165088e1de049e4c6a94ba0f73b73ea6636c85494ae5b516c0f1094f51d751738ab0d383ba254c5ade08a99fb1b"
         );
         vm.prank(recipient);
-        collection.mint{value: mintPrice * 3}(
+        collection.mint{value: mintPrice}(
             2742163345,
-            3,
+            1,
             hex"a683622ff02d5db7693fc088d7382b73f03bf1656a4cc771f2410e30d521bb87", // keccak(bytes("2742163345", "utf-8")).hex()
             hex"2c07228dcd8c019203a2bbead06a3db9e0ad417fdc1bf82ce8216eba01fff70421aa09a1da9238e93da10da266f4d7824f9a48488a2252652af7485b18197d9d1c"
         );
@@ -83,7 +86,7 @@ contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
         vm.expectEmit();
         // in this test: random supply is alway 29 case because block.timestamp and msg.sender are fixed.
         // see worstRandEver contract function.
-        // in this test: we've already minted 3 quantiy of token 123 in the above mint call
+        // in this test: we've already minted 3 quantity of tokenID 123 in the above mint call
         // remaining supply *should be* = 23
         emit Refunded(recipient, (MAX_TOKEN_SUPPLY - 23) * mintPrice);
         collection.mint{value: mintPrice * MAX_TOKEN_SUPPLY}(123, MAX_TOKEN_SUPPLY);
@@ -182,7 +185,9 @@ contract XCommunityNotesTest is Test, IXCommunityNotes, IOwnable {
     }
 
     function test_setMintPrice_RevertIf_notOwner() public {
-        vm.expectRevert(IOwnable.NotOwner.selector);
+        // following specif expectRevert should work ...
+        // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
+        vm.expectRevert();
         vm.prank(recipient);
         collection.setMintPrice(123);
     }

@@ -5,11 +5,9 @@ import {Test} from "forge-std/Test.sol";
 import {FactchainCommunity, IFactchainCommunity} from "../src/FactchainCommunity.sol";
 import {FactchainCommunityProxy} from "../src/FactchainCommunityProxy.sol";
 
-
-
 contract FactchainCommunityTest is Test, IFactchainCommunity {
     FactchainCommunity public fcCommunity;
-    
+
     uint160 lastUintAddress = 0;
 
     function nextAddress() public returns (address) {
@@ -248,7 +246,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         });
 
         vm.startPrank(rater1);
-        // following specif expectRevert should work ... 
+        // following specif expectRevert should work ...
         // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
         vm.expectRevert();
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
@@ -427,7 +425,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
     }
 
     function test_setMinimumStakePerNote_RevertIf_notOwner() public {
-        // following specif expectRevert should work ... 
+        // following specif expectRevert should work ...
         // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
         vm.expectRevert();
         vm.prank(player1);
@@ -441,7 +439,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
     }
 
     function test_setMinimumStakePerRating_RevertIf_notOwner() public {
-        // following specif expectRevert should work ... 
+        // following specif expectRevert should work ...
         // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
         vm.expectRevert();
         vm.prank(player1);
