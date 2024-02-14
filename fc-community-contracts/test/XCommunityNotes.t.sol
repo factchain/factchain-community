@@ -84,7 +84,7 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
         uint256 balanceBefore = address(recipient).balance;
         vm.prank(recipient);
         vm.expectEmit();
-        // in this test: random supply is alway 29 case because block.timestamp and msg.sender are fixed.
+        // in this test: random supply is alway 29 because block.timestamp and msg.sender are fixed.
         // see worstRandEver contract function.
         // in this test: we've already minted 3 quantity of tokenID 123 in the above mint call
         // remaining supply *should be* = 23

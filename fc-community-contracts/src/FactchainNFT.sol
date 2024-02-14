@@ -1,9 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.20;
 
-import {ERC721URIStorage} from "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import {ERC721} from "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import {Ownable} from "./utils/Ownable.sol";
+import {ERC721URIStorageUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract FactchainSFT {
     function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id)
@@ -20,20 +22,29 @@ interface IFactchainSFTEvents {
 /// @author Pierre HAY
 /// @notice
 /// @dev
-contract FactchainNFT is Ownable, ERC721URIStorage, IFactchainSFTEvents {
+contract FactchainNFT is OwnableUpgradeable, ERC721URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFTEvents {
     FactchainSFT factsLithography;
     uint256 public tokenIdCounter;
     string private baseTokenURI;
     mapping(string => mapping(address => uint256)) public noteIds;
 
-    constructor(address _owner, address _factsLitography, string memory _baseTokenURI)
-        Ownable(_owner)
-        ERC721("FactchainNotes", "FCN")
-    {
+    // disable contract until initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address _owner, address _factsLitography, string memory _baseTokenURI) public initializer {
+        __ERC721_init("FactchainNotes", "FCN");
+        __ERC721URIStorage_init();
+        __Ownable_init(_owner);
+        __UUPSUpgradeable_init();
+
         tokenIdCounter = 0;
         baseTokenURI = _baseTokenURI;
         factsLithography = FactchainSFT(_factsLitography);
     }
+
+    function _authorizeUpgrade(address /* newImplementation */ ) internal view override onlyOwner {}
 
     function setFactchainSFTContract(address _factsLitography) public onlyOwner {
         factsLithography = FactchainSFT(_factsLitography);
@@ -69,18 +80,5 @@ contract FactchainNFT is Ownable, ERC721URIStorage, IFactchainSFTEvents {
     /// @param _baseTokenURI the new base token URI
     function setBaseURI(string memory _baseTokenURI) public onlyOwner {
         baseTokenURI = _baseTokenURI;
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721URIStorage, Ownable)
-        returns (bool)
-    {
-        // https://docs.soliditylang.org/en/develop/contracts.html#multiple-inheritance-and-linearization
-        // Solidity uses C3 linearization (like Python) but MRO is from right to left (unlike Python)
-        // We rewrite the Ownbale supportInterface check first to have it included in the call chain.
-        return interfaceId == 0x7f5828d0 || super.supportsInterface(interfaceId);
     }
 }

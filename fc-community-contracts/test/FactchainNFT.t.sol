@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {FactchainNFT} from "../src/FactchainNFT.sol";
+import {FactchainNFTProxy} from "../src/FactchainNFTProxy.sol";
 
 contract FactchainNFTTest is Test {
     FactchainNFT collection;
@@ -14,7 +15,9 @@ contract FactchainNFTTest is Test {
     string public postUrl = "https://twitter.com/rektorship/status/1750724519705153835";
 
     function setUp() public {
-        collection = new FactchainNFT(owner, factChainSFT, "https://gateway.pinata.cloud/ipfs/");
+        address payable proxy =
+            payable(address(new FactchainNFTProxy(owner, factChainSFT, "https://gateway.pinata.cloud/ipfs/")));
+        collection = FactchainNFT(proxy);
     }
 
     function testGetTokenURI() public {
@@ -30,12 +33,5 @@ contract FactchainNFTTest is Test {
         collection.setBaseURI("http://ipfs.com/");
         collection.mint(recipient, postUrl, raters, "QmNSYBE2J3gnDrwXJAVnL6KfCzKvsgnWFVpxzyUUWcDmtt");
         assertEq(collection.tokenURI(1), "http://ipfs.com/QmNSYBE2J3gnDrwXJAVnL6KfCzKvsgnWFVpxzyUUWcDmtt");
-    }
-
-    function test_supportInterfaces() public {
-        assertTrue(collection.supportsInterface(0x7f5828d0)); // Ownable_INTERFACT_ID
-        assertTrue(collection.supportsInterface(0x49064906)); // ERC4906_INTERFACE_ID
-        assertTrue(collection.supportsInterface(0x80ac58cd)); // ERC721
-        assertFalse(collection.supportsInterface(0xffffffff));
     }
 }
