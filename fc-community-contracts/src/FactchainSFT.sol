@@ -13,6 +13,8 @@ interface IFactchainSFTEvents {
     event FactchainNFTContractUpdated(address factchainNFTContract);
     event FactchainBuildersRewarded(uint256 amount);
     event CreatorRewarded(address creator, uint256 amount);
+    event MintPriceUpdated(uint256 newMintPrice);
+    event ProtocolRewardUpdated(uint256 newProtocolReward);
 }
 
 interface IFactchainSFT is IFactchainSFTEvents {
@@ -23,12 +25,14 @@ interface IFactchainSFT is IFactchainSFTEvents {
     error NegativeBalance();
     error FailedToReward();
     error ReservedToFactchain();
+    error ProtocolRewardTooHigh();
 }
 
 contract FactchainSFT is OwnableUpgradeable, ERC1155URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFT {
     address public FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
     uint256 public mintPrice;
+    uint256 public protocolReward;
 
     mapping(uint256 => uint256) public supply;
 
@@ -49,6 +53,9 @@ contract FactchainSFT is OwnableUpgradeable, ERC1155URIStorageUpgradeable, UUPSU
         __UUPSUpgradeable_init();
 
         mintPrice = 1_000_000_000_000_000;
+        emit MintPriceUpdated(mintPrice);
+        protocolReward = mintPrice / 2;
+        emit ProtocolRewardUpdated(protocolReward);
         _setBaseURI("https://gateway.pinata.cloud/ipfs/");
     }
 
@@ -61,6 +68,13 @@ contract FactchainSFT is OwnableUpgradeable, ERC1155URIStorageUpgradeable, UUPSU
 
     function setMintPrice(uint256 _mintPrice) public onlyOwner {
         mintPrice = _mintPrice;
+        emit MintPriceUpdated(mintPrice);
+    }
+
+    function setProtocolReward(uint256 _protocolReward) public onlyOwner {
+        if (_protocolReward > mintPrice / 2) revert ProtocolRewardTooHigh();
+        protocolReward = _protocolReward;
+        emit ProtocolRewardUpdated(protocolReward);
     }
 
     function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id)
@@ -79,19 +93,20 @@ contract FactchainSFT is OwnableUpgradeable, ERC1155URIStorageUpgradeable, UUPSU
         return id;
     }
 
-    function mint(uint256 id, uint256 value) external payable {
-        if (msg.value != mintPrice * value) revert BadMintPrice();
-        if (value <= 0) revert ValueError();
-        if (value > supply[id]) {
+    function mint(uint256 id, uint256 quantity) external payable {
+        if (msg.value != mintPrice * quantity) revert BadMintPrice();
+        if (quantity <= 0) revert ValueError();
+        if (quantity > supply[id]) {
             revert SupplyExhausted();
         }
-        supply[id] -= value;
+        supply[id] -= quantity;
         address creator = _creatorsNFT[id];
-        uint256 reward = msg.value / 2;
-        (bool result,) = payable(creator).call{value: reward}("");
+        uint256 factchainBuildersReward = protocolReward * quantity;
+        uint256 creatorReward = msg.value - factchainBuildersReward;
+        (bool result,) = payable(creator).call{value: creatorReward}("");
         if (!result) revert FailedToReward();
-        emit FactchainBuildersRewarded(reward);
-        emit CreatorRewarded(creator, reward);
-        _mint(msg.sender, id, value, "");
+        emit FactchainBuildersRewarded(factchainBuildersReward);
+        emit CreatorRewarded(creator, creatorReward);
+        _mint(msg.sender, id, quantity, "");
     }
 }
