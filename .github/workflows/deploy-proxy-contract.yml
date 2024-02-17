@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Deploy new implementation of main contract
         if: needs.changes.outputs.main-contract == 'true'
-        uses: YBadiss/deploy-contract/proxy@main
+        uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'FactchainCommunity'
           proxy-contract-address: ${{ vars.FACTCHAIN_COMMUNITY_PROXY_ADDRESS }}
@@ -50,7 +50,7 @@ jobs:
       - name: Deploy new implementation of SFT contract
         if: needs.changes.outputs.sft-contract == 'true'
         id: sft
-        uses: YBadiss/deploy-contract/proxy@main
+        uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'FactchainSFT'
           proxy-contract-address: ${{ vars.FACTCHAIN_SFT_PROXY_ADDRESS }}
@@ -65,7 +65,7 @@ jobs:
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       - name: Deploy new implementation of NFT contract
         if: needs.changes.outputs.nft-contract == 'true'
-        uses: YBadiss/deploy-contract/proxy@main
+        uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'FactchainNFT'
           proxy-contract-address: ${{ vars.FACTCHAIN_NFT_PROXY_ADDRESS }}
@@ -80,7 +80,7 @@ jobs:
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       - name: Deploy new implementation of X contract
         if: needs.changes.outputs.x-contract == 'true'
-        uses: YBadiss/deploy-contract/proxy@main
+        uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'XCommunityNotes'
           proxy-contract-address: ${{ vars.X_COMMUNITY_NOTES_PROXY_ADDRESS }}
