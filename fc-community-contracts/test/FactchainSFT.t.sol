@@ -2,10 +2,10 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import {IOwnable} from "../src/utils/Ownable.sol";
 import {FactchainSFT, IFactchainSFT} from "../src/FactchainSFT.sol";
+import {FactchainProxy} from "../src/FactchainProxy.sol";
 
-contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
+contract FactchainSFTTest is Test, IFactchainSFT {
     FactchainSFT collection;
 
     address public owner = address(1);
@@ -18,7 +18,10 @@ contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
     address[] public raters = [rater1, rater2, rater3];
 
     function setUp() public {
-        collection = new FactchainSFT(owner);
+        FactchainSFT implementation = new FactchainSFT();
+        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner)));
+        collection = FactchainSFT(payable(address(proxy)));
+
         vm.deal(nftBuyer, 100 ether);
         vm.deal(creator, 100 ether);
         vm.deal(factchainNFT, 100 ether);
@@ -65,20 +68,51 @@ contract FactchainSFTTest is Test, IFactchainSFT, IOwnable {
             factchainSFTBalanceBefore + mintPrice / 2,
             "Factchain builders should have been rewarded too by half MintPrice"
         );
-        // should exhaust the supply
+        vm.startPrank(owner);
+        vm.expectEmit();
+        emit ProtocolRewardUpdated(250000000000000);
+        collection.setProtocolReward(mintPrice / 4);
+        vm.startPrank(nftBuyer);
+        vm.expectEmit();
+        uint256 expectedFactchainBuildersReward = 250000000000000 * 41;
+        emit FactchainBuildersRewarded(expectedFactchainBuildersReward);
+        emit CreatorRewarded(creator, mintPrice * 41 - expectedFactchainBuildersReward);
         collection.mint{value: mintPrice * 41}(42, 41);
+        // should exhaust the supply
         vm.expectRevert(IFactchainSFT.SupplyExhausted.selector);
         collection.mint{value: mintPrice}(42, 1);
     }
 
     function test_setMintPrice() public {
         vm.prank(owner);
+        vm.expectEmit();
+        emit MintPriceUpdated(123);
         collection.setMintPrice(123);
         assert(collection.mintPrice() == 123);
     }
 
+    function test_setProtocolReward() public {
+        vm.prank(owner);
+        vm.expectEmit();
+        uint256 protocolReward = 1_000_000_000_000_000 / 2;
+        emit ProtocolRewardUpdated(protocolReward);
+        collection.setProtocolReward(protocolReward);
+    }
+
+    function test_setWrongProtocolReward() public {
+        vm.prank(owner);
+        vm.expectRevert(IFactchainSFT.ProtocolRewardTooHigh.selector);
+        collection.setProtocolReward(1_000_000_000_000_001);
+    }
+
+    function test_setProtocolReward_RevertIf_notOwner() public {
+        vm.expectRevert();
+        vm.prank(nftBuyer);
+        collection.setProtocolReward(1_000_000_000_000_000 / 2);
+    }
+
     function test_setMintPrice_RevertIf_notOwner() public {
-        vm.expectRevert(IOwnable.NotOwner.selector);
+        vm.expectRevert();
         vm.prank(nftBuyer);
         collection.setMintPrice(123);
     }

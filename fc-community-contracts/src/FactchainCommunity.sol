@@ -2,7 +2,9 @@
 pragma solidity ^0.8.20;
 
 import {stdMath} from "forge-std/StdMath.sol";
-import "./utils/Ownable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 interface IFactchainCommunityEvents {
     /// @dev This emits when a the Owner funds the reserve
@@ -68,11 +70,11 @@ interface IFactchainCommunity is IFactchainCommunityEvents {
 /// @author Yacine B. Badiss, Pierre HAY
 /// @notice
 /// @dev
-contract FactchainCommunity is Ownable, IFactchainCommunity {
+contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeable, IFactchainCommunity {
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
-    uint64 public minimumStakePerNote = 1_000_000_000_000_000;
-    uint64 public minimumStakePerRating = 100_000_000_000_000;
+    uint64 public minimumStakePerNote;
+    uint64 public minimumStakePerRating;
 
     /// @notice Mapping of note identifier (postUrl + creatorAddress) to Note object
     mapping(string => mapping(address => Note)) public communityNotes;
@@ -89,9 +91,21 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
     /// It costs an extra 20k gas per call to createNote/rateNote
     mapping(address => UserStats) public userStats;
 
-    /// @notice Instantiate a new contract and set its owner
-    /// @param _owner Owner of the contract
-    constructor(address _owner) Ownable(_owner) {}
+    // disable contract until initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    /// @notice Initialize the contract, setting its initial owner. Called only once.
+    /// @param initialOwner initialOwner of the contract
+    function initialize(address initialOwner) public initializer {
+        minimumStakePerNote = 1_000_000_000_000_000;
+        minimumStakePerRating = 100_000_000_000_000;
+        __Ownable_init(initialOwner);
+        __UUPSUpgradeable_init();
+    }
+
+    function _authorizeUpgrade(address /* newImplementation */ ) internal view override onlyOwner {}
 
     ////////////////////////////////////////////////////////////////////////
     /// Getter functions
@@ -255,12 +269,12 @@ contract FactchainCommunity is Ownable, IFactchainCommunity {
         rewardOrSlashRaters(_postUrl, _creator);
         emit NoteFinalised({postUrl: _postUrl, creator: _creator, finalRating: _finalRating});
     }
-    
+
     /// @notice Set minimum staking for note creation
     function setMinimumStakePerNote(uint64 _miniumStakePerNote) external onlyOwner {
         minimumStakePerNote = _miniumStakePerNote;
     }
-    
+
     /// @notice Set minimum staking for note rating
     function setMinimumStakePerRating(uint64 _minimumStakePerRating) external onlyOwner {
         minimumStakePerRating = _minimumStakePerRating;

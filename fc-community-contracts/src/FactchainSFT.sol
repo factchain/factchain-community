@@ -1,9 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.20;
 
-import {ERC1155URIStorage} from "openzeppelin-contracts/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
-import {ERC1155} from "openzeppelin-contracts/contracts/token/ERC1155/ERC1155.sol";
-import {Ownable} from "./utils/Ownable.sol";
+import {ERC1155URIStorageUpgradeable} from
+    "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/ERC1155URIStorageUpgradeable.sol";
+import {ERC1155Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {Arrays} from "openzeppelin-contracts/contracts/utils/Arrays.sol";
 
@@ -11,6 +13,8 @@ interface IFactchainSFTEvents {
     event FactchainNFTContractUpdated(address factchainNFTContract);
     event FactchainBuildersRewarded(uint256 amount);
     event CreatorRewarded(address creator, uint256 amount);
+    event MintPriceUpdated(uint256 newMintPrice);
+    event ProtocolRewardUpdated(uint256 newProtocolReward);
 }
 
 interface IFactchainSFT is IFactchainSFTEvents {
@@ -21,12 +25,14 @@ interface IFactchainSFT is IFactchainSFTEvents {
     error NegativeBalance();
     error FailedToReward();
     error ReservedToFactchain();
+    error ProtocolRewardTooHigh();
 }
 
-contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
+contract FactchainSFT is OwnableUpgradeable, ERC1155URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFT {
     address public FACTCHAIN_NFT_CONTRACT;
     uint256 public constant FACTCHAINERS_MINT_SUPPLY = 42;
-    uint256 public mintPrice = 1_000_000_000_000_000;
+    uint256 public mintPrice;
+    uint256 public protocolReward;
 
     mapping(uint256 => uint256) public supply;
 
@@ -35,9 +41,25 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
 
     using Arrays for address[];
 
-    constructor(address _owner) Ownable(_owner) ERC1155("https://gateway.pinata.cloud/ipfs/") {
+    // disable contract until initialization
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address _owner) public initializer {
+        __ERC1155_init("https://gateway.pinata.cloud/ipfs/");
+        __ERC1155URIStorage_init();
+        __Ownable_init(_owner);
+        __UUPSUpgradeable_init();
+
+        mintPrice = 1_000_000_000_000_000;
+        emit MintPriceUpdated(mintPrice);
+        protocolReward = mintPrice / 2;
+        emit ProtocolRewardUpdated(protocolReward);
         _setBaseURI("https://gateway.pinata.cloud/ipfs/");
     }
+
+    function _authorizeUpgrade(address /* newImplementation */ ) internal view override onlyOwner {}
 
     function setFactchainNFTContract(address _factchainNFTContract) public onlyOwner {
         FACTCHAIN_NFT_CONTRACT = _factchainNFTContract;
@@ -46,9 +68,19 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
 
     function setMintPrice(uint256 _mintPrice) public onlyOwner {
         mintPrice = _mintPrice;
+        emit MintPriceUpdated(mintPrice);
     }
 
-    function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id) public returns (uint256) {
+    function setProtocolReward(uint256 _protocolReward) public onlyOwner {
+        if (_protocolReward > mintPrice / 2) revert ProtocolRewardTooHigh();
+        protocolReward = _protocolReward;
+        emit ProtocolRewardUpdated(protocolReward);
+    }
+
+    function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id)
+        public
+        returns (uint256)
+    {
         if (msg.sender != FACTCHAIN_NFT_CONTRACT) {
             revert ReservedToFactchain();
         }
@@ -61,26 +93,20 @@ contract FactchainSFT is Ownable, ERC1155URIStorage, IFactchainSFT {
         return id;
     }
 
-    function mint(uint256 id, uint256 value) external payable {
-        if (msg.value != mintPrice * value) revert BadMintPrice();
-        if (value <= 0) revert ValueError();
-        if (value > supply[id]) {
+    function mint(uint256 id, uint256 quantity) external payable {
+        if (msg.value != mintPrice * quantity) revert BadMintPrice();
+        if (quantity <= 0) revert ValueError();
+        if (quantity > supply[id]) {
             revert SupplyExhausted();
         }
-        supply[id] -= value;
+        supply[id] -= quantity;
         address creator = _creatorsNFT[id];
-        uint256 reward = msg.value / 2;
-        (bool result,) = payable(creator).call{value: reward}("");
+        uint256 factchainBuildersReward = protocolReward * quantity;
+        uint256 creatorReward = msg.value - factchainBuildersReward;
+        (bool result,) = payable(creator).call{value: creatorReward}("");
         if (!result) revert FailedToReward();
-        emit FactchainBuildersRewarded(reward);
-        emit CreatorRewarded(creator, reward);
-        _mint(msg.sender, id, value, "");
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, Ownable) returns (bool) {
-        // https://docs.soliditylang.org/en/develop/contracts.html#multiple-inheritance-and-linearization
-        // Solidity uses C3 linearization (like Python) but MRO is from right to left (unlike Python)
-        // We rewrite the Ownbale supportInterface check first to have it included in the call chain.
-        return interfaceId == 0x7f5828d0 || super.supportsInterface(interfaceId);
+        emit FactchainBuildersRewarded(factchainBuildersReward);
+        emit CreatorRewarded(creator, creatorReward);
+        _mint(msg.sender, id, quantity, "");
     }
 }

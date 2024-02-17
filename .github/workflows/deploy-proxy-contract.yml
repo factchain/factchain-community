@@ -1,0 +1,95 @@
+name: Deploy contracts
+on:
+  push:
+    branches: [ main ]
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      main-contract: ${{ steps.changes.outputs.main-contract }}
+      nft-contract: ${{ steps.changes.outputs.nft-contract }}
+      sft-contract: ${{ steps.changes.outputs.sft-contract }}
+      x-contract: ${{ steps.changes.outputs.x-contract }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            main-contract:
+              - 'fc-community-contracts/src/FactchainCommunity.sol'
+            nft-contract:
+              - 'fc-community-contracts/src/FactchainNFT.sol'
+            sft-contract:
+              - 'fc-community-contracts/src/FactchainSFT.sol'
+            x-contract:
+              - 'fc-community-contracts/src/XCommunityNotes.sol'
+          token: ''
+  deploy-contracts:
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+    permissions: write-all
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy new implementation of main contract
+        if: needs.changes.outputs.main-contract == 'true'
+        uses: YBadiss/deploy-contract/proxy@v2
+        with:
+          implementation-contract-name: 'FactchainCommunity'
+          proxy-contract-address: ${{ vars.FACTCHAIN_COMMUNITY_PROXY_ADDRESS }}
+          call-args: ''
+          deployer-pk: ${{ secrets.DEPLOYER_PK }}
+          owner-pk: ${{ secrets.OWNER_PK }}
+          parent-dir: 'fc-community-contracts'
+          chain-id: '11155111'
+          rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
+          verify: true
+          etherscan-url: 'https://sepolia.etherscan.io'
+          etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
+      - name: Deploy new implementation of SFT contract
+        if: needs.changes.outputs.sft-contract == 'true'
+        id: sft
+        uses: YBadiss/deploy-contract/proxy@v2
+        with:
+          implementation-contract-name: 'FactchainSFT'
+          proxy-contract-address: ${{ vars.FACTCHAIN_SFT_PROXY_ADDRESS }}
+          call-args: ''
+          deployer-pk: ${{ secrets.DEPLOYER_PK }}
+          owner-pk: ${{ secrets.NFT_OWNER_PK }}
+          parent-dir: 'fc-community-contracts'
+          chain-id: '11155111'
+          rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
+          verify: true
+          etherscan-url: 'https://sepolia.etherscan.io'
+          etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
+      - name: Deploy new implementation of NFT contract
+        if: needs.changes.outputs.nft-contract == 'true'
+        uses: YBadiss/deploy-contract/proxy@v2
+        with:
+          implementation-contract-name: 'FactchainNFT'
+          proxy-contract-address: ${{ vars.FACTCHAIN_NFT_PROXY_ADDRESS }}
+          call-args: ''
+          deployer-pk: ${{ secrets.DEPLOYER_PK }}
+          owner-pk: ${{ secrets.NFT_OWNER_PK }}
+          parent-dir: 'fc-community-contracts'
+          chain-id: '11155111'
+          rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
+          verify: true
+          etherscan-url: 'https://sepolia.etherscan.io'
+          etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
+      - name: Deploy new implementation of X contract
+        if: needs.changes.outputs.x-contract == 'true'
+        uses: YBadiss/deploy-contract/proxy@v2
+        with:
+          implementation-contract-name: 'XCommunityNotes'
+          proxy-contract-address: ${{ vars.X_COMMUNITY_NOTES_PROXY_ADDRESS }}
+          call-args: ''
+          deployer-pk: ${{ secrets.DEPLOYER_PK }}
+          owner-pk: ${{ secrets.OWNER_PK }}
+          parent-dir: 'fc-community-contracts'
+          chain-id: '11155111'
+          rpc-url: ${{ secrets.RPC_ETH_SEPOLIA_HTTPS }}
+          verify: true
+          etherscan-url: 'https://sepolia.etherscan.io'
+          etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
