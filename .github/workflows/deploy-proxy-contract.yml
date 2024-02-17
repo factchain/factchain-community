@@ -1,10 +1,7 @@
 name: Deploy contracts
 on:
-  pull_request:
-    branches: [ main ]
   push:
     branches: [ main ]
-  workflow_dispatch:
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -56,9 +53,8 @@ jobs:
         uses: YBadiss/deploy-contract/proxy@main
         with:
           implementation-contract-name: 'FactchainSFT'
-          # proxy-contract-address: ${{ vars.FACTCHAIN_SFT_PROXY_ADDRESS }}
-          proxy-contract-name: 'FactchainProxy'
-          call-args: '"initialize(address)" "${{ vars.NFT_OWNER_ADDRESS }}"'
+          proxy-contract-address: ${{ vars.FACTCHAIN_SFT_PROXY_ADDRESS }}
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.NFT_OWNER_PK }}
           parent-dir: 'fc-community-contracts'
@@ -72,9 +68,8 @@ jobs:
         uses: YBadiss/deploy-contract/proxy@main
         with:
           implementation-contract-name: 'FactchainNFT'
-          # proxy-contract-address: ${{ vars.FACTCHAIN_NFT_PROXY_ADDRESS }}
-          proxy-contract-name: 'FactchainProxy'
-          call-args: '"initialize(address,address,string)" "${{ vars.NFT_OWNER_ADDRESS }}" "${{ steps.sft.outputs.proxy-contract-address }}" "https://gateway.pinata.cloud/ipfs/"'
+          proxy-contract-address: ${{ vars.FACTCHAIN_NFT_PROXY_ADDRESS }}
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.NFT_OWNER_PK }}
           parent-dir: 'fc-community-contracts'
@@ -88,9 +83,8 @@ jobs:
         uses: YBadiss/deploy-contract/proxy@main
         with:
           implementation-contract-name: 'XCommunityNotes'
-          # proxy-contract-address: ${{ vars.X_COMMUNITY_NOTES_PROXY_ADDRESS }}
-          proxy-contract-name: 'FactchainProxy'
-          call-args: '"initialize(address,address)" "${{ vars.OWNER_ADDRESS }}" "${{ vars.BACKEND_ADDRESS }}"'
+          proxy-contract-address: ${{ vars.X_COMMUNITY_NOTES_PROXY_ADDRESS }}
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.OWNER_PK }}
           parent-dir: 'fc-community-contracts'
