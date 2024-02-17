@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {XCommunityNotes, IXCommunityNotes} from "../src/XCommunityNotes.sol";
-import {XCommunityNotesProxy} from "../src/XCommunityNotesProxy.sol";
+import {FactchainProxy} from "../src/FactchainProxy.sol";
 
 contract XCommunityNotesTest is Test, IXCommunityNotes {
     XCommunityNotes collection;
@@ -20,8 +20,10 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
     address public backend = address(0x90bfaBa1671799a249fD2EAb12ff67de59a588ce);
 
     function setUp() public {
-        address payable proxy = payable(address(new XCommunityNotesProxy(owner, backend)));
-        collection = XCommunityNotes(proxy);
+        XCommunityNotes implementation = new XCommunityNotes();
+        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner, backend)));
+        collection = XCommunityNotes(payable(address(proxy)));
+
         vm.deal(recipient, 100 ether);
         vm.deal(other, 100 ether);
     }

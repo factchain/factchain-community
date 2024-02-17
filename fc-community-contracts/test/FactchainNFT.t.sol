@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import {FactchainNFT} from "../src/FactchainNFT.sol";
-import {FactchainNFTProxy} from "../src/FactchainNFTProxy.sol";
+import {FactchainProxy} from "../src/FactchainProxy.sol";
 
 contract FactchainNFTTest is Test {
     FactchainNFT collection;
@@ -15,9 +15,9 @@ contract FactchainNFTTest is Test {
     string public postUrl = "https://twitter.com/rektorship/status/1750724519705153835";
 
     function setUp() public {
-        address payable proxy =
-            payable(address(new FactchainNFTProxy(owner, factChainSFT, "https://gateway.pinata.cloud/ipfs/")));
-        collection = FactchainNFT(proxy);
+        FactchainNFT implementation = new FactchainNFT();
+        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner, factChainSFT, "https://gateway.pinata.cloud/ipfs/")));
+        collection = FactchainNFT(payable(address(proxy)));
     }
 
     function testGetTokenURI() public {

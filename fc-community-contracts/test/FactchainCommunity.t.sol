@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {FactchainCommunity, IFactchainCommunity} from "../src/FactchainCommunity.sol";
-import {FactchainCommunityProxy} from "../src/FactchainCommunityProxy.sol";
+import {FactchainProxy} from "../src/FactchainProxy.sol";
 
 contract FactchainCommunityTest is Test, IFactchainCommunity {
     FactchainCommunity public fcCommunity;
@@ -30,8 +30,9 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
     }
 
     function setUp() public {
-        address payable proxy = payable(address(new FactchainCommunityProxy(theOwner)));
-        fcCommunity = FactchainCommunity(proxy);
+        FactchainCommunity implementation = new FactchainCommunity();
+        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(implementation.initialize, (theOwner)));
+        fcCommunity = FactchainCommunity(payable(address(proxy)));
         fundReserve();
     }
 
