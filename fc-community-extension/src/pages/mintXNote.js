@@ -117,7 +117,7 @@ console.log(`contract`, contract);
 console.log(`contract address ${contract.target}`);
 
 const mintXNote = async (xNoteId) => {
-  const value = 1;
+  const value = 1n;
   console.log('Minting X Note');
   const mintPrice = await contract.mintPrice();
   return await makeTransactionCall(

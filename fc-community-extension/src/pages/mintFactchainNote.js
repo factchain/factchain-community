@@ -143,7 +143,7 @@ const getFactchainNftInfo = async (postUrl, creatorAddress) => {
 };
 
 const mintFactchainNote = async (factchainNoteId) => {
-  const value = 1;
+  const value = 1n;
   console.log('Minting Factchain Note');
   const mintPrice = await sftContract.mintPrice();
   return await makeTransactionCall(
