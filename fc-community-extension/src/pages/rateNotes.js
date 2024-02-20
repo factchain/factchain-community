@@ -1,7 +1,8 @@
 import { render } from 'solid-js/web';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { logger } from '../utils/logging';
-import { FCHero, FCLoader } from './components';
+import { FCHero, FCLoaderClean } from './components';
+import FCNote from './components/FCNote';
 import { createSignal } from 'solid-js';
 import { makeTransactionUrl } from '../utils/constants';
 
@@ -10,7 +11,7 @@ import './style.css';
 function FCRateNote({ note, rateNote }) {
   const [transaction, setTransaction] = createSignal(null);
   const [submitting, setSubmitting] = createSignal(false);
-  const [rating, setRating] = createSignal(null);
+  const [rating, setRating] = createSignal(3);
   const [error, setError] = createSignal(null);
 
   const submit = async () => {
@@ -29,36 +30,61 @@ function FCRateNote({ note, rateNote }) {
     return transaction() ? transaction().hash : null;
   };
 
+  const handleChange = (e) => {
+    setRating(Number(e.target.value));
+  };
+
   return (
     <div>
       <FCHero />
-
-      <h1>Rate Factchain Note</h1>
-      <div>
-        <div>
-          <div style="font-size: 120%">
-            Rate the level of helpfulness of this note:
-          </div>
-          <p style="margin: 30px;">{note.content}</p>
-          <div>
-            <input
-              id="rating"
-              type="range"
-              min="1"
-              step="1"
-              max="5"
-              disabled={transactionHash() || submitting()}
-            ></input>
-          </div>
+      <div className="max-w-[400px] mx-auto px-4 py-3">
+        <h1 className="text-2xl font-semibold text-center mb-4">
+          Rate Factchain Note
+        </h1>
+        <div className="mb-8">
+          <FCNote
+            key={note.postUrl}
+            postUrl={note.postUrl}
+            creator={note.creatorAddress}
+            content={note.content}
+            hideMetas
+          />
         </div>
+        {!transactionHash() && (
+          <div>
+            <div className="text-base">
+              {'How helpful is this note? Rate it on a scale of 1 to 5.'}
+            </div>
+            <div className="px-8 my-8 flex items-center gap-4">
+              <input
+                className="flex-grow accent-fcAccent outline-none"
+                id="rating"
+                type="range"
+                min="1"
+                step="1"
+                max="5"
+                disabled={transactionHash() || submitting()}
+                onChange={handleChange}
+                value={rating()}
+              />
+              <div className="text-base bg-fcAccent/10 text-fcAccent font-bold rounded-full w-8 h-8 flex items-center justify-center">
+                {rating()}
+              </div>
+            </div>
+          </div>
+        )}
 
         <Switch>
           <Match when={transactionHash()}>
-            <div>
-              <div style="margin-top: 50px; margin-bottom: 20px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
-                Your rating of {rating()}/5 was successfully submitted!
+            <div className="flex flex-col items-center text-center">
+              <img
+                className="w-[70px] h-[70px]"
+                src="/ui/icons/checkbox-checked.png"
+              />
+              <div className="text-base mt-4">
+                {`You gave this note a ${rating()}/5 rating.`}
               </div>
-              <div style="margin-bottom: 10px; font-size: 90%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+              <div className="mt-2">
                 View transaction on{' '}
                 <a
                   className="link"
@@ -72,18 +98,25 @@ function FCRateNote({ note, rateNote }) {
             </div>
           </Match>
           <Match when={submitting()}>
-            <div>
-              <FCLoader />
+            <div className="flex justify-center">
+              <FCLoaderClean />
             </div>
           </Match>
           <Match when={true}>
-            <div>
-              <button onclick={submit}>Submit rating</button>
-            </div>
+            {error() && (
+              <div className="mb-4 bg-red-400/10 text-red-500 font-mono text-base p-4 rounded break-words">
+                Error: {JSON.stringify(error())}
+              </div>
+            )}
+            <button
+              className="btn p-4 w-full text-lg font-semibold"
+              onclick={submit}
+            >
+              Submit rating
+            </button>
           </Match>
         </Switch>
       </div>
-      {error() ? <div>Error: {JSON.stringify(error())}</div> : <div></div>}
     </div>
   );
 }
