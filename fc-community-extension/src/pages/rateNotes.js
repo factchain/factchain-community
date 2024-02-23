@@ -95,6 +95,12 @@ function FCRateNote({ note, rateNote }) {
                 </a>
                 .
               </div>
+              <button
+                className="btn p-4 w-full text-lg font-semibold mt-4"
+                onclick={() => window.close()}
+              >
+                {'Close'}
+              </button>
             </div>
           </Match>
           <Match when={submitting()}>
