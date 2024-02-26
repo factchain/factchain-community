@@ -6,7 +6,7 @@ import FCNote from './components/FCNote';
 import FCEmptyState from './components/FCEmptyState';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
-import { cutText, elipseText } from '../utils/constants';
+import { elipseText } from '../utils/constants';
 
 import './style.css';
 
@@ -94,6 +94,7 @@ function FCNotes(props) {
                       postUrl={note.postUrl}
                       creator={note.creatorAddress}
                       content={note.content}
+                      finalRating={note.finalRating}
                     />
                   )}
                 </For>

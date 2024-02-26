@@ -20,12 +20,12 @@ const FCNote = (props) => {
       </div>
       <div className="flex items-start gap-2">
         <div className="opacity-90 line-clamp-4 flex-grow">{props.content}</div>
-        {!props.hideMetas && (
+        {!props.hideMetas && props.finalRating && (
           <div className="shrink-0 flex flex-col gap-1 items-center">
             <div className="w-[32px] h-[32px] bg-pink-400/30 rounded"></div>
             <div className="flex items-center gap-1">
               {/* TODO proper note + dynamic image based on note */}
-              <strong>{'4.9'}</strong>
+              <strong>{props.finalRating}</strong>
               <span>
                 <img
                   className="w-[16px] h-[16px]"
