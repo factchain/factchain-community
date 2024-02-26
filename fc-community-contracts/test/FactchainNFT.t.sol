@@ -16,7 +16,8 @@ contract FactchainNFTTest is Test {
 
     function setUp() public {
         FactchainNFT implementation = new FactchainNFT();
-        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner, factChainSFT, "https://gateway.pinata.cloud/ipfs/")));
+        FactchainProxy proxy =
+        new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner, factChainSFT, "https://gateway.pinata.cloud/ipfs/")));
         collection = FactchainNFT(payable(address(proxy)));
     }
 
