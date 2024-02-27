@@ -20,18 +20,20 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
     address public player2 = nextAddress();
     address public rater1 = nextAddress();
     address public rater2 = nextAddress();
+    address public rater3 = nextAddress();
 
     function fundReserve() public {
         hoax(theOwner);
         vm.expectEmit();
-        emit ReserveFunded(100);
-        (bool result,) = payable(fcCommunity).call{value: 100}("");
+        emit ReserveFunded(1_000_000_000_000_000_000);
+        (bool result,) = payable(fcCommunity).call{value: 1_000_000_000_000_000_000}("");
         assertTrue(result);
     }
 
     function setUp() public {
         FactchainCommunity implementation = new FactchainCommunity();
-        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(implementation.initialize, (theOwner)));
+        FactchainProxy proxy =
+            new FactchainProxy(address(implementation), abi.encodeCall(implementation.initialize, (theOwner)));
         fcCommunity = FactchainCommunity(payable(address(proxy)));
         fundReserve();
     }
@@ -308,6 +310,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         uint256 minimumStakePerRating = fcCommunity.minimumStakePerRating();
         (,, uint96 rater1OldRewards,) = fcCommunity.userStats(rater1);
         (,,, uint96 rater2OldSlash) = fcCommunity.userStats(rater2);
+        (,,, uint96 rater3OldSlash) = fcCommunity.userStats(rater3);
 
         hoax(player1);
         fcCommunity.createNote{value: minimumStakePerNote}({
@@ -318,7 +321,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         hoax(rater1);
         uint256 rater1OriginalBalance = rater1.balance;
         // _rating perfectly matches final rating (1)
-        // rater1 should be reward of 2 WEI
+        // rater1 should be reward of 1.5 * stake
         fcCommunity.rateNote{value: minimumStakePerRating}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
@@ -328,26 +331,40 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         hoax(rater2);
         uint256 rater2OriginalBalance = rater2.balance;
         // wrong rating with maximal delta
-        // rater2 should be slashed of 2 WEI
+        // rater2 should be slashed of their entire stake
         fcCommunity.rateNote{value: minimumStakePerRating}({
             _postUrl: "https://twitter.com/something",
             _creator: player1,
             _rating: 5
         });
 
+        hoax(rater3);
+        uint256 rater3OriginalBalance = rater3.balance;
+        // wrong rating with delta == 3
+        // rater2 should be slashed of 0.75 * stake
+        fcCommunity.rateNote{value: minimumStakePerRating}({
+            _postUrl: "https://twitter.com/something",
+            _creator: player1,
+            _rating: 4
+        });
         vm.expectEmit();
-        emit RaterRewarded("https://twitter.com/something", player1, rater1, 2, minimumStakePerRating);
+        emit RaterRewarded("https://twitter.com/something", player1, rater1, 150000000000000, minimumStakePerRating);
         vm.expectEmit();
-        emit RaterSlashed("https://twitter.com/something", player1, rater2, 2, minimumStakePerRating);
+        emit RaterSlashed(
+            "https://twitter.com/something", player1, rater2, minimumStakePerRating, minimumStakePerRating
+        );
         vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         (,, uint96 rater1NewRewards,) = fcCommunity.userStats(rater1);
-        assert(rater1.balance == rater1OriginalBalance + 2);
-        assert(rater1NewRewards == rater1OldRewards + 2);
+        assert(rater1.balance == rater1OriginalBalance + 150000000000000);
+        assert(rater1NewRewards == rater1OldRewards + 150000000000000);
         (,,, uint96 rater2NewSlash) = fcCommunity.userStats(rater2);
-        assert(rater2.balance == rater2OriginalBalance - 2);
-        assert(rater2NewSlash == rater2OldSlash + 2);
+        assert(rater2.balance == rater2OriginalBalance - minimumStakePerRating);
+        assert(rater2NewSlash == rater2OldSlash + minimumStakePerRating);
+        (,,, uint96 rater3NewSlash) = fcCommunity.userStats(rater3);
+        assert(rater3.balance == rater3OriginalBalance - 75000000000000);
+        assert(rater3NewSlash == rater3OldSlash + 75000000000000);
     }
 
     function test_rewardCreator() public {
@@ -362,19 +379,19 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         });
 
         vm.expectEmit();
-        emit CreatorRewarded("https://twitter.com/something", player1, 30, minimumStakePerNote);
+
+        uint96 expectedReward = 1_500_000_000_000_000;
+        emit CreatorRewarded("https://twitter.com/something", player1, expectedReward, minimumStakePerNote);
         vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
-
-        assert(player1.balance == player1OriginalBalance + 30);
+        assert(player1.balance == player1OriginalBalance + expectedReward);
         (,, uint96 newRewards,) = fcCommunity.userStats(player1);
-        assert(newRewards == oldRewards + 30);
+        assert(newRewards == oldRewards + expectedReward);
     }
 
     function test_slashCreator() public {
         uint256 minimumStakePerNote = fcCommunity.minimumStakePerNote();
         (,,, uint96 oldSlash) = fcCommunity.userStats(player1);
-
         hoax(player1);
         uint256 player1OriginalBalance = player1.balance;
         fcCommunity.createNote{value: minimumStakePerNote}({
@@ -382,41 +399,25 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
             _content: "Something something something"
         });
         vm.expectEmit();
-        emit CreatorSlashed("https://twitter.com/something", player1, 10, minimumStakePerNote);
+        emit CreatorSlashed("https://twitter.com/something", player1, minimumStakePerNote, minimumStakePerNote);
         vm.prank(theOwner);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
-
-        assert(player1.balance == player1OriginalBalance - 10);
+        assert(player1.balance == player1OriginalBalance - minimumStakePerNote);
         (,,, uint96 newSlash) = fcCommunity.userStats(player1);
-        assert(newSlash == oldSlash + 10);
+        assert(newSlash == oldSlash + minimumStakePerNote);
     }
 
     function test_RevertIf_insuficientFundForReward() public {
         uint256 minimumStakePerNote = fcCommunity.minimumStakePerNote();
-        uint256 index = 0;
-        while (address(fcCommunity).balance > 30) {
-            string memory postUrl1 = string.concat("https://twitter.com/something", vm.toString(index));
-            hoax(player1);
-            fcCommunity.createNote{value: minimumStakePerNote}({
-                _postUrl: postUrl1,
-                _content: "Something something something"
-            });
-
-            vm.prank(theOwner);
-            fcCommunity.finaliseNote({_postUrl: postUrl1, _creator: player1, _finalRating: 5});
-            index += 1;
-        }
-
-        string memory postUrl2 = string.concat("https://twitter.com/something", vm.toString(index));
         hoax(player1);
         fcCommunity.createNote{value: minimumStakePerNote}({
-            _postUrl: postUrl2,
+            _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-
         vm.expectRevert(IFactchainCommunity.FailedToReward.selector);
         vm.prank(theOwner);
-        fcCommunity.finaliseNote({_postUrl: postUrl2, _creator: player1, _finalRating: 5});
+        vm.deal(address(fcCommunity), 0);
+        fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
     }
 
     function test_setMinimumStakePerNote() public {

@@ -21,7 +21,8 @@ contract XCommunityNotesTest is Test, IXCommunityNotes {
 
     function setUp() public {
         XCommunityNotes implementation = new XCommunityNotes();
-        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner, backend)));
+        FactchainProxy proxy =
+            new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner, backend)));
         collection = XCommunityNotes(payable(address(proxy)));
 
         vm.deal(recipient, 100 ether);

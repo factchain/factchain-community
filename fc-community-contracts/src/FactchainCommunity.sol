@@ -25,6 +25,10 @@ interface IFactchainCommunityEvents {
     event CreatorSlashed(string postUrl, address indexed creator, uint256 slash, uint256 stake);
     /// @dev This emits when a Note was finalised
     event NoteFinalised(string postUrl, address indexed creator, uint8 indexed finalRating);
+    /// @dev This emits when the minimum stake per note is updated
+    event MinimumStakePerNoteUpdated(uint64 newMinimumStake);
+    /// @dev This emits when the minimum stake per rating is updated
+    event MinimumStakePerRatingUpdated(uint64 newMinimumStake);
 }
 
 interface IFactchainCommunity is IFactchainCommunityEvents {
@@ -149,24 +153,32 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
 
     function rewardOrSlashCreator(string memory _postUrl, address _creator) internal {
         uint8 finalRating = communityNotes[_postUrl][_creator].finalRating;
-        if (finalRating >= 3) {
-            uint96 reward = uint96(finalRating - 2) * 10;
-            // This will revert if contract current balance
-            // (address(this).balance) < minimumStakePerNote + reward
-            (bool result,) = payable(_creator).call{value: minimumStakePerNote + reward}("");
-            if (!result) revert FailedToReward();
-
-            userStats[_creator].ethRewarded += reward;
-            emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: minimumStakePerNote});
-        } else if (finalRating < 2) {
-            uint96 slash = finalRating * 10;
-            // This will revert if contract current balance
-            // (address(this).balance) < minimumStakePerNote - slash
+        if (finalRating == 1) {
+            // slash = minimumStakePerNote
+            // skipping refund
+            userStats[_creator].ethSlashed += minimumStakePerNote;
+            emit CreatorSlashed({
+                postUrl: _postUrl,
+                creator: _creator,
+                slash: minimumStakePerNote,
+                stake: minimumStakePerNote
+            });
+        } else if (finalRating == 2) {
+            // trick to avoid floating point slash=0.75 * minimumStakePerNote
+            uint96 slash = minimumStakePerNote - minimumStakePerNote / 4;
+            userStats[_creator].ethSlashed += slash;
             (bool result,) = payable(_creator).call{value: minimumStakePerNote - slash}("");
             if (!result) revert FailedToSlash();
-
-            userStats[_creator].ethSlashed += slash;
             emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: minimumStakePerNote});
+        } else {
+            uint96 reward;
+            if (finalRating == 3) reward = minimumStakePerNote / 2;
+            if (finalRating == 4) reward = minimumStakePerNote;
+            if (finalRating == 5) reward = minimumStakePerNote + minimumStakePerNote / 2;
+            userStats[_creator].ethRewarded += reward;
+            (bool result,) = payable(_creator).call{value: minimumStakePerNote + reward}("");
+            if (!result) revert FailedToReward();
+            emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: minimumStakePerNote});
         }
     }
 
@@ -176,13 +188,12 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
             address rater = noteRaters[_postUrl][_creator][index];
             uint96 delta = uint96(stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]));
             if (delta < 2) {
-                uint96 reward = 2 - delta;
-                // This will revert if contract current balance
-                // (address(this).balance) < minimumStakePerRating + reward
+                uint96 reward;
+                if (delta == 0) reward = minimumStakePerRating + minimumStakePerRating / 2;
+                if (delta == 1) reward = minimumStakePerRating;
+                userStats[rater].ethRewarded += reward;
                 (bool result,) = payable(rater).call{value: minimumStakePerRating + reward}("");
                 if (!result) revert FailedToReward();
-
-                userStats[rater].ethRewarded += reward;
                 emit RaterRewarded({
                     postUrl: _postUrl,
                     creator: _creator,
@@ -190,14 +201,23 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
                     reward: reward,
                     stake: minimumStakePerRating
                 });
-            } else if (delta > 2) {
-                uint96 slash = delta - 2;
-                // This will revert if contract current balance
-                // (address(this).balance) < minimumStakePerRating - slash
+            } else if (delta == 4) {
+                // worst slash, skip refund
+                userStats[rater].ethSlashed += minimumStakePerRating;
+                emit RaterSlashed({
+                    postUrl: _postUrl,
+                    creator: _creator,
+                    rater: rater,
+                    slash: minimumStakePerRating,
+                    stake: minimumStakePerRating
+                });
+            } else {
+                uint96 slash;
+                if (delta == 3) slash = minimumStakePerRating - minimumStakePerRating / 4;
+                if (delta == 2) slash = minimumStakePerRating / 2;
+                userStats[rater].ethSlashed += slash;
                 (bool result,) = payable(rater).call{value: minimumStakePerRating - slash}("");
                 if (!result) revert FailedToSlash();
-
-                userStats[rater].ethSlashed += slash;
                 emit RaterSlashed({
                     postUrl: _postUrl,
                     creator: _creator,
@@ -273,10 +293,12 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
     /// @notice Set minimum staking for note creation
     function setMinimumStakePerNote(uint64 _miniumStakePerNote) external onlyOwner {
         minimumStakePerNote = _miniumStakePerNote;
+        emit MinimumStakePerNoteUpdated(minimumStakePerNote);
     }
 
     /// @notice Set minimum staking for note rating
     function setMinimumStakePerRating(uint64 _minimumStakePerRating) external onlyOwner {
         minimumStakePerRating = _minimumStakePerRating;
+        emit MinimumStakePerRatingUpdated(minimumStakePerRating);
     }
 }

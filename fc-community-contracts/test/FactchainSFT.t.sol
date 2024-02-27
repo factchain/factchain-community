@@ -19,7 +19,8 @@ contract FactchainSFTTest is Test, IFactchainSFT {
 
     function setUp() public {
         FactchainSFT implementation = new FactchainSFT();
-        FactchainProxy proxy = new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner)));
+        FactchainProxy proxy =
+            new FactchainProxy(address(implementation), abi.encodeCall(collection.initialize, (owner)));
         collection = FactchainSFT(payable(address(proxy)));
 
         vm.deal(nftBuyer, 100 ether);
