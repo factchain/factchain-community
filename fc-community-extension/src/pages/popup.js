@@ -59,7 +59,7 @@ function FCProfile(props) {
           <div className="flex items-center justify-between bg-neutral-400/10 rounded-2xl px-10 py-6 shadow">
             <StatCard name="Notes" value={props.numberNotes} />
             <StatCard name="Ratings" value={props.numberRatings} />
-            <StatCard name="Earnings" value={props.earnings} />
+            <StatCard name="Earnings" value={props.earnings.slice(0, 7)} />
           </div>
           {props.loggedIn && <FCNetworks />}
         </div>
