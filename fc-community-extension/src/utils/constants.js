@@ -29,18 +29,25 @@ export const makeOpenseaUrl = (contractAddress, tokenId) =>
 export const FC_MAIN_CONTRACT_ABI = [
   {
     type: 'constructor',
-    inputs: [
-      {
-        name: '_owner',
-        type: 'address',
-        internalType: 'address',
-      },
-    ],
+    inputs: [],
     stateMutability: 'nonpayable',
   },
   {
     type: 'receive',
     stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'UPGRADE_INTERFACE_VERSION',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'string',
+        internalType: 'string',
+      },
+    ],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -177,6 +184,19 @@ export const FC_MAIN_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'initialize',
+    inputs: [
+      {
+        name: 'initialOwner',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     name: 'minimumStakePerNote',
     inputs: [],
     outputs: [
@@ -245,6 +265,19 @@ export const FC_MAIN_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'proxiableUUID',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'rateNote',
     inputs: [
       {
@@ -265,6 +298,13 @@ export const FC_MAIN_CONTRACT_ABI = [
     ],
     outputs: [],
     stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'renounceOwnership',
+    inputs: [],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -294,35 +334,34 @@ export const FC_MAIN_CONTRACT_ABI = [
   },
   {
     type: 'function',
-    name: 'supportsInterface',
-    inputs: [
-      {
-        name: 'interfaceId',
-        type: 'bytes4',
-        internalType: 'bytes4',
-      },
-    ],
-    outputs: [
-      {
-        name: '',
-        type: 'bool',
-        internalType: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     name: 'transferOwnership',
     inputs: [
       {
-        name: '_newOwner',
+        name: 'newOwner',
         type: 'address',
         internalType: 'address',
       },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'upgradeToAndCall',
+    inputs: [
+      {
+        name: 'newImplementation',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+        internalType: 'bytes',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'function',
@@ -416,6 +455,45 @@ export const FC_MAIN_CONTRACT_ABI = [
         type: 'uint256',
         indexed: false,
         internalType: 'uint256',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'Initialized',
+    inputs: [
+      {
+        name: 'version',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'MinimumStakePerNoteUpdated',
+    inputs: [
+      {
+        name: 'newMinimumStake',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'MinimumStakePerRatingUpdated',
+    inputs: [
+      {
+        name: 'newMinimumStake',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
       },
     ],
     anonymous: false,
@@ -614,6 +692,30 @@ export const FC_MAIN_CONTRACT_ABI = [
     anonymous: false,
   },
   {
+    type: 'event',
+    name: 'Upgraded',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        indexed: true,
+        internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'error',
+    name: 'AddressEmptyCode',
+    inputs: [
+      {
+        name: 'target',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
     type: 'error',
     name: 'CantRateOwnNote',
     inputs: [],
@@ -621,6 +723,27 @@ export const FC_MAIN_CONTRACT_ABI = [
   {
     type: 'error',
     name: 'ContentInvalid',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967InvalidImplementation',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967NonPayable',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'FailedInnerCall',
     inputs: [],
   },
   {
@@ -640,7 +763,12 @@ export const FC_MAIN_CONTRACT_ABI = [
   },
   {
     type: 'error',
-    name: 'NotOwner',
+    name: 'InvalidInitialization',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'NotInitializing',
     inputs: [],
   },
   {
@@ -660,6 +788,28 @@ export const FC_MAIN_CONTRACT_ABI = [
   },
   {
     type: 'error',
+    name: 'OwnableInvalidOwner',
+    inputs: [
+      {
+        name: 'owner',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'OwnableUnauthorizedAccount',
+    inputs: [
+      {
+        name: 'account',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
     name: 'PostUrlInvalid',
     inputs: [],
   },
@@ -673,23 +823,28 @@ export const FC_MAIN_CONTRACT_ABI = [
     name: 'RatingInvalid',
     inputs: [],
   },
+  {
+    type: 'error',
+    name: 'UUPSUnauthorizedCallContext',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnsupportedProxiableUUID',
+    inputs: [
+      {
+        name: 'slot',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+  },
 ];
 
 export const FC_X_CONTRACT_ABI = [
   {
     type: 'constructor',
-    inputs: [
-      {
-        name: '_owner',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_backend',
-        type: 'address',
-        internalType: 'address',
-      },
-    ],
+    inputs: [],
     stateMutability: 'nonpayable',
   },
   {
@@ -714,6 +869,19 @@ export const FC_X_CONTRACT_ABI = [
         name: '',
         type: 'uint256',
         internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'UPGRADE_INTERFACE_VERSION',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'string',
+        internalType: 'string',
       },
     ],
     stateMutability: 'view',
@@ -797,6 +965,24 @@ export const FC_X_CONTRACT_ABI = [
       },
     ],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'initialize',
+    inputs: [
+      {
+        name: '_owner',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_backend',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -893,6 +1079,26 @@ export const FC_X_CONTRACT_ABI = [
       },
     ],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'proxiableUUID',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'renounceOwnership',
+    inputs: [],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -1060,13 +1266,31 @@ export const FC_X_CONTRACT_ABI = [
     name: 'transferOwnership',
     inputs: [
       {
-        name: '_newOwner',
+        name: 'newOwner',
         type: 'address',
         internalType: 'address',
       },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'upgradeToAndCall',
+    inputs: [
+      {
+        name: 'newImplementation',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+        internalType: 'bytes',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'function',
@@ -1144,6 +1368,19 @@ export const FC_X_CONTRACT_ABI = [
         type: 'bool',
         indexed: false,
         internalType: 'bool',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'Initialized',
+    inputs: [
+      {
+        name: 'version',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
       },
     ],
     anonymous: false,
@@ -1350,6 +1587,30 @@ export const FC_X_CONTRACT_ABI = [
     anonymous: false,
   },
   {
+    type: 'event',
+    name: 'Upgraded',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        indexed: true,
+        internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'error',
+    name: 'AddressEmptyCode',
+    inputs: [
+      {
+        name: 'target',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
     type: 'error',
     name: 'BadMintPrice',
     inputs: [],
@@ -1458,7 +1719,33 @@ export const FC_X_CONTRACT_ABI = [
   },
   {
     type: 'error',
+    name: 'ERC1967InvalidImplementation',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967NonPayable',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'FailedInnerCall',
+    inputs: [],
+  },
+  {
+    type: 'error',
     name: 'FailedToRefund',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'InvalidInitialization',
     inputs: [],
   },
   {
@@ -1473,13 +1760,51 @@ export const FC_X_CONTRACT_ABI = [
   },
   {
     type: 'error',
-    name: 'NotOwner',
+    name: 'NotInitializing',
     inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'OwnableInvalidOwner',
+    inputs: [
+      {
+        name: 'owner',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'OwnableUnauthorizedAccount',
+    inputs: [
+      {
+        name: 'account',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
   },
   {
     type: 'error',
     name: 'SupplyExhausted',
     inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnauthorizedCallContext',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnsupportedProxiableUUID',
+    inputs: [
+      {
+        name: 'slot',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
   },
   {
     type: 'error',
@@ -1496,24 +1821,21 @@ export const FC_X_CONTRACT_ABI = [
 export const FC_NFT_CONTRACT_ABI = [
   {
     type: 'constructor',
-    inputs: [
+    inputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'UPGRADE_INTERFACE_VERSION',
+    inputs: [],
+    outputs: [
       {
-        name: '_owner',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_factsLitography',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_baseTokenURI',
+        name: '',
         type: 'string',
         internalType: 'string',
       },
     ],
-    stateMutability: 'nonpayable',
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -1570,6 +1892,29 @@ export const FC_NFT_CONTRACT_ABI = [
       },
     ],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'initialize',
+    inputs: [
+      {
+        name: '_owner',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_factsLitography',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_baseTokenURI',
+        type: 'string',
+        internalType: 'string',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -1697,6 +2042,26 @@ export const FC_NFT_CONTRACT_ABI = [
       },
     ],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'proxiableUUID',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'renounceOwnership',
+    inputs: [],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -1885,13 +2250,31 @@ export const FC_NFT_CONTRACT_ABI = [
     name: 'transferOwnership',
     inputs: [
       {
-        name: '_newOwner',
+        name: 'newOwner',
         type: 'address',
         internalType: 'address',
       },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'upgradeToAndCall',
+    inputs: [
+      {
+        name: 'newImplementation',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+        internalType: 'bytes',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'event',
@@ -1977,6 +2360,19 @@ export const FC_NFT_CONTRACT_ABI = [
   },
   {
     type: 'event',
+    name: 'Initialized',
+    inputs: [
+      {
+        name: 'version',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
     name: 'MetadataUpdate',
     inputs: [
       {
@@ -2031,6 +2427,46 @@ export const FC_NFT_CONTRACT_ABI = [
       },
     ],
     anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'Upgraded',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        indexed: true,
+        internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'error',
+    name: 'AddressEmptyCode',
+    inputs: [
+      {
+        name: 'target',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967InvalidImplementation',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967NonPayable',
+    inputs: [],
   },
   {
     type: 'error',
@@ -2137,21 +2573,63 @@ export const FC_NFT_CONTRACT_ABI = [
   },
   {
     type: 'error',
-    name: 'NotOwner',
+    name: 'FailedInnerCall',
     inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'InvalidInitialization',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'NotInitializing',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'OwnableInvalidOwner',
+    inputs: [
+      {
+        name: 'owner',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'OwnableUnauthorizedAccount',
+    inputs: [
+      {
+        name: 'account',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnauthorizedCallContext',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnsupportedProxiableUUID',
+    inputs: [
+      {
+        name: 'slot',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
   },
 ];
 
 export const FC_SFT_CONTRACT_ABI = [
   {
     type: 'constructor',
-    inputs: [
-      {
-        name: '_owner',
-        type: 'address',
-        internalType: 'address',
-      },
-    ],
+    inputs: [],
     stateMutability: 'nonpayable',
   },
   {
@@ -2176,6 +2654,19 @@ export const FC_SFT_CONTRACT_ABI = [
         name: '',
         type: 'address',
         internalType: 'address',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'UPGRADE_INTERFACE_VERSION',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'string',
+        internalType: 'string',
       },
     ],
     stateMutability: 'view',
@@ -2264,6 +2755,19 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'initialize',
+    inputs: [
+      {
+        name: '_owner',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     name: 'isApprovedForAll',
     inputs: [
       {
@@ -2296,7 +2800,7 @@ export const FC_SFT_CONTRACT_ABI = [
         internalType: 'uint256',
       },
       {
-        name: 'value',
+        name: 'quantity',
         type: 'uint256',
         internalType: 'uint256',
       },
@@ -2329,6 +2833,39 @@ export const FC_SFT_CONTRACT_ABI = [
       },
     ],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'protocolReward',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'proxiableUUID',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'renounceOwnership',
+    inputs: [],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -2442,6 +2979,19 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'function',
+    name: 'setProtocolReward',
+    inputs: [
+      {
+        name: '_protocolReward',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     name: 'supply',
     inputs: [
       {
@@ -2483,13 +3033,31 @@ export const FC_SFT_CONTRACT_ABI = [
     name: 'transferOwnership',
     inputs: [
       {
-        name: '_newOwner',
+        name: 'newOwner',
         type: 'address',
         internalType: 'address',
       },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'upgradeToAndCall',
+    inputs: [
+      {
+        name: 'newImplementation',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+        internalType: 'bytes',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'function',
@@ -2582,6 +3150,32 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'event',
+    name: 'Initialized',
+    inputs: [
+      {
+        name: 'version',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'MintPriceUpdated',
+    inputs: [
+      {
+        name: 'newMintPrice',
+        type: 'uint256',
+        indexed: false,
+        internalType: 'uint256',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
     name: 'OwnershipTransferred',
     inputs: [
       {
@@ -2595,6 +3189,19 @@ export const FC_SFT_CONTRACT_ABI = [
         type: 'address',
         indexed: true,
         internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'ProtocolRewardUpdated',
+    inputs: [
+      {
+        name: 'newProtocolReward',
+        type: 'uint256',
+        indexed: false,
+        internalType: 'uint256',
       },
     ],
     anonymous: false,
@@ -2691,6 +3298,30 @@ export const FC_SFT_CONTRACT_ABI = [
       },
     ],
     anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'Upgraded',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        indexed: true,
+        internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'error',
+    name: 'AddressEmptyCode',
+    inputs: [
+      {
+        name: 'target',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
   },
   {
     type: 'error',
@@ -2801,7 +3432,33 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'error',
+    name: 'ERC1967InvalidImplementation',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967NonPayable',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'FailedInnerCall',
+    inputs: [],
+  },
+  {
+    type: 'error',
     name: 'FailedToReward',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'InvalidInitialization',
     inputs: [],
   },
   {
@@ -2811,7 +3468,34 @@ export const FC_SFT_CONTRACT_ABI = [
   },
   {
     type: 'error',
-    name: 'NotOwner',
+    name: 'NotInitializing',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'OwnableInvalidOwner',
+    inputs: [
+      {
+        name: 'owner',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'OwnableUnauthorizedAccount',
+    inputs: [
+      {
+        name: 'account',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ProtocolRewardTooHigh',
     inputs: [],
   },
   {
@@ -2823,6 +3507,22 @@ export const FC_SFT_CONTRACT_ABI = [
     type: 'error',
     name: 'SupplyExhausted',
     inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnauthorizedCallContext',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnsupportedProxiableUUID',
+    inputs: [
+      {
+        name: 'slot',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
   },
   {
     type: 'error',
