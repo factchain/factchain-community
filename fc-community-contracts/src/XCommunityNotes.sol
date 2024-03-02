@@ -34,6 +34,7 @@ interface IXCommunityNotes is IXCommunityNotesEvents {
 /// @dev
 contract XCommunityNotes is OwnableUpgradeable, ERC1155Upgradeable, UUPSUpgradeable, IXCommunityNotes {
     uint256 public constant MAX_TOKEN_SUPPLY = 42;
+    uint256 public constant MIN_TOKEN_SUPPLY = 1;
     uint256 public constant SUPPLY_EXHAUSTED = MAX_TOKEN_SUPPLY + 1;
     uint256 public mintPrice;
 
@@ -124,6 +125,7 @@ contract XCommunityNotes is OwnableUpgradeable, ERC1155Upgradeable, UUPSUpgradea
     }
 
     function worstRandEver() internal view returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % MAX_TOKEN_SUPPLY;
+        uint256 newSupply = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % MAX_TOKEN_SUPPLY;
+        return MIN_TOKEN_SUPPLY > newSupply ? MIN_TOKEN_SUPPLY : newSupply;
     }
 }
