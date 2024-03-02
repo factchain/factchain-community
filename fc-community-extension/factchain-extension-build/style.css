@@ -747,20 +747,15 @@ video {
 .bg-fcGrey\/70 {
   background-color: rgba(57, 62, 70, 0.7);
 }
-.bg-neutral-400\/10 {
-  background-color: rgba(163, 163, 163, 0.1);
-}
-.bg-neutral-400\/30 {
-  background-color: rgba(163, 163, 163, 0.3);
-}
 .bg-neutral-950\/30 {
   background-color: rgba(10, 10, 10, 0.3);
 }
-.bg-pink-400\/30 {
-  background-color: rgba(244, 114, 182, 0.3);
-}
 .bg-red-400\/10 {
   background-color: rgba(248, 113, 113, 0.1);
+}
+.object-cover {
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .p-2 {
   padding: 0.5rem;
