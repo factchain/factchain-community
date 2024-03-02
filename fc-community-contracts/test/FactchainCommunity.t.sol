@@ -7,6 +7,7 @@ import {FactchainProxy} from "../src/FactchainProxy.sol";
 
 contract FactchainCommunityTest is Test, IFactchainCommunity {
     FactchainCommunity public fcCommunity;
+    bytes32 public constant FINALISER_ROLE = keccak256("FINALISER_ROLE");
 
     uint160 lastUintAddress = 0;
 
@@ -16,6 +17,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
     }
 
     address public theOwner = nextAddress();
+    address public theAdmin = nextAddress();
     address public player1 = nextAddress();
     address public player2 = nextAddress();
     address public rater1 = nextAddress();
@@ -28,6 +30,9 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         emit ReserveFunded(1_000_000_000_000_000_000);
         (bool result,) = payable(fcCommunity).call{value: 1_000_000_000_000_000_000}("");
         assertTrue(result);
+
+        hoax(theOwner);
+        fcCommunity.grantRole(FINALISER_ROLE, theAdmin);
     }
 
     function setUp() public {
@@ -181,7 +186,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
             _content: "Something something something"
         });
 
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         hoax(rater1);
@@ -263,7 +268,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
             _content: "Something something something"
         });
 
-        vm.startPrank(theOwner);
+        vm.startPrank(theAdmin);
         vm.expectRevert(IFactchainCommunity.RatingInvalid.selector);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 0});
         vm.expectRevert(IFactchainCommunity.RatingInvalid.selector);
@@ -271,7 +276,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
     }
 
     function test_finaliseNote_RevertIf_notDoesNotExist() public {
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         vm.expectRevert(IFactchainCommunity.NoteDoesNotExist.selector);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
@@ -286,7 +291,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
 
         vm.expectEmit();
         emit NoteFinalised("https://twitter.com/something", player1, 1);
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
     }
 
@@ -298,7 +303,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
             _content: "Something something something"
         });
 
-        vm.startPrank(theOwner);
+        vm.startPrank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         vm.expectRevert(IFactchainCommunity.NoteAlreadyFinalised.selector);
@@ -353,7 +358,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         emit RaterSlashed(
             "https://twitter.com/something", player1, rater2, minimumStakePerRating, minimumStakePerRating
         );
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         (,, uint96 rater1NewRewards,) = fcCommunity.userStats(rater1);
@@ -382,7 +387,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
 
         uint96 expectedReward = 1_500_000_000_000_000;
         emit CreatorRewarded("https://twitter.com/something", player1, expectedReward, minimumStakePerNote);
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
         assert(player1.balance == player1OriginalBalance + expectedReward);
         (,, uint96 newRewards,) = fcCommunity.userStats(player1);
@@ -400,7 +405,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         });
         vm.expectEmit();
         emit CreatorSlashed("https://twitter.com/something", player1, minimumStakePerNote, minimumStakePerNote);
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
         assert(player1.balance == player1OriginalBalance - minimumStakePerNote);
         (,,, uint96 newSlash) = fcCommunity.userStats(player1);
@@ -415,7 +420,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
             _content: "Something something something"
         });
         vm.expectRevert(IFactchainCommunity.FailedToReward.selector);
-        vm.prank(theOwner);
+        vm.prank(theAdmin);
         vm.deal(address(fcCommunity), 0);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
     }
