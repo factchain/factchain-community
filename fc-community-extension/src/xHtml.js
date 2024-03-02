@@ -43,9 +43,9 @@ export const makeFactchainNoteHtml = (
   }
   if (mintSFTButtonID) {
     actionHtml += htmlBuilder.action(
-      'Like this Factchain note?',
+      'Do you like this Factchain note?',
       mintSFTButtonID,
-      'Mint it'
+      'Collect it'
     );
   }
 
@@ -122,7 +122,7 @@ const htmlBuilders = {
     mintXNoteOnDetailsPage: `<div class="css-175oi2r r-g6ijar r-nsbfu8 r-1xfd6ze">
       <div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep">
         <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-a023e6 r-rjixqe r-b88u0q" style="color: rgb(247, 249, 249); text-overflow: unset;">
-          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you like this note?</span>
         </div>
         <div class="css-175oi2r r-18u37iz">
           <div id="mintNoteButton" role="button" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-791edh r-id7aif r-15ysp7h r-4wgw6l r-ymttw5 r-1loqt21 r-o7ynqc r-6416eg r-1ny4l3l" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
@@ -137,7 +137,7 @@ const htmlBuilders = {
     </div>`,
     mintXNoteOnMainPage: `<div class="css-175oi2r r-1awozwy r-126aqm3 r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu r-ea455c">
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-1b43r93 r-1cwl3u0 r-16dba41" style="color: rgb(231, 233, 234); text-overflow: unset;">
-        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you like this note?</span>
       </div>
       <div role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
         <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="color: rgb(239, 243, 244); text-overflow: unset;">
@@ -196,7 +196,7 @@ const htmlBuilders = {
     mintXNoteOnDetailsPage: `<div class="css-175oi2r r-g2wdr4 r-nsbfu8 r-1xfd6ze">
       <div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep">
         <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-a023e6 r-rjixqe r-b88u0q" style="color: rgb(231, 233, 234); text-overflow: unset;">
-          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you like this note?</span>
         </div>
         <div class="css-175oi2r r-18u37iz">
           <div id="mintNoteButton" role="button" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-791edh r-id7aif r-15ysp7h r-4wgw6l r-ymttw5 r-1loqt21 r-o7ynqc r-6416eg r-1ny4l3l" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
@@ -211,7 +211,7 @@ const htmlBuilders = {
     </div>`,
     mintXNoteOnMainPage: `<div class="css-175oi2r r-1awozwy r-1roi411 r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu">
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-1b43r93 r-1cwl3u0 r-16dba41" style="color: rgb(231, 233, 234); text-overflow: unset;">
-        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you like this note?</span>
       </div>
       <div role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(83, 100, 113); background-color: rgba(0, 0, 0, 0);">
         <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-1qd0xha r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="color: rgb(239, 243, 244); text-overflow: unset;">
@@ -270,7 +270,7 @@ const htmlBuilders = {
     mintXNoteOnDetailsPage: `<div class="css-175oi2r r-x572qd r-nsbfu8 r-1xfd6ze">
       <div class="css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep">
         <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-a023e6 r-rjixqe r-b88u0q" style="text-overflow: unset; color: rgb(15, 20, 25);">
-          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+          <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you like this note?</span>
         </div>
         <div class="css-175oi2r r-18u37iz">
           <div id="mintNoteButton" role="button" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-791edh r-id7aif r-15ysp7h r-4wgw6l r-ymttw5 r-1loqt21 r-o7ynqc r-6416eg r-1ny4l3l" style="background-color: rgba(0, 0, 0, 0); border-color: rgb(207, 217, 222);">
@@ -285,7 +285,7 @@ const htmlBuilders = {
     </div>`,
     mintXNoteOnMainPage: `<div class="css-175oi2r r-1awozwy r-1ets6dv r-5kkj8d r-18u37iz r-16y2uox r-1wtj0ep r-1e081e0 r-1f1sjgu r-ea455c">
       <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-1b43r93 r-1cwl3u0 r-16dba41" style="text-overflow: unset; color: rgb(15, 20, 25);">
-        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Like this note?</span>
+        <span class="css-1qaijid r-bcqeeo r-qvutc0 r-poiln3" style="text-overflow: unset;">Do you like this note?</span>
       </div>
       <div role="link" tabindex="0" class="css-175oi2r r-sdzlij r-1phboty r-rs99b7 r-lrvibr r-15ysp7h r-4wgw6l r-ymttw5 r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21" style="border-color: rgb(207, 217, 222); background-color: rgba(0, 0, 0, 0);">
         <div dir="ltr" class="css-1rynq56 r-bcqeeo r-qvutc0 r-37j5jr r-q4m81j r-a023e6 r-rjixqe r-b88u0q r-1awozwy r-6koalj r-18u37iz r-16y2uox r-1777fci" style="text-overflow: unset; color: rgb(15, 20, 25);">
