@@ -6,6 +6,7 @@ import {ERC721URIStorageUpgradeable} from
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 contract FactchainSFT {
     function initialMint(address creator, address[] memory raters, string memory ipfsHash, uint256 id)
@@ -22,11 +23,12 @@ interface IFactchainSFTEvents {
 /// @author Pierre HAY
 /// @notice
 /// @dev
-contract FactchainNFT is OwnableUpgradeable, ERC721URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFTEvents {
+contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFTEvents {
     FactchainSFT factsLithography;
     uint256 public tokenIdCounter;
     string private baseTokenURI;
     mapping(string => mapping(address => uint256)) public noteIds;
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     // disable contract until initialization
     constructor() {
@@ -44,12 +46,39 @@ contract FactchainNFT is OwnableUpgradeable, ERC721URIStorageUpgradeable, UUPSUp
         factsLithography = FactchainSFT(_factsLitography);
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    /// Internal functions
+    ////////////////////////////////////////////////////////////////////////
+
     function _authorizeUpgrade(address /* newImplementation */ ) internal view override onlyOwner {}
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseTokenURI;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    /// Owner actions
+    ////////////////////////////////////////////////////////////////////////
+
+    function _transferOwnership(address newOwner) override internal virtual {
+        super._transferOwnership(newOwner);
+        _grantRole(DEFAULT_ADMIN_ROLE, newOwner);
+    }
 
     function setFactchainSFTContract(address _factsLitography) public onlyOwner {
         factsLithography = FactchainSFT(_factsLitography);
         emit FactchainSFTContractUpdated(_factsLitography);
     }
+
+    /// @notice set a new baseTokenURI
+    /// @param _baseTokenURI the new base token URI
+    function setBaseURI(string memory _baseTokenURI) public onlyOwner {
+        baseTokenURI = _baseTokenURI;
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    /// Minter action
+    ////////////////////////////////////////////////////////////////////////
 
     /// @notice mint a NFT
     /// @param creator destination address for the orginal fact (NFT-721)
@@ -57,9 +86,9 @@ contract FactchainNFT is OwnableUpgradeable, ERC721URIStorageUpgradeable, UUPSUp
     /// @param ipfsHash metadata ID on ipfs shared by the original and its copies
     function mint(address creator, string memory postUrl, address[] memory raters, string memory ipfsHash)
         public
-        onlyOwner
         returns (uint256)
     {
+        require(hasRole(MINTER_ROLE, msg.sender));
         unchecked {
             // An overflow here would be a great collective achievement (2**256 factchain notes)
             ++tokenIdCounter;
@@ -72,13 +101,11 @@ contract FactchainNFT is OwnableUpgradeable, ERC721URIStorageUpgradeable, UUPSUp
         return newItemId;
     }
 
-    function _baseURI() internal view override returns (string memory) {
-        return baseTokenURI;
-    }
+    ////////////////////////////////////////////////////////////////////////
+    /// Interface functions
+    ////////////////////////////////////////////////////////////////////////
 
-    /// @notice set a new baseTokenURI
-    /// @param _baseTokenURI the new base token URI
-    function setBaseURI(string memory _baseTokenURI) public onlyOwner {
-        baseTokenURI = _baseTokenURI;
+    function supportsInterface(bytes4 interfaceId) public view virtual override (ERC721URIStorageUpgradeable, AccessControlUpgradeable) returns (bool) {
+        return ERC721URIStorageUpgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 }

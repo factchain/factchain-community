@@ -245,7 +245,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         });
     }
 
-    function test_finaliseNote_RevertIf_notOwner() public {
+    function test_finaliseNote_RevertIf_notFinaliser() public {
         uint256 minimumStakePerNote = fcCommunity.minimumStakePerNote();
         hoax(player1);
         fcCommunity.createNote{value: minimumStakePerNote}({
