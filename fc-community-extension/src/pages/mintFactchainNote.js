@@ -47,7 +47,7 @@ export function FCMintFactchainNote({
         return;
       }
     } catch (error) {
-      setError(error);
+      setError(`${error}`);
     }
   });
   const transactionHash = () => {
@@ -138,7 +138,7 @@ console.log(`sftContract (${sftContract.target})`, sftContract);
 const getFactchainNftInfo = async (postUrl, creatorAddress) => {
   console.log('Getting factchain note info', postUrl, creatorAddress);
   const id = await nftContract.noteIds(postUrl, creatorAddress);
-  const supply = await nftContract.supply(id);
+  const supply = await sftContract.supply(id);
   return { id, supply };
 };
 
