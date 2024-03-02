@@ -6,7 +6,7 @@ import FCNote from './components/FCNote';
 import FCEmptyState from './components/FCEmptyState';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
-import { cutText, elipseText } from '../utils/constants';
+import { elipseText } from '../utils/constants';
 
 import './style.css';
 
@@ -19,9 +19,9 @@ const FCNetworks = () => (
       src="/logos/warpcast.png"
     />
     <img
-      title="Lens protocol"
+      title="Youtube"
       className="w-[80px] h-[80px]"
-      src="/logos/lens.png"
+      src="/logos/youtube.png"
     />
     <div className="-mt-2 col-span-2 col-start-2 text-fcAccent text-center text-sm">
       {'Coming soon!'}
@@ -44,7 +44,11 @@ function FCProfile(props) {
       <div className="space-y-4 min-h-full flex flex-col">
         <div className="flex-grow space-y-4">
           <div className="flex items-center w-5/6 mx-auto bg-neutral-950/30 py-2 px-4 rounded gap-4 shadow-md border border-neutral-950/40">
-            <div className="rounded-full w-[40px] h-[40px] bg-neutral-400/30 shadow"></div>
+            <img
+              src="/logos/eth.png"
+              alt="Profile Picture"
+              className="rounded-full w-[40px] h-[40px] object-cover shadow"
+            />
             <div className="flex-grow">
               <div className="font-semibold text-xl">Account</div>
               <div className="opacity-70">
@@ -52,10 +56,10 @@ function FCProfile(props) {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-between bg-neutral-400/10 rounded-2xl px-10 py-6 shadow">
+          <div className="flex items-center justify-between rounded-2xl px-10 py-6">
             <StatCard name="Notes" value={props.numberNotes} />
             <StatCard name="Ratings" value={props.numberRatings} />
-            <StatCard name="Earnings" value={props.earnings} />
+            <StatCard name="Earnings" value={`${props.earnings.slice(0, 7)}`} />
           </div>
           {props.loggedIn && <FCNetworks />}
         </div>
@@ -94,6 +98,7 @@ function FCNotes(props) {
                       postUrl={note.postUrl}
                       creator={note.creatorAddress}
                       content={note.content}
+                      finalRating={note.finalRating}
                     />
                   )}
                 </For>
@@ -178,14 +183,14 @@ function FCPopup({ provider }) {
       return {
         notes: `${stats[0]}`,
         ratings: `${stats[1]}`,
-        earnings: `${ethers.formatEther(earnings)} ETH`,
+        earnings: `${ethers.formatEther(earnings)} ⧫`,
       };
     } else {
       console.log(`Default data for user stats`);
       return {
         notes: '?',
         ratings: '?',
-        earnings: '? ETH',
+        earnings: '? ⧫',
       };
     }
   };
@@ -195,7 +200,7 @@ function FCPopup({ provider }) {
   const numberRatings = () =>
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
-    userStats.loading || !userStats() ? '? ETH' : userStats().earnings;
+    userStats.loading || !userStats() ? '?' : userStats().earnings;
   provider.getAddress().then(setAddress);
 
   return (

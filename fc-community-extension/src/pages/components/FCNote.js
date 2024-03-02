@@ -11,7 +11,10 @@ const FCNote = (props) => {
       className="bg-fcGrey/70 rounded-md p-2 text-xs space-y-2 shadow block hover:bg-fcGrey/90"
     >
       <div className="flex items-center gap-2">
-        <div className="shrink-0 w-[24px] h-[24px] rounded-full bg-pink-400/30"></div>
+        <img
+          src="/logos/x.png"
+          className="rounded-full w-[24px] h-[24px] object-cover shadow"
+        />
         <div className="truncate">
           <strong>{elipseText(props.creator, 10)}</strong>
           <span className="opacity-70">{' - '}</span>
@@ -20,12 +23,15 @@ const FCNote = (props) => {
       </div>
       <div className="flex items-start gap-2">
         <div className="opacity-90 line-clamp-4 flex-grow">{props.content}</div>
-        {!props.hideMetas && (
+        {!props.hideMetas && props.finalRating && (
           <div className="shrink-0 flex flex-col gap-1 items-center">
-            <div className="w-[32px] h-[32px] bg-pink-400/30 rounded"></div>
+            <img
+              src="/icons/icon_32.png"
+              className="rounded-full w-[32px] h-[32px] object-cover shadow"
+            />
             <div className="flex items-center gap-1">
               {/* TODO proper note + dynamic image based on note */}
-              <strong>{'4.9'}</strong>
+              <strong>{props.finalRating}</strong>
               <span>
                 <img
                   className="w-[16px] h-[16px]"
