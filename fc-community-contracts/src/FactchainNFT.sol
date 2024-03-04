@@ -86,9 +86,9 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
     /// @param ipfsHash metadata ID on ipfs shared by the original and its copies
     function mint(address creator, string memory postUrl, address[] memory raters, string memory ipfsHash)
         public
+        onlyRole(MINTER_ROLE)
         returns (uint256)
     {
-        require(hasRole(MINTER_ROLE, msg.sender));
         unchecked {
             // An overflow here would be a great collective achievement (2**256 factchain notes)
             ++tokenIdCounter;

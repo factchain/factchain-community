@@ -303,8 +303,7 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
     ////////////////////////////////////////////////////////////////////////
 
     /// @notice Finalise a note
-    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external {
-        require(hasRole(FINALISER_ROLE, msg.sender));
+    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external onlyRole(FINALISER_ROLE) {
         if (!isRatingValid(_finalRating)) revert RatingInvalid();
         if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
         if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
