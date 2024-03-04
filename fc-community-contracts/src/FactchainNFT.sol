@@ -20,7 +20,7 @@ interface IFactchainSFTEvents {
 }
 
 /// @title Factchainers Community Notes NFT
-/// @author Pierre HAY
+/// @author Pierre HAY and Yacine Badiss
 /// @notice
 /// @dev
 contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFTEvents {
