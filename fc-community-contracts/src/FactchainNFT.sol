@@ -16,7 +16,7 @@ contract FactchainSFT {
 }
 
 interface IFactchainSFTEvents {
-    event FactchainSFTContractUpdated(address factsLithography);
+    event FactchainSFTContractUpdated(address truthFragments);
 }
 
 /// @title Factchainers Community Notes NFT
@@ -24,7 +24,7 @@ interface IFactchainSFTEvents {
 /// @notice
 /// @dev
 contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFTEvents {
-    FactchainSFT factsLithography;
+    FactchainSFT truthFragments;
     uint256 public tokenIdCounter;
     string private baseTokenURI;
     mapping(string => mapping(address => uint256)) public noteIds;
@@ -35,7 +35,7 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
         _disableInitializers();
     }
 
-    function initialize(address _owner, address _factsLitography, string memory _baseTokenURI) public initializer {
+    function initialize(address _owner, address _truthFragments, string memory _baseTokenURI) public initializer {
         __ERC721_init("FactchainNotes", "FCN");
         __ERC721URIStorage_init();
         __Ownable_init(_owner);
@@ -43,7 +43,7 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
 
         tokenIdCounter = 0;
         baseTokenURI = _baseTokenURI;
-        factsLithography = FactchainSFT(_factsLitography);
+        truthFragments = FactchainSFT(_truthFragments);
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -65,9 +65,9 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
         _grantRole(DEFAULT_ADMIN_ROLE, newOwner);
     }
 
-    function setFactchainSFTContract(address _factsLitography) public onlyOwner {
-        factsLithography = FactchainSFT(_factsLitography);
-        emit FactchainSFTContractUpdated(_factsLitography);
+    function setFactchainSFTContract(address _truthFragments) public onlyOwner {
+        truthFragments = FactchainSFT(_truthFragments);
+        emit FactchainSFTContractUpdated(_truthFragments);
     }
 
     /// @notice set a new baseTokenURI
@@ -96,7 +96,7 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
         uint256 newItemId = tokenIdCounter;
         _safeMint(creator, newItemId);
         _setTokenURI(newItemId, ipfsHash);
-        factsLithography.initialMint(creator, raters, ipfsHash, newItemId);
+        truthFragments.initialMint(creator, raters, ipfsHash, newItemId);
         noteIds[postUrl][creator] = newItemId;
         return newItemId;
     }
