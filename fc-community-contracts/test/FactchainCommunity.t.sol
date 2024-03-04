@@ -253,7 +253,7 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
             _content: "Something something something"
         });
 
-        vm.startPrank(rater1);
+        vm.startPrank(theOwner);
         // following specif expectRevert should work ...
         // vm.expectRevert(OwnableUpgradeable.OwnableUnauthorizedAccount.selector);
         vm.expectRevert();
