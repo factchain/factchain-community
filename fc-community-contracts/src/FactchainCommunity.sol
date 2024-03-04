@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {stdMath} from "forge-std/StdMath.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -74,9 +75,11 @@ interface IFactchainCommunity is IFactchainCommunityEvents {
 /// @author Yacine B. Badiss, Pierre HAY
 /// @notice
 /// @dev
-contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeable, IFactchainCommunity {
+contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlUpgradeable, UUPSUpgradeable, IFactchainCommunity {
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
+    bytes32 public constant FINALISER_ROLE = keccak256("FINALISER_ROLE");
+
     uint64 public minimumStakePerNote;
     uint64 public minimumStakePerRating;
 
@@ -273,21 +276,14 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
     /// Owner actions
     ////////////////////////////////////////////////////////////////////////
 
+    function _transferOwnership(address newOwner) override internal virtual {
+        super._transferOwnership(newOwner);
+        _grantRole(DEFAULT_ADMIN_ROLE, newOwner);
+    }
+
     // @notice Fund the contract
     receive() external payable onlyOwner {
         emit ReserveFunded(msg.value);
-    }
-
-    /// @notice Finalise a note
-    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external onlyOwner {
-        if (!isRatingValid(_finalRating)) revert RatingInvalid();
-        if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
-        if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
-
-        communityNotes[_postUrl][_creator].finalRating = _finalRating;
-        rewardOrSlashCreator(_postUrl, _creator);
-        rewardOrSlashRaters(_postUrl, _creator);
-        emit NoteFinalised({postUrl: _postUrl, creator: _creator, finalRating: _finalRating});
     }
 
     /// @notice Set minimum staking for note creation
@@ -300,5 +296,21 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, UUPSUpgradeabl
     function setMinimumStakePerRating(uint64 _minimumStakePerRating) external onlyOwner {
         minimumStakePerRating = _minimumStakePerRating;
         emit MinimumStakePerRatingUpdated(minimumStakePerRating);
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    /// Finaliser actions
+    ////////////////////////////////////////////////////////////////////////
+
+    /// @notice Finalise a note
+    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external onlyRole(FINALISER_ROLE) {
+        if (!isRatingValid(_finalRating)) revert RatingInvalid();
+        if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
+        if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
+
+        communityNotes[_postUrl][_creator].finalRating = _finalRating;
+        rewardOrSlashCreator(_postUrl, _creator);
+        rewardOrSlashRaters(_postUrl, _creator);
+        emit NoteFinalised({postUrl: _postUrl, creator: _creator, finalRating: _finalRating});
     }
 }
