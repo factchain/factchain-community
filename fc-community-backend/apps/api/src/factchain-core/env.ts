@@ -4,8 +4,6 @@ const DEFAULT_CONFIG: Config = {
   LOOKBACK_DAYS: "5",
   USEFUL_NOTE_THRESHOLD: "3",
   MINIMUM_RATING: "1",
-  MAIN_CONTRACT_OWNER_PKEY: "",
-  NFT_CONTRACT_OWNER_PKEY: "",
   INFRA_RPC_URL: "",
   MAIN_CONTRACT_ADDRESS: "",
   NFT_CONTRACT_ADDRESS: "",
@@ -18,6 +16,8 @@ const DEFAULT_CONFIG: Config = {
   AWS_REGION: "",
   AWS_BUCKET: "",
   BACKEND_PKEY: "",
+  NFT_MINTER_PKEY: "",
+  NOTE_FINALISER_PKEY: "",
 };
 
 export const config: Config = Object.keys(DEFAULT_CONFIG).reduce((o, key) => {
