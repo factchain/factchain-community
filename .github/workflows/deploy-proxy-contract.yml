@@ -6,6 +6,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
+      ci: ${{ steps.changes.outputs.ci }}
       main-contract: ${{ steps.changes.outputs.main-contract }}
       nft-contract: ${{ steps.changes.outputs.nft-contract }}
       sft-contract: ${{ steps.changes.outputs.sft-contract }}
@@ -16,6 +17,8 @@ jobs:
         id: changes
         with:
           filters: |
+            ci:
+              - '.github/workflows/deploy-proxy-contract.yml'
             main-contract:
               - 'fc-community-contracts/src/FactchainCommunity.sol'
             nft-contract:
@@ -33,12 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Deploy new implementation of main contract
-        if: needs.changes.outputs.main-contract == 'true'
+        if: needs.changes.outputs.main-contract == 'true' || needs.changes.outputs.ci == 'true'
         uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'FactchainCommunity'
           proxy-contract-address: ${{ vars.FACTCHAIN_COMMUNITY_PROXY_ADDRESS }}
-          call-args: '0x'
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.OWNER_PK }}
           parent-dir: 'fc-community-contracts'
@@ -48,13 +51,13 @@ jobs:
           etherscan-url: 'https://sepolia.etherscan.io'
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       - name: Deploy new implementation of SFT contract
-        if: needs.changes.outputs.sft-contract == 'true'
+        if: needs.changes.outputs.sft-contract == 'true' || needs.changes.outputs.ci == 'true'
         id: sft
         uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'FactchainSFT'
           proxy-contract-address: ${{ vars.FACTCHAIN_SFT_PROXY_ADDRESS }}
-          call-args: '0x'
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.NFT_OWNER_PK }}
           parent-dir: 'fc-community-contracts'
@@ -64,12 +67,12 @@ jobs:
           etherscan-url: 'https://sepolia.etherscan.io'
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       - name: Deploy new implementation of NFT contract
-        if: needs.changes.outputs.nft-contract == 'true'
+        if: needs.changes.outputs.nft-contract == 'true' || needs.changes.outputs.ci == 'true'
         uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'FactchainNFT'
           proxy-contract-address: ${{ vars.FACTCHAIN_NFT_PROXY_ADDRESS }}
-          call-args: '0x'
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.NFT_OWNER_PK }}
           parent-dir: 'fc-community-contracts'
@@ -79,12 +82,12 @@ jobs:
           etherscan-url: 'https://sepolia.etherscan.io'
           etherscan-api-key: ${{ secrets.ETHERSCAN_SEPOLIA_API_KEY }}
       - name: Deploy new implementation of X contract
-        if: needs.changes.outputs.x-contract == 'true'
+        if: needs.changes.outputs.x-contract == 'true' || needs.changes.outputs.ci == 'true'
         uses: YBadiss/deploy-contract/proxy@v2
         with:
           implementation-contract-name: 'XCommunityNotes'
           proxy-contract-address: ${{ vars.X_COMMUNITY_NOTES_PROXY_ADDRESS }}
-          call-args: '0x'
+          call-args: ''
           deployer-pk: ${{ secrets.DEPLOYER_PK }}
           owner-pk: ${{ secrets.OWNER_PK }}
           parent-dir: 'fc-community-contracts'
