@@ -37,7 +37,7 @@ contract FactchainNFTTest is Test {
         collection.mint(recipient, postUrl, raters, "QmdByzCXRCbPZ2DYq3wqURjShNEGZ2qDNW4w9mcwA9oWLv");
     }
 
-    function testGetTokenURI() public {
+    function test_getTokenURI() public {
         vm.prank(admin);
         collection.mint(recipient, postUrl, raters, "QmdByzCXRCbPZ2DYq3wqURjShNEGZ2qDNW4w9mcwA9oWLv");
         assertEq(
@@ -45,7 +45,7 @@ contract FactchainNFTTest is Test {
         );
     }
 
-    function testSetBaseURI() public {
+    function test_setBaseURI() public {
         vm.prank(owner);
         collection.setBaseURI("http://ipfs.com/");
         vm.prank(admin);
