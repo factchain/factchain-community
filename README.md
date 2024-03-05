@@ -43,17 +43,26 @@ Notes that are deemed useful by the community are shown under their posts, provi
 - Open the extension so it can connect to your Metamask account
 - Open Twitter which will also connect to your Metamask account
 
-### Create a note
+### Create a Factchain note
 
-- Select a post you want to create a note on, and click on the 3 dots
-- Click on `Create Factchain Note` and go through the steps
+- Select a social media post you wish to add contect to
+- Click on `Create Factchain Note` and write your note
+- Review and sign the transaction in your wallet
 
-![Create note](./create.gif)
+![Create note](./createNote.gif)
 
-### Rate a note
+### Rate a Factchain note
 
-- Open a post with an existing note you want to rate
-- The note will be visible under the post
-- Click on `Rate it` and go through the steps
+- Spot a social media post to which Factchain users have added context, or pick one from the Ratings section of the Factchain extension
+- Click on `Rate it` and give the Factchain note your rating
+- Review and sign the transaction in your wallet
 
-![Rate note](./rate.gif)
+![Rate note](./rateNote.gif)
+
+### Collect a Factchain note
+
+- Spot a Factchain note that you like under a scocial media post, or pick one from the Ratings section of the Factchain extension
+- Click on `Collect it` 
+- Review and sign the transaction in your wallet
+
+![Rate note](./collectFactchainNote.gif)
