@@ -2,21 +2,31 @@
 
 [![Contracts Code Checks](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/contracts-code-checks.yml) [![Extension Code Checks](https://github.com/factchain/factchain-community/actions/workflows/extension-code-checks.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/extension-code-checks.yml) [![Extension Build](https://github.com/factchain/factchain-community/actions/workflows/build-extension.yml/badge.svg)](https://github.com/factchain/factchain-community/actions/workflows/build-extension.yml) 
 
-# Factchain
+# Factchain: an Ethereum-Based Truth Layer
 
-Decentralized notes, decentralized rewards. A collaborative approach to combating misinformation, one block at a time.
+Factchain is an immutable and transparent truth layer that supports all social platforms. It is permissionless and devoid of any central authority.
 
-Factchainers can record notes about any social media post on the blockchain. If enough contributors from different viewpoints rate a note as helpful, Factchain browser extension will use it to enrich the social media website.
+Factchainers can add context to any post, in the form of Notes,  which then get rated by the community.
 
-- Notes & votes are permissionless. No central authority to trust.
-- Transparent incentives for note writers & voters. Factchain rewards writers who create helpful notes & voters who identify helpful/misleading notes
-- Factchain's truth layer works for any social media platform:
-  - Factchain's browser extension adds Factchain notes on top of social media posts
-  - Anyone can query the Factchain API for notes on social media posts
+Useful Notes become visible to all Factchain users, enhancing their social media experience and shielding them from misinformation.
+
+For their work, Note Creators and Raters are rewarded by the Factchain protocol, incentivising quality contributions.
+
+# How Does Factchain work?
+
+Anyone with an Ethereum address can create and rate Factchain Notes by calling the Factchain Community contract
+
+A rating algorithm runs regularly to assess ratings and give notes their final usefulnesss score.
+
+All notes and ratings are stored forever onchain, which makes it easy for anyone to audit them and build a competing note scoring algorithm.
+
+Creating and rating Notes requires an ETH stake. The funds remain locked in the contract until the finalisation period concludes, at which point they are distributed between all participants depending on the final rating of the Note: The better the Note, the better the rewards, but bad Notes will get you slashed. The goal is to give an incentive to users to create meaningful and useful Notes.
+
+Notes that are deemed useful by the community are shown under their posts, providing context and nuance when navigating social media platforms.
+
 
 ## Links
 - [Manifesto](https://factchain.tech/)
-- [PoC Demo](https://drive.google.com/file/d/1tJgjMYLVi_VUSCHalCxqlsctuYiVFX4W/view?usp=share_link)
 - [Deployed Contracts](https://factchain.tech/about/)
 
 ## Using Factchain
