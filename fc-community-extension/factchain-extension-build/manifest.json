@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Factchain Community",
-  "version": "0.4.0",
-  "description": "Review all socials on chain",
+  "version": "0.5.0",
+  "description": "Guardians of truth. Put your ETH where your mouth is.",
   "icons": {
     "16": "icons/icon_16.png",
     "32": "icons/icon_32.png",
