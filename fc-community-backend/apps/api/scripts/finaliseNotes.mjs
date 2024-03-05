@@ -5,7 +5,7 @@ import { NoteService } from "../dist/factchain-core/noteService.js";
 import { config } from "../dist/factchain-core/env.js";
 
 const LOOKBACK_DAYS = parseInt(process.argv[2]) || 2;
-const MINIMUM_RATING = parseInt(process.argv[3]) || 1;
+const MINIMUM_RATING = parseInt(config.MINIMUM_RATING);
 
 const fc = new FactChainBackend(config);
 const ns = new NoteService(fc, fc);

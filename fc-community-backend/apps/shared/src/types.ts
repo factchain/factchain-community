@@ -3,6 +3,7 @@ import { ContractTransactionResponse } from "ethers";
 export type Config = {
   LOOKBACK_DAYS: string;
   USEFUL_NOTE_THRESHOLD: string;
+  MINIMUM_RATING: string;
   // chain vars
   MAIN_CONTRACT_OWNER_PKEY: string;
   INFRA_RPC_URL: string;
