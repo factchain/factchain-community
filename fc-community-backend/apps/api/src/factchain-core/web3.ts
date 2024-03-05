@@ -37,11 +37,11 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     this._config = config;
     this._provider = new ethers.JsonRpcProvider(this._config.INFRA_RPC_URL);
     this._mainWallet = new ethers.Wallet(
-      config.MAIN_CONTRACT_OWNER_PKEY,
+      config.NOTE_FINALISER_PKEY,
       this._provider,
     );
     this._nftWallet = new ethers.Wallet(
-      config.NFT_CONTRACT_OWNER_PKEY,
+      config.NFT_MINTER_PKEY,
       this._provider,
     );
     this._fcCommunity = new ethers.Contract(
