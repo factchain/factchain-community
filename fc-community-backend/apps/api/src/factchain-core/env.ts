@@ -3,6 +3,7 @@ import { Config } from "./types";
 const DEFAULT_CONFIG: Config = {
   LOOKBACK_DAYS: "5",
   USEFUL_NOTE_THRESHOLD: "3",
+  MINIMUM_RATING: "1",
   MAIN_CONTRACT_OWNER_PKEY: "",
   NFT_CONTRACT_OWNER_PKEY: "",
   INFRA_RPC_URL: "",
