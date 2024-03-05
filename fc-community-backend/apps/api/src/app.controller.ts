@@ -15,6 +15,7 @@ import {
 
 import { ThrottlerGuard } from "@nestjs/throttler";
 
+import { Throttle } from "@nestjs/throttler"
 import { ParseBoolPipe, DefaultValuePipe, UseGuards } from "@nestjs/common";
 @Controller()
 export class AppController {
@@ -103,6 +104,7 @@ export class AppController {
 
   @Post("/x/note")
   @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 1, ttl: 1000 } })
   async createXNoteMetadata(
     @Body("noteUrl") noteUrl: string,
     @Body("content") content: string,

@@ -7,8 +7,8 @@ import { AppService } from "./app.service";
   imports: [
     ThrottlerModule.forRoot([
       {
-        ttl: 1000,
-        limit: 2,
+        ttl: 60000,
+        limit: 15,
       },
     ]),
   ],
