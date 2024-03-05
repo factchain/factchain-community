@@ -13,7 +13,10 @@ import {
   ContractsResponse,
 } from "./factchain-core/types";
 
-import { ParseBoolPipe, DefaultValuePipe } from "@nestjs/common";
+import { ThrottlerGuard } from "@nestjs/throttler";
+
+import { Throttle } from "@nestjs/throttler"
+import { ParseBoolPipe, DefaultValuePipe, UseGuards } from "@nestjs/common";
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -34,6 +37,7 @@ export class AppController {
   }
 
   @Get("/notes")
+  @UseGuards(ThrottlerGuard)
   async getNotes(
     @Query("postUrl") postUrl: string,
     @Query("from") from: number,
@@ -91,6 +95,7 @@ export class AppController {
   }
 
   @Get("/x/note/id")
+  @UseGuards(ThrottlerGuard)
   async getXNoteID(@Query("noteUrl") noteUrl): Promise<XSignedNoteIDResponse> {
     console.log(`Get factchain ID for X note URL ${noteUrl}`);
     const res = await this.appService.getXNoteID(noteUrl);
@@ -98,6 +103,8 @@ export class AppController {
   }
 
   @Post("/x/note")
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 1, ttl: 1000 } })
   async createXNoteMetadata(
     @Body("noteUrl") noteUrl: string,
     @Body("content") content: string,
