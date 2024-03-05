@@ -25,7 +25,7 @@ Creating and rating Notes requires an ETH stake. The funds remain locked in the 
 Notes that are deemed useful by the community are shown under their posts, providing context and nuance when navigating social media platforms.
 
 
-# Get Started
+# Put Your ETH Where Your Mouth Is. Join the Guardians of Truth.
 - [Manifesto](https://factchain.tech/)
 - [Deployed Contracts](https://factchain.tech/about/)
 
