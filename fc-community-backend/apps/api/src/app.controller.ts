@@ -7,14 +7,11 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { AppService } from "./app.service";
-import {
-  NotesResponse,
-  XSignedNoteIDResponse,
-} from "./factchain-core/types";
+import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
 
 import { ThrottlerGuard } from "@nestjs/throttler";
 
-import { Throttle } from "@nestjs/throttler"
+import { Throttle } from "@nestjs/throttler";
 import { ParseBoolPipe, DefaultValuePipe, UseGuards } from "@nestjs/common";
 @Controller()
 export class AppController {
