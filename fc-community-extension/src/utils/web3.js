@@ -9,7 +9,6 @@ import {
   FC_NFT_CONTRACT_ABI,
   FC_SFT_CONTRACT_ABI,
 } from './constants';
-import { getContracts } from './backend';
 import abiDecoder from 'abi-decoder';
 
 abiDecoder.addABI(FC_MAIN_CONTRACT_ABI);
@@ -72,14 +71,36 @@ export const createFactchainProvider = async () => {
       });
       return accounts;
     };
+
+    const getContractAddress = (contractName) => {
+      // mapping contractName to fixed proxy contract
+      // doesn't break the upgradeability
+      // because proxy should never be upgraded to another addess
+      switch (contractName) {
+        case 'main':
+          return '0x3b5946b3bd79c2B211E49c3149872f1d66223AE7';
+        case 'x':
+          return '0xaC51f5E2664aa966c678Dc935E0d853d3495A48C';
+        case 'sft':
+          return '0xF9408EB2C2219E28aEFB32035c49d491880650A2';
+        case 'nft':
+          return '0x5818764B4272f4eCff170216abE99D36c0c41622';
+        default:
+          // should never happen
+          // caller isn't expected to catch this error
+          throw new Error(`Unknown Contract ${contractName}`);
+      }
+    };
+
     const getContract = async (contractName, contractAbi) => {
       const ethersProvider = new ethers.BrowserProvider(provider);
       const signer = await ethersProvider.getSigner();
-      const contractAddress = (await getContracts())[contractName];
+      const contractAddress = getContractAddress(contractName);
       return new ethers.Contract(contractAddress, contractAbi, signer);
     };
+
     const onContractEvents = async (contractName, topics, callback) => {
-      const contractAddress = (await getContracts())[contractName];
+      const contractAddress = getContractAddress(contractName);
       filter = {
         address: contractAddress,
         topics: topics.map(utils.id),

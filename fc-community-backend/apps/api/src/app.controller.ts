@@ -10,7 +10,6 @@ import { AppService } from "./app.service";
 import {
   NotesResponse,
   XSignedNoteIDResponse,
-  ContractsResponse,
 } from "./factchain-core/types";
 
 import { ThrottlerGuard } from "@nestjs/throttler";
@@ -29,11 +28,6 @@ export class AppController {
   @Get("/_version")
   getVersion(): string {
     return this.appService.getVersion();
-  }
-
-  @Get("/_contracts")
-  getContracts(): ContractsResponse {
-    return { contracts: this.appService.getContracts() };
   }
 
   @Get("/notes")
