@@ -1,7 +1,7 @@
 {
   "name": "fc-community-extension",
-  "version": "0.5.0",
-  "description": "Factchain Community",
+  "version": "0.6.0",
+  "description": "Factchain",
   "private": true,
   "scripts": {
     "watch": "webpack --mode=development --watch --config config/webpack.config.js",

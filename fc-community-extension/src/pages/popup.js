@@ -59,7 +59,7 @@ function FCProfile(props) {
           <div className="flex items-center justify-between rounded-2xl px-10 py-6">
             <StatCard name="Notes" value={props.numberNotes} />
             <StatCard name="Ratings" value={props.numberRatings} />
-            <StatCard name="Earnings" value={props.earnings} />
+            <StatCard name="Earnings" value={`${props.earnings.slice(0, 7)} ⧫`} />
           </div>
           {props.loggedIn && <FCNetworks />}
         </div>
@@ -183,14 +183,14 @@ function FCPopup({ provider }) {
       return {
         notes: `${stats[0]}`,
         ratings: `${stats[1]}`,
-        earnings: `${ethers.formatEther(earnings).slice(0, 7)} ⧫`,
+        earnings: `${ethers.formatEther(earnings)}`,
       };
     } else {
       console.log(`Default data for user stats`);
       return {
         notes: '?',
         ratings: '?',
-        earnings: '? ⧫',
+        earnings: '?',
       };
     }
   };
