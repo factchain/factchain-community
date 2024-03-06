@@ -75,25 +75,6 @@ export const createXNoteId = async (noteUrl, content) => {
   }
 };
 
-export const getContracts = async () => {
-  let fullUrl = `${BACKEND_URL}/_contracts`;
-  console.log('Getting contracts', fullUrl);
-
-  try {
-    const response = await fetch(fullUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    const data = await response.json();
-    return data.contracts;
-  } catch (error) {
-    console.error('Error fetching contracts:', error);
-    throw error;
-  }
-};
-
 export const awaitOpenSeaUrl = async (openseaUrl) => {
   console.log('Waiting for opensea url to be ok', openseaUrl);
   let retry = 10;

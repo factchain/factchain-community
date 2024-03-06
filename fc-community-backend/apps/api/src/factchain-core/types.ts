@@ -57,16 +57,6 @@ export type NotesResponse = {
   notes: Array<Note>;
 };
 
-export type ContractAddresses = {
-  main: string;
-  nft: string;
-  sft: string;
-  x: string;
-};
-
-export type ContractsResponse = {
-  contracts: ContractAddresses;
-};
 
 export type FactChainEvent =
   | "ReserveFunded"
