@@ -40,10 +40,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       config.NOTE_FINALISER_PKEY,
       this._provider,
     );
-    this._nftWallet = new ethers.Wallet(
-      config.NFT_MINTER_PKEY,
-      this._provider,
-    );
+    this._nftWallet = new ethers.Wallet(config.NFT_MINTER_PKEY, this._provider);
     this._fcCommunity = new ethers.Contract(
       this._config.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,

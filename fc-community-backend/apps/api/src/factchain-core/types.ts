@@ -57,7 +57,6 @@ export type NotesResponse = {
   notes: Array<Note>;
 };
 
-
 export type FactChainEvent =
   | "ReserveFunded"
   | "NoteCreated"
