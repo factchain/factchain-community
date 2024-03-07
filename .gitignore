@@ -24,7 +24,8 @@ dist
 lib
 bin
 yarn-error.log
-
+*.js.map
+*.css.map
 
 
 # compiled output

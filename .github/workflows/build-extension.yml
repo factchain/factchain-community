@@ -17,7 +17,9 @@ jobs:
         run: yarn
 
       - name: Build extension
-        run: yarn run build
+        run: |
+          yarn run build
+          git status -u
 
       - name: Commit and push
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -27,3 +29,6 @@ jobs:
           commit_user_name: Factchain Bot
           commit_user_email: bot@factchain.tech
           commit_author: Factchain Bot <bot@factchain.tech>
+
+      - name: Check results
+        run: git status -u
