@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "watch": "webpack --mode=development --watch --config config/webpack.config.js",
-    "build": "webpack --mode=production --config config/webpack.config.js && mkdir -p factchain-extension-build && rm -rf factchain-extension-build/* && cp -R build/* factchain-extension-build/",
+    "build": "mkdir -p factchain-extension-build && rm -rf factchain-extension-build/* && mkdir -p build && rm -rf build && webpack --mode=production --config config/webpack.config.js && cp -R build/* factchain-extension-build/",
     "pack": "node pack.js",
     "repack": "npm run build && npm run pack",
     "prettier": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\"",
