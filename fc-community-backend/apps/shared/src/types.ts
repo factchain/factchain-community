@@ -5,11 +5,6 @@ export type Config = {
   USEFUL_NOTE_THRESHOLD: string;
   MINIMUM_RATING: string;
   // chain vars
-  INFRA_RPC_URL: string;
-  MAIN_CONTRACT_ADDRESS: string;
-  NFT_CONTRACT_ADDRESS: string;
-  SFT_CONTRACT_ADDRESS: string;
-  X_CONTRACT_ADDRESS: string;
   NFT_MINTER_PKEY: string;
   NOTE_FINALISER_PKEY: string;
   // AI image generation
@@ -25,6 +20,14 @@ export type Config = {
   BACKEND_PKEY: string;
   [key: string]: string;
 };
+
+export type Network = {
+  INFRA_RPC_URL: string;
+  MAIN_CONTRACT_ADDRESS: string;
+  NFT_CONTRACT_ADDRESS: string;
+  SFT_CONTRACT_ADDRESS: string;
+  X_CONTRACT_ADDRESS: string;
+}
 
 export type Rating = {
   postUrl: string;

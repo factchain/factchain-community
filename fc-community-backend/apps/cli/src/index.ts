@@ -30,8 +30,9 @@ program
   .description("get a list of events")
   .option("-f, --from <number>", "Start block", parseInt, 0)
   .option("-t, --to <number>", "End block", parseInt)
+  .option("-n, --network <string>", "network name")
   .action(async (eventType: FactChainEvent, options: any) => {
-    await getEvents(eventType, options.from, options.to);
+    await getEvents(eventType, options.from, options.to, options.network);
   });
 
 program
@@ -39,8 +40,9 @@ program
   .description("get a factchain note")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Creator address")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await getNote(options.url, options.creator);
+    await getNote(options.url, options.creator, options.network);
   });
 
 program
@@ -48,8 +50,9 @@ program
   .description("get factchain notes for a given post")
   .option("-u, --url <url>", "Post url")
   .option("-f, --from <number>", "lookback days")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await getNotes(options.url, options.from);
+    await getNotes(options.url, options.from, options.network);
   });
 
 program
@@ -57,8 +60,9 @@ program
   .description("create a factchain note")
   .option("-u, --url <url>", "Post url")
   .option("-t, --text <text>", "Note content")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await createNote(options.url, options.text);
+    await createNote(options.url, options.text, options.network);
   });
 
 program
@@ -67,8 +71,14 @@ program
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
   .option("-r, --rating <number>", "Note Rating", parseInt, 0)
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await rateNote(options.url, options.creator, options.rating);
+    await rateNote(
+      options.url,
+      options.creator,
+      options.rating,
+      options.network,
+    );
   });
 
 program
@@ -76,8 +86,9 @@ program
   .description("get factchain notes to finalised")
   .option("-f, --from <number>", "lookback days")
   .option("-m, --minimum <number>", "minimum note ratings", 1)
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await getEligibleNotes(options.from, options.minimum);
+    await getEligibleNotes(options.from, options.minimum, options.network);
   });
 
 program
@@ -87,8 +98,15 @@ program
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
   .option("-r, --rating <number>", "Final rating")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await mintNote(options.text, options.url, options.creator, options.rating);
+    await mintNote(
+      options.text,
+      options.url,
+      options.creator,
+      options.rating,
+      options.network,
+    );
   });
 
 program
@@ -96,8 +114,13 @@ program
   .description("generate nft data and upload to s3")
   .option("-t, --text <text>", "Note content")
   .option("-u, --url <url>", "Note url")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await createXCommunityNoteNFTMetadata(options.text, options.url);
+    await createXCommunityNoteNFTMetadata(
+      options.text,
+      options.url,
+      options.network,
+    );
   });
 
 program
@@ -106,16 +129,23 @@ program
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Note creator")
   .option("-r, --rater <address>", "Note Rater")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await getRating(options.url, options.creator, options.rater);
+    await getRating(
+      options.url,
+      options.creator,
+      options.rater,
+      options.network,
+    );
   });
 
 program
   .command("set-sft")
   .description("set factchain NFT contract in factchain SFT")
   .option("-a, --address <address>", "Factchain main contract address")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await setNFTContractInSFT(options.address);
+    await setNFTContractInSFT(options.address, options.network);
   });
 
 program
@@ -123,8 +153,9 @@ program
   .description("get factchain note raters")
   .option("-u, --url <url>", "Post url")
   .option("-c, --creator <address>", "Creator Address")
+  .option("-n, --network <string>", "network name")
   .action(async (options: any) => {
-    await getNoteRaters(options.url, options.creator);
+    await getNoteRaters(options.url, options.creator, options.network);
   });
 
 program.parse();

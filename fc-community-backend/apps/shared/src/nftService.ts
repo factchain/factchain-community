@@ -203,7 +203,7 @@ export const createNFT1155DatafromXCommunityNote = async (
     await axios.get(replicateUrl, { responseType: "arraybuffer" })
   ).data;
   const params = {
-    Bucket: "factchain-community",
+    Bucket: AWSBucket,
     Key: `${tokenID}.png`,
     Body: imageBuffer,
     ContentType: "image/png",

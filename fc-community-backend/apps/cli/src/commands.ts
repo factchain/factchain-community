@@ -9,15 +9,21 @@ import {
 import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
+import {
+  NetworkConfigs,
+  getNetworkConfig,
+} from "./factchain-core/networks/config";
+
 export const getEvents = async (
   eventType: FactChainEvent,
   fromBlock: number,
   toBlock: number,
+  network: keyof NetworkConfigs,
 ): Promise<Array<EventLog>> => {
   console.log(
     `getEvents command called with type=${eventType} and option fromBlock=${fromBlock}, toBlock=${toBlock}`,
   );
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const eventLogs = await fc.getEvents(eventType, fromBlock, toBlock);
   console.log(eventLogs);
   return eventLogs;
@@ -26,8 +32,9 @@ export const getEvents = async (
 export const getNote = async (
   postUrl: string,
   creator: string,
+  network: keyof NetworkConfigs,
 ): Promise<Note> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const ns = new NoteService(fc, fc);
   const note = await ns.getNote(postUrl, creator);
   console.log(note);
@@ -37,8 +44,9 @@ export const getNote = async (
 export const getNotes = async (
   postUrl: string,
   from: number,
+  network: keyof NetworkConfigs,
 ): Promise<Note[]> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const ns = new NoteService(fc, fc);
   const notes = await ns.getNotes((_postUrl, _) => _postUrl === postUrl, from);
   console.log(notes);
@@ -48,8 +56,9 @@ export const getNotes = async (
 export const createNote = async (
   postUrl: string,
   text: string,
+  network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const transactionResponse = await fc.createNote(postUrl, text);
   console.log(transactionResponse);
   return transactionResponse;
@@ -59,8 +68,9 @@ export const rateNote = async (
   postUrl: string,
   creator: string,
   rating: number,
+  network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const transactionResponse = await fc.rateNote(postUrl, creator, rating);
   console.log(transactionResponse);
   return transactionResponse;
@@ -69,8 +79,9 @@ export const rateNote = async (
 export const getEligibleNotes = async (
   from: number,
   minimumRatingsPerNote: number,
+  network: keyof NetworkConfigs,
 ): Promise<Array<Note>> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const ns = new NoteService(fc, fc);
   const eligibleNotes = await ns.getNotesToFinalise(
     from,
@@ -85,8 +96,9 @@ export const mintNote = async (
   postUrl: string,
   creator: string,
   finalRating: number,
+  network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   return await fc.mintNote721({
     postUrl,
     creatorAddress: creator,
@@ -98,8 +110,9 @@ export const mintNote = async (
 export const createXCommunityNoteNFTMetadata = async (
   text: string,
   noteUrl: string,
+  network: keyof NetworkConfigs,
 ): Promise<XSignedNoteIDResponse> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const ns = new NoteService(fc, fc);
   const res = await ns.createXNoteMetadata(noteUrl, text);
   console.log(res);
@@ -110,8 +123,9 @@ export const getRating = async (
   postUrl: string,
   creator: string,
   rater: string,
+  network: keyof NetworkConfigs,
 ): Promise<Rating> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const rating = await fc.getRating(postUrl, creator, rater);
   console.log(rating);
   return rating;
@@ -120,8 +134,9 @@ export const getRating = async (
 export const getNoteRaters = async (
   postUrl: string,
   creator: string,
+  network: keyof NetworkConfigs,
 ): Promise<String[]> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const raters = await fc.getNoteRaters(postUrl, creator);
   console.log(raters);
   return raters;
@@ -129,8 +144,9 @@ export const getNoteRaters = async (
 
 export const setNFTContractInSFT = async (
   NFTContractAddress: string,
+  network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config);
+  const fc = new FactChainBackend(config, getNetworkConfig(network));
   const response = await fc.setNFTContractInSFT(NFTContractAddress);
   console.log(response);
   return response;

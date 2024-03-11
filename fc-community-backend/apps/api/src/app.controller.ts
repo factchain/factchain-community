@@ -12,7 +12,13 @@ import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
 import { ThrottlerGuard } from "@nestjs/throttler";
 
 import { Throttle } from "@nestjs/throttler";
-import { ParseBoolPipe, DefaultValuePipe, UseGuards } from "@nestjs/common";
+import {
+  ParseBoolPipe,
+  DefaultValuePipe,
+  UseGuards,
+  Headers,
+} from "@nestjs/common";
+import { getNetworkConfig } from "./factchain-core/networks/config";
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -36,8 +42,11 @@ export class AppController {
     @Query("awaitingRatingBy") awaitingRatingBy: string,
     @Query("onlyUseful", new DefaultValuePipe(false), ParseBoolPipe)
     onlyUseful: boolean,
+    @Headers() headers: Record<string, any>,
   ): Promise<NotesResponse> {
+    const network = getNetworkConfig(headers["network"]);
     let notes = [];
+
     if (from) {
       // max 21 days of lookbackdays to be kind on quicknode!
       if (!(from > 0 && from <= 21)) {
@@ -53,6 +62,7 @@ export class AppController {
         `Get all notes awaiting for rating by ${awaitingRatingBy} on ${postUrl}`,
       );
       notes = await this.appService.getNotesAwaitingRatingByOnGivenPost(
+        network,
         postUrl,
         awaitingRatingBy,
         from,
@@ -63,19 +73,24 @@ export class AppController {
     // simple QueryParam
     if (postUrl) {
       console.log(`Get notes for postUrl=${postUrl}`);
-      notes = await this.appService.getNotesByPost(postUrl, from);
+      notes = await this.appService.getNotesByPost(network, postUrl, from);
     } else if (creatorAddress) {
       console.log(`Get all notes created by ${creatorAddress}`);
-      notes = await this.appService.getNotesByCreator(creatorAddress, from);
+      notes = await this.appService.getNotesByCreator(
+        network,
+        creatorAddress,
+        from,
+      );
     } else if (awaitingRatingBy) {
       console.log(`Get all notes awaiting for rating by ${awaitingRatingBy}`);
       notes = await this.appService.getNotesAwaitingRatingBy(
+        network,
         awaitingRatingBy,
         from,
       );
     } else {
       console.log(`Get all notes`);
-      notes = await this.appService.getAllNotesFrom(from);
+      notes = await this.appService.getAllNotesFrom(network, from);
     }
 
     // final generic QueryParam
@@ -87,9 +102,13 @@ export class AppController {
 
   @Get("/x/note/id")
   @UseGuards(ThrottlerGuard)
-  async getXNoteID(@Query("noteUrl") noteUrl): Promise<XSignedNoteIDResponse> {
+  async getXNoteID(
+    @Query("noteUrl") noteUrl: string,
+    @Headers() headers: Record<string, any>,
+  ): Promise<XSignedNoteIDResponse> {
+    const network = getNetworkConfig(headers["Network"]);
     console.log(`Get factchain ID for X note URL ${noteUrl}`);
-    const res = await this.appService.getXNoteID(noteUrl);
+    const res = await this.appService.getXNoteID(network, noteUrl);
     return res;
   }
 
@@ -99,8 +118,14 @@ export class AppController {
   async createXNoteMetadata(
     @Body("noteUrl") noteUrl: string,
     @Body("content") content: string,
+    @Headers() headers: Record<string, any>,
   ): Promise<XSignedNoteIDResponse> {
-    const res = await this.appService.createXNoteMetadata(noteUrl, content);
+    const network = getNetworkConfig(headers["Network"]);
+    const res = await this.appService.createXNoteMetadata(
+      network,
+      noteUrl,
+      content,
+    );
     console.log(
       `Create metadata for X note URL ${noteUrl}, Factchain ID ${res.id}`,
     );
