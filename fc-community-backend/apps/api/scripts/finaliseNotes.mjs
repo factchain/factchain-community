@@ -3,11 +3,12 @@
 import { FactChainBackend } from "../dist/factchain-core/web3.js";
 import { NoteService } from "../dist/factchain-core/noteService.js";
 import { config } from "../dist/factchain-core/env.js";
+import { getNetworkConfig } from "../dist/factchain-core/networks/config.js"
 
 const LOOKBACK_DAYS = parseInt(process.argv[2]) || 2;
 const MINIMUM_RATING = parseInt(config.MINIMUM_RATING);
 
-const fc = new FactChainBackend(config);
+const fc = new FactChainBackend(config, getNetworkConfig("ETHEREUM_SEPOLIA"));
 const ns = new NoteService(fc, fc);
 
 const nonces = await fc.getNonces();
