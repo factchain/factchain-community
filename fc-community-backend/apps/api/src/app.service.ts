@@ -5,6 +5,7 @@ import { NoteService } from "./factchain-core/noteService";
 import { config } from "./factchain-core/env";
 
 import { sanitizeXUrl } from "./factchain-core/utils";
+import { NetworkConfig } from "./factchain-core/networks/config";
 
 @Injectable()
 export class AppService {
@@ -22,8 +23,12 @@ export class AppService {
     );
   }
 
-  async getNotesByPost(postUrl: string, from: number): Promise<Array<Note>> {
-    const fc = new FactChainBackend(config);
+  async getNotesByPost(
+    network: NetworkConfig,
+    postUrl: string,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
 
     const sanitizedPostUrl = sanitizeXUrl(postUrl);
@@ -34,15 +39,22 @@ export class AppService {
     return notes;
   }
 
-  async getAllNotesFrom(from: number): Promise<Array<Note>> {
-    const fc = new FactChainBackend(config);
+  async getAllNotesFrom(
+    network: NetworkConfig,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotes((_postUrl, _creator) => true, from);
     return notes;
   }
 
-  async getNotesByCreator(creator: string, from: number): Promise<Array<Note>> {
-    const fc = new FactChainBackend(config);
+  async getNotesByCreator(
+    network: NetworkConfig,
+    creator: string,
+    from: number,
+  ): Promise<Array<Note>> {
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
     // TODO: only push lowered address to contract
     // and remove the conversion here
@@ -54,10 +66,11 @@ export class AppService {
   }
 
   async getNotesAwaitingRatingBy(
+    network: NetworkConfig,
     rater: string,
     from: number,
   ): Promise<Array<Note>> {
-    const fc = new FactChainBackend(config);
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
     const notes = await ns.getNotesAwaitingRatingBy(
       (_postUrl, _creator) => true,
@@ -68,11 +81,12 @@ export class AppService {
   }
 
   async getNotesAwaitingRatingByOnGivenPost(
+    network: NetworkConfig,
     postUrl: string,
     rater: string,
     from: number,
   ): Promise<Array<Note>> {
-    const fc = new FactChainBackend(config);
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
 
     const sanitizedPostUrl = sanitizeXUrl(postUrl);
@@ -84,8 +98,11 @@ export class AppService {
     return notes;
   }
 
-  async getXNoteID(noteUrl: string): Promise<XSignedNoteIDResponse> {
-    const fc = new FactChainBackend(config);
+  async getXNoteID(
+    network: NetworkConfig,
+    noteUrl: string,
+  ): Promise<XSignedNoteIDResponse> {
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
     try {
       return await ns.getXNoteID(noteUrl);
@@ -98,10 +115,11 @@ export class AppService {
   }
 
   async createXNoteMetadata(
+    network: NetworkConfig,
     noteUrl: string,
     content: string,
   ): Promise<XSignedNoteIDResponse> {
-    const fc = new FactChainBackend(config);
+    const fc = new FactChainBackend(config, network);
     const ns = new NoteService(fc, fc);
     return await ns.createXNoteMetadata(noteUrl, content);
   }

@@ -23,9 +23,11 @@ import { FC_SFT_JSON_ABI } from "./contractsABIs/sft";
 import { FC_NFT_JSON_ABI } from "./contractsABIs/nft";
 
 import { Config, XSignedNoteIDResponse } from "./types";
+import { NetworkConfig } from "./networks/config";
 
 export class FactChainBackend implements NoteReader, NoteWriter {
   private _config: Config;
+  private _network: NetworkConfig;
   private _provider: ethers.AbstractProvider;
   private _mainWallet: ethers.Signer;
   private _nftWallet: ethers.Signer;
@@ -33,23 +35,24 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   private _fcNFT: ethers.Contract;
   private _fcSFT: ethers.Contract;
 
-  constructor(config: Config) {
+  constructor(config: Config, network: NetworkConfig) {
     this._config = config;
-    this._provider = new ethers.JsonRpcProvider(this._config.INFRA_RPC_URL);
+    this._network = network;
+    this._provider = new ethers.JsonRpcProvider(this._network.INFRA_RPC_URL);
     this._mainWallet = new ethers.Wallet(
       config.NOTE_FINALISER_PKEY,
       this._provider,
     );
     this._nftWallet = new ethers.Wallet(config.NFT_MINTER_PKEY, this._provider);
     this._fcCommunity = new ethers.Contract(
-      this._config.MAIN_CONTRACT_ADDRESS,
+      this._network.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,
       this._mainWallet,
     );
     // main NFT (ERC-721) contract
     // given to the author of a factchain note
     this._fcNFT = new ethers.Contract(
-      this._config.NFT_CONTRACT_ADDRESS,
+      this._network.NFT_CONTRACT_ADDRESS,
       FC_NFT_JSON_ABI,
       this._nftWallet,
     );
@@ -57,7 +60,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     // copies of the orginal NFT to reward raters
     // factchainers as well can mint to support the author
     this._fcSFT = new ethers.Contract(
-      this._config.SFT_CONTRACT_ADDRESS,
+      this._network.SFT_CONTRACT_ADDRESS,
       FC_SFT_JSON_ABI,
       this._nftWallet,
     );
@@ -220,13 +223,6 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       throw new Error("Bad rating!");
     }
     const finaliseOptions = nonce !== undefined ? { nonce } : {};
-    const runnerAddress = await (
-      this._fcCommunity.runner as ethers.Signer
-    ).getAddress();
-    console.log(
-      `Finalising note ${creator}:${postUrl} using ${runnerAddress}`,
-      finaliseOptions,
-    );
     return await this._fcCommunity.finaliseNote(
       postUrl,
       creator,
@@ -246,13 +242,6 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       this._config.PINATA_JWT,
     );
     const mintOptions = nonce !== undefined ? { nonce } : {};
-    const runnerAddress = await (
-      this._fcNFT.runner as ethers.Signer
-    ).getAddress();
-    console.log(
-      `Minting note ${note.creatorAddress}:${note.postUrl} using ${runnerAddress}`,
-      mintOptions,
-    );
     return await this._fcNFT.mint(
       note.creatorAddress,
       note.postUrl,
