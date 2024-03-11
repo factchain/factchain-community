@@ -27,7 +27,7 @@ export type Network = {
   NFT_CONTRACT_ADDRESS: string;
   SFT_CONTRACT_ADDRESS: string;
   X_CONTRACT_ADDRESS: string;
-}
+};
 
 export type Rating = {
   postUrl: string;
@@ -59,7 +59,6 @@ export type XSignedNoteIDResponse = {
 export type NotesResponse = {
   notes: Array<Note>;
 };
-
 
 export type FactChainEvent =
   | "ReserveFunded"
