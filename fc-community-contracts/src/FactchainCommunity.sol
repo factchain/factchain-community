@@ -30,6 +30,11 @@ interface IFactchainCommunityEvents {
     event MinimumStakePerNoteUpdated(uint64 newMinimumStake);
     /// @dev This emits when the minimum stake per rating is updated
     event MinimumStakePerRatingUpdated(uint64 newMinimumStake);
+
+    /// @dev This emits when reward transaction failed
+    event FailedToReward(address receiver, uint256 amount);
+    /// @dev This emits when slash transaction failed
+    event FailedToSlash(address receiver, uint256 amount);
 }
 
 interface IFactchainCommunity is IFactchainCommunityEvents {
@@ -66,16 +71,22 @@ interface IFactchainCommunity is IFactchainCommunityEvents {
     error NoteAlreadyFinalised();
     error RatingAlreadyExists();
     error CantRateOwnNote();
-    error FailedToReward();
-    error FailedToSlash();
     error InsufficientStake();
+    error EmptyStuckFundsBalance();
+    error FailToWithdrawStuckFunds();
 }
 
 /// @title Factchain Community
 /// @author Yacine B. Badiss, Pierre HAY
 /// @notice
 /// @dev
-contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlUpgradeable, UUPSUpgradeable, IFactchainCommunity {
+contract FactchainCommunity is
+    Initializable,
+    OwnableUpgradeable,
+    AccessControlUpgradeable,
+    UUPSUpgradeable,
+    IFactchainCommunity
+{
     uint8 internal constant POST_URL_MAX_LENGTH = 160;
     uint16 internal constant CONTENT_MAX_LENGTH = 500;
     bytes32 public constant FINALISER_ROLE = keccak256("FINALISER_ROLE");
@@ -97,6 +108,15 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
     /// before moving to mainnet and replaced by an indexing of contract events.
     /// It costs an extra 20k gas per call to createNote/rateNote
     mapping(address => UserStats) public userStats;
+
+    /// @notice Mapping of user address to their stuck balance (should always be empty)
+    /// only exist to handle potential vulnerability where a malicious contract
+    /// creates a note or a rating and doesn't implement any receive logic or intentionally revert inside it.
+    /// Factchain Community emits a `FailtToReward` or `FailToSlash` event and updates the `stuckFunds` mapping
+    /// rather than reverting and blocking the finalisation logic.
+    /// User can always check this mapping for free as a readcall and withdraw their stuck funds if any.
+    /// Calling the `withdrawStuckFunds` function of this contract.
+    mapping(address => uint256) public stuckFunds;
 
     // disable contract until initialization
     constructor() {
@@ -169,19 +189,35 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
         } else if (finalRating == 2) {
             // trick to avoid floating point slash=0.75 * minimumStakePerNote
             uint96 slash = minimumStakePerNote - minimumStakePerNote / 4;
+            uint256 change = minimumStakePerNote - slash;
+
             userStats[_creator].ethSlashed += slash;
-            (bool result,) = payable(_creator).call{value: minimumStakePerNote - slash}("");
-            if (!result) revert FailedToSlash();
-            emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: minimumStakePerNote});
+
+            (bool result,) = payable(_creator).call{value: change}("");
+            if (!result) {
+                stuckFunds[_creator] += change;
+                emit FailedToSlash(_creator, change);
+            } else {
+                emit CreatorSlashed({postUrl: _postUrl, creator: _creator, slash: slash, stake: minimumStakePerNote});
+            }
         } else {
             uint96 reward;
             if (finalRating == 3) reward = minimumStakePerNote / 2;
             if (finalRating == 4) reward = minimumStakePerNote;
-            if (finalRating == 5) reward = minimumStakePerNote + minimumStakePerNote / 2;
+            if (finalRating == 5) {
+                reward = minimumStakePerNote + minimumStakePerNote / 2;
+            }
+
             userStats[_creator].ethRewarded += reward;
+            uint256 change = minimumStakePerNote + reward;
+
             (bool result,) = payable(_creator).call{value: minimumStakePerNote + reward}("");
-            if (!result) revert FailedToReward();
-            emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: minimumStakePerNote});
+            if (!result) {
+                stuckFunds[_creator] += change;
+                emit FailedToReward(_creator, change);
+            } else {
+                emit CreatorRewarded({postUrl: _postUrl, creator: _creator, reward: reward, stake: minimumStakePerNote});
+            }
         }
     }
 
@@ -192,18 +228,25 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
             uint96 delta = uint96(stdMath.delta(finalRating, communityRatings[_postUrl][_creator][rater]));
             if (delta < 2) {
                 uint96 reward;
-                if (delta == 0) reward = minimumStakePerRating + minimumStakePerRating / 2;
+                if (delta == 0) {
+                    reward = minimumStakePerRating + minimumStakePerRating / 2;
+                }
                 if (delta == 1) reward = minimumStakePerRating;
                 userStats[rater].ethRewarded += reward;
-                (bool result,) = payable(rater).call{value: minimumStakePerRating + reward}("");
-                if (!result) revert FailedToReward();
-                emit RaterRewarded({
-                    postUrl: _postUrl,
-                    creator: _creator,
-                    rater: rater,
-                    reward: reward,
-                    stake: minimumStakePerRating
-                });
+                uint256 change = minimumStakePerNote + reward;
+                (bool result,) = payable(rater).call{value: change}("");
+                if (!result) {
+                    stuckFunds[rater] += change;
+                    emit FailedToReward(rater, change);
+                } else {
+                    emit RaterRewarded({
+                        postUrl: _postUrl,
+                        creator: _creator,
+                        rater: rater,
+                        reward: reward,
+                        stake: minimumStakePerRating
+                    });
+                }
             } else if (delta == 4) {
                 // worst slash, skip refund
                 userStats[rater].ethSlashed += minimumStakePerRating;
@@ -216,18 +259,26 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
                 });
             } else {
                 uint96 slash;
-                if (delta == 3) slash = minimumStakePerRating - minimumStakePerRating / 4;
+                if (delta == 3) {
+                    slash = minimumStakePerRating - minimumStakePerRating / 4;
+                }
                 if (delta == 2) slash = minimumStakePerRating / 2;
                 userStats[rater].ethSlashed += slash;
-                (bool result,) = payable(rater).call{value: minimumStakePerRating - slash}("");
-                if (!result) revert FailedToSlash();
-                emit RaterSlashed({
-                    postUrl: _postUrl,
-                    creator: _creator,
-                    rater: rater,
-                    slash: slash,
-                    stake: minimumStakePerRating
-                });
+                uint256 change = minimumStakePerNote - slash;
+
+                (bool result,) = payable(rater).call{value: change}("");
+                if (!result) {
+                    stuckFunds[rater] += change;
+                    emit FailedToSlash(rater, change);
+                } else {
+                    emit RaterSlashed({
+                        postUrl: _postUrl,
+                        creator: _creator,
+                        rater: rater,
+                        slash: slash,
+                        stake: minimumStakePerRating
+                    });
+                }
             }
         }
     }
@@ -257,7 +308,9 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
         if (_creator == msg.sender) revert CantRateOwnNote();
         if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
         if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
-        if (ratingExists(_postUrl, _creator, msg.sender)) revert RatingAlreadyExists();
+        if (ratingExists(_postUrl, _creator, msg.sender)) {
+            revert RatingAlreadyExists();
+        }
 
         communityRatings[_postUrl][_creator][msg.sender] = _rating;
         noteRaters[_postUrl][_creator].push(msg.sender);
@@ -272,11 +325,21 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
         });
     }
 
+    function withdrawStuckFunds() external {
+        // reentrancy guard: Checks-Effects-Interactions Pattern
+        uint256 balance;
+        balance = stuckFunds[msg.sender];
+        if (balance <= 0) revert EmptyStuckFundsBalance();
+        stuckFunds[msg.sender] = 0;
+        (bool success,) = payable(msg.sender).call{value: balance}("");
+        if (!success) revert FailToWithdrawStuckFunds();
+    }
+
     ////////////////////////////////////////////////////////////////////////
     /// Owner actions
     ////////////////////////////////////////////////////////////////////////
 
-    function _transferOwnership(address newOwner) override internal virtual {
+    function _transferOwnership(address newOwner) internal virtual override {
         super._transferOwnership(newOwner);
         _grantRole(DEFAULT_ADMIN_ROLE, newOwner);
     }
@@ -303,7 +366,10 @@ contract FactchainCommunity is Initializable, OwnableUpgradeable, AccessControlU
     ////////////////////////////////////////////////////////////////////////
 
     /// @notice Finalise a note
-    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating) external onlyRole(FINALISER_ROLE) {
+    function finaliseNote(string memory _postUrl, address _creator, uint8 _finalRating)
+        external
+        onlyRole(FINALISER_ROLE)
+    {
         if (!isRatingValid(_finalRating)) revert RatingInvalid();
         if (!noteExists(_postUrl, _creator)) revert NoteDoesNotExist();
         if (isNoteFinalised(_postUrl, _creator)) revert NoteAlreadyFinalised();
