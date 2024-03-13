@@ -211,7 +211,7 @@ contract FactchainCommunity is
             userStats[_creator].ethRewarded += reward;
             uint256 change = minimumStakePerNote + reward;
 
-            (bool result,) = payable(_creator).call{value: minimumStakePerNote + reward}("");
+            (bool result,) = payable(_creator).call{value: change}("");
             if (!result) {
                 stuckFunds[_creator] += change;
                 emit FailedToReward(_creator, change);

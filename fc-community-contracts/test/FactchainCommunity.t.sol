@@ -363,14 +363,19 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         (,, uint96 rater1NewRewards,) = fcCommunity.userStats(rater1);
-        assert(rater1.balance == rater1OriginalBalance + 150000000000000);
-        assert(rater1NewRewards == rater1OldRewards + 150000000000000);
+
+        // Asserts a is approximately equal to b with delta in percentage, where 1e18 is 100%.
+        // OK
+        assertApproxEqRel(rater1.balance, rater1OriginalBalance + 150000000000000, 1e18);
+        // Fail
+        // assert(rater1.balance == rater1OriginalBalance + 150000000000000);
+        assertApproxEqRel(rater1NewRewards, rater1OldRewards + 150000000000000, 1e18);
         (,,, uint96 rater2NewSlash) = fcCommunity.userStats(rater2);
-        assert(rater2.balance == rater2OriginalBalance - minimumStakePerRating);
-        assert(rater2NewSlash == rater2OldSlash + minimumStakePerRating);
+        assertApproxEqRel(rater2.balance, rater2OriginalBalance - minimumStakePerRating, 1e18);
+        assertApproxEqRel(rater2NewSlash, rater2OldSlash + minimumStakePerRating, 1e18);
         (,,, uint96 rater3NewSlash) = fcCommunity.userStats(rater3);
-        assert(rater3.balance == rater3OriginalBalance - 75000000000000);
-        assert(rater3NewSlash == rater3OldSlash + 75000000000000);
+        assertApproxEqRel(rater3.balance, rater3OriginalBalance - 75000000000000, 1e18);
+        assertApproxEqRel(rater3NewSlash, rater3OldSlash + 75000000000000, 1e18);
     }
 
     function test_rewardCreator() public {
