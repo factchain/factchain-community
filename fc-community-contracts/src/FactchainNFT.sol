@@ -23,7 +23,13 @@ interface IFactchainSFTEvents {
 /// @author Pierre HAY and Yacine Badiss
 /// @notice
 /// @dev
-contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URIStorageUpgradeable, UUPSUpgradeable, IFactchainSFTEvents {
+contract FactchainNFT is
+    OwnableUpgradeable,
+    AccessControlUpgradeable,
+    ERC721URIStorageUpgradeable,
+    UUPSUpgradeable,
+    IFactchainSFTEvents
+{
     FactchainSFT truthFragments;
     uint256 public tokenIdCounter;
     string private baseTokenURI;
@@ -60,7 +66,7 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
     /// Owner actions
     ////////////////////////////////////////////////////////////////////////
 
-    function _transferOwnership(address newOwner) override internal virtual {
+    function _transferOwnership(address newOwner) internal virtual override {
         super._transferOwnership(newOwner);
         _grantRole(DEFAULT_ADMIN_ROLE, newOwner);
     }
@@ -105,7 +111,14 @@ contract FactchainNFT is OwnableUpgradeable, AccessControlUpgradeable, ERC721URI
     /// Interface functions
     ////////////////////////////////////////////////////////////////////////
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override (ERC721URIStorageUpgradeable, AccessControlUpgradeable) returns (bool) {
-        return ERC721URIStorageUpgradeable.supportsInterface(interfaceId) || AccessControlUpgradeable.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721URIStorageUpgradeable, AccessControlUpgradeable)
+        returns (bool)
+    {
+        return ERC721URIStorageUpgradeable.supportsInterface(interfaceId)
+            || AccessControlUpgradeable.supportsInterface(interfaceId);
     }
 }

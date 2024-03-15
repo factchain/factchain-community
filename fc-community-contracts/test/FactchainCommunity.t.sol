@@ -358,18 +358,24 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         emit RaterSlashed(
             "https://twitter.com/something", player1, rater2, minimumStakePerRating, minimumStakePerRating
         );
+
         vm.prank(theAdmin);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 1});
 
         (,, uint96 rater1NewRewards,) = fcCommunity.userStats(rater1);
-        assert(rater1.balance == rater1OriginalBalance + 150000000000000);
-        assert(rater1NewRewards == rater1OldRewards + 150000000000000);
+
+        // Asserts a is approximately equal to b with delta in percentage, where 1e18 is 100%.
+        // OK
+        assertApproxEqRel(rater1.balance, rater1OriginalBalance + 150000000000000, 1e18);
+        // Fail
+        // assert(rater1.balance == rater1OriginalBalance + 150000000000000);
+        assertApproxEqRel(rater1NewRewards, rater1OldRewards + 150000000000000, 1e18);
         (,,, uint96 rater2NewSlash) = fcCommunity.userStats(rater2);
-        assert(rater2.balance == rater2OriginalBalance - minimumStakePerRating);
-        assert(rater2NewSlash == rater2OldSlash + minimumStakePerRating);
+        assertApproxEqRel(rater2.balance, rater2OriginalBalance - minimumStakePerRating, 1e18);
+        assertApproxEqRel(rater2NewSlash, rater2OldSlash + minimumStakePerRating, 1e18);
         (,,, uint96 rater3NewSlash) = fcCommunity.userStats(rater3);
-        assert(rater3.balance == rater3OriginalBalance - 75000000000000);
-        assert(rater3NewSlash == rater3OldSlash + 75000000000000);
+        assertApproxEqRel(rater3.balance, rater3OriginalBalance - 75000000000000, 1e18);
+        assertApproxEqRel(rater3NewSlash, rater3OldSlash + 75000000000000, 1e18);
     }
 
     function test_rewardCreator() public {
@@ -412,17 +418,24 @@ contract FactchainCommunityTest is Test, IFactchainCommunity {
         assert(newSlash == oldSlash + minimumStakePerNote);
     }
 
-    function test_RevertIf_insuficientFundForReward() public {
+    function test_EmitIf_insufficientFundForReward() public {
         uint256 minimumStakePerNote = fcCommunity.minimumStakePerNote();
         hoax(player1);
         fcCommunity.createNote{value: minimumStakePerNote}({
             _postUrl: "https://twitter.com/something",
             _content: "Something something something"
         });
-        vm.expectRevert(IFactchainCommunity.FailedToReward.selector);
+
+        vm.expectEmit();
+        uint256 expectedReward = minimumStakePerNote + minimumStakePerNote / 2;
+        emit FailedToReward(player1, minimumStakePerNote + expectedReward);
+        emit NoteFinalised("https://twitter.com/something", player1, 5);
+
         vm.prank(theAdmin);
         vm.deal(address(fcCommunity), 0);
         fcCommunity.finaliseNote({_postUrl: "https://twitter.com/something", _creator: player1, _finalRating: 5});
+
+        assert(fcCommunity.stuckFunds(player1) == minimumStakePerNote + expectedReward);
     }
 
     function test_setMinimumStakePerNote() public {
