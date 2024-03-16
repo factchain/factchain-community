@@ -2,7 +2,7 @@ import { render } from 'solid-js/web';
 import { createSignal, Switch, Match } from 'solid-js';
 import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
 import { logger } from '../utils/logging';
-import { cutText, makeTransactionUrl } from '../utils/constants';
+import { makeTransactionUrl } from '../utils/constants';
 import { FCHero, FCLoaderClean } from './components';
 
 import './style.css';

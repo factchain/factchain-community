@@ -158,24 +158,32 @@ function FCFooter(props) {
   );
 }
 
-function FCPopup({ provider }) {
+function FCPopup() {
   const [selectedTab, setSelectedTab] = createSignal('Profile');
   const [address, setAddress] = createSignal('');
+  const [provider, setProvider] = createSignal(null);
   const loggedIn = () => !!address();
 
   const changeConnectionState = async () => {
+    if (!provider()) {
+      const factchainProvider = await createFactchainProvider();
+      setProvider(factchainProvider);
+    }
+
     setSelectedTab('Profile');
     if (loggedIn()) {
-      await provider.disconnect();
+      await provider().disconnect();
       await chrome.runtime.sendMessage({
         type: 'fc-set-address',
         address: '',
       });
       setAddress('');
     } else {
-      await provider.requestAddress().then(setAddress);
+      console.log(provider());
+      await provider().requestAddress().then(setAddress);
     }
   };
+
   const getUserStats = async (address) => {
     console.log(`address: ${address}`);
     if (address) {
@@ -197,6 +205,8 @@ function FCPopup({ provider }) {
       };
     }
   };
+
+
   const [userStats] = createResource(address, getUserStats);
   const numberNotes = () =>
     userStats.ready || !userStats() ? '?' : userStats().notes;
@@ -204,7 +214,8 @@ function FCPopup({ provider }) {
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '?' : userStats().earnings;
-  provider.getAddress().then(setAddress);
+  
+  // provider.getAddress().then(setAddress);
 
   return (
     <div className="h-[600px] w-[375px] flex flex-col">
@@ -212,7 +223,6 @@ function FCPopup({ provider }) {
         <Match when={selectedTab() === 'Profile'}>
           <FCHero />
           <FCProfile
-            provider={provider}
             loggedIn={loggedIn()}
             address={address()}
             changeConnectionState={changeConnectionState}
@@ -245,6 +255,4 @@ function FCPopup({ provider }) {
   );
 }
 
-const provider = await createFactchainProvider();
-
-render(() => <FCPopup provider={provider} />, document.getElementById('app'));
+render(() => <FCPopup />, document.getElementById('app'));

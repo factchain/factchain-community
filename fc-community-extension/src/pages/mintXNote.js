@@ -12,10 +12,17 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
   const [transaction, setTransaction] = createSignal(null);
   const [openseaUrl, setOpenseaUrl] = createSignal(null);
   const [error, setError] = createSignal(null);
+  const [provider, setProvider] = createSignal(null);
+
   createResource(async () => {
     try {
       setError(null);
       setTransaction(null);
+
+      if (!provider) {
+        setProvider(await createFactchainProvider());
+      }
+
       let res = await getXNoteId(noteUrl);
       if (!res) {
         res = await createXNoteId(noteUrl, content);
@@ -23,7 +30,7 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
       console.log('Retrieved xNoteId', res);
       setXNoteId(res);
 
-      const { transaction, error } = await mintXNote(res);
+      const { transaction, error } = await mintXNote(res, provider);
       console.log('mintResult', transaction, error);
       setTransaction(transaction);
       if (error) {
@@ -111,12 +118,14 @@ const content = await chrome.runtime.sendMessage({
   type: 'fc-get-from-cache',
   target: 'content',
 });
-const provider = await createFactchainProvider();
-const contract = await provider.getXContract();
-console.log(`contract`, contract);
-console.log(`contract address ${contract.target}`);
 
-const mintXNote = async (xNoteId) => {
+
+const mintXNote = async (xNoteId, provider) => {
+
+  const contract = await provider.getXContract();
+  console.log(`contract`, contract);
+  console.log(`contract address ${contract.target}`);
+
   const value = 1n;
   console.log('Minting X Note');
   const mintPrice = await contract.mintPrice();
