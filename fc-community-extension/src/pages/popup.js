@@ -158,7 +158,7 @@ function FCFooter(props) {
   );
 }
 
-function FCPopup() {
+async function FCPopup() {
   const [selectedTab, setSelectedTab] = createSignal('Profile');
   const [address, setAddress] = createSignal('');
   const [provider, setProvider] = createSignal(null);
@@ -184,10 +184,12 @@ function FCPopup() {
     }
   };
 
-  const getUserStats = async (address) => {
+  const getUserStats = async () => {
+    const { address } = await chrome.runtime.sendMessage({type: 'fc-get-address'})
     console.log(`address: ${address}`);
     if (address) {
-      const contract = await provider.getMainContract();
+      const factchainProvider = await createFactchainProvider();
+      const contract = await factchainProvider.getMainContract();
       const stats = await contract.userStats(address);
       console.log(`User stats: ${stats}`);
       const earnings = `${Math.max(Number(stats[2] - stats[3]), 0)}`;
@@ -207,15 +209,13 @@ function FCPopup() {
   };
 
 
-  const [userStats] = createResource(address, getUserStats);
+  const [userStats] = createResource(getUserStats);
   const numberNotes = () =>
     userStats.ready || !userStats() ? '?' : userStats().notes;
   const numberRatings = () =>
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '?' : userStats().earnings;
-  
-  // provider.getAddress().then(setAddress);
 
   return (
     <div className="h-[600px] w-[375px] flex flex-col">
