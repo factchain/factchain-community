@@ -158,28 +158,42 @@ function FCFooter(props) {
   );
 }
 
-function FCPopup({ provider }) {
+function FCPopup() {
   const [selectedTab, setSelectedTab] = createSignal('Profile');
   const [address, setAddress] = createSignal('');
   const loggedIn = () => !!address();
 
+  const [provider] = createResource(async () => {
+    try {
+      const p = await createFactchainProvider();
+      p.getAddress().then(setAddress);
+      return p;
+    } catch (e) {
+      return null;
+    }
+  });
+
   const changeConnectionState = async () => {
+    if (!provider()) {
+      return;
+    }
     setSelectedTab('Profile');
     if (loggedIn()) {
-      await provider.disconnect();
+      await provider().disconnect();
       await chrome.runtime.sendMessage({
         type: 'fc-set-address',
         address: '',
       });
       setAddress('');
     } else {
-      await provider.requestAddress().then(setAddress);
+      await provider().requestAddress().then(setAddress);
     }
   };
-  const getUserStats = async (address) => {
+
+  const [userStats] = createResource(address, async (address) => {
     console.log(`address: ${address}`);
     if (address) {
-      const contract = await provider.getMainContract();
+      const contract = await provider().getMainContract();
       const stats = await contract.userStats(address);
       console.log(`User stats: ${stats}`);
       const earnings = `${Math.max(Number(stats[2] - stats[3]), 0)}`;
@@ -196,15 +210,13 @@ function FCPopup({ provider }) {
         earnings: '?',
       };
     }
-  };
-  const [userStats] = createResource(address, getUserStats);
+  });
   const numberNotes = () =>
     userStats.ready || !userStats() ? '?' : userStats().notes;
   const numberRatings = () =>
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '?' : userStats().earnings;
-  provider.getAddress().then(setAddress);
 
   return (
     <div className="h-[600px] w-[375px] flex flex-col">
@@ -212,7 +224,6 @@ function FCPopup({ provider }) {
         <Match when={selectedTab() === 'Profile'}>
           <FCHero />
           <FCProfile
-            provider={provider}
             loggedIn={loggedIn()}
             address={address()}
             changeConnectionState={changeConnectionState}
@@ -245,6 +256,4 @@ function FCPopup({ provider }) {
   );
 }
 
-const provider = await createFactchainProvider();
-
-render(() => <FCPopup provider={provider} />, document.getElementById('app'));
+render(() => <FCPopup />, document.getElementById('app'));
