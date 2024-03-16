@@ -29,6 +29,25 @@ const FCNetworks = () => (
   </div>
 );
 
+function FCConnectButton({ walletName, disabled, connectWallet }) {
+  return (
+    <button
+      className="w-full p-4 font-semibold text-base btn"
+      onclick={connectWallet}
+      disabled={disabled}
+    >
+      <div className="flex place-content-evenly">
+        <img
+          src={`/logos/${walletName}.png`}
+          alt={`${walletName} Logo`}
+          className="w-[25px] h-[25px]"
+        />
+        <span>Connect with {walletName}</span>
+      </div>
+    </button>
+  );
+}
+
 function FCProfile(props) {
   function StatCard(props) {
     return (
@@ -66,12 +85,28 @@ function FCProfile(props) {
           </div>
           {props.loggedIn && <FCNetworks />}
         </div>
-        <button
-          className="w-full p-4 font-semibold text-base btn"
-          onclick={props.changeConnectionState}
-        >
-          {props.loggedIn ? 'Log out' : 'Connect a wallet'}
-        </button>
+        <Switch>
+          <Match when={props.loggedIn}>
+            <button
+              className="w-full p-4 font-semibold text-base btn"
+              onclick={props.changeConnectionState}
+            >
+              Log out
+            </button>
+          </Match>
+          <Match when={!props.loggedIn}>
+            <FCConnectButton
+              walletName="Metamask"
+              disabled={false}
+              connectWallet={props.changeConnectionState}
+            />
+            <FCConnectButton
+              walletName="Rabby"
+              disabled={true}
+              connectWallet={props.changeConnectionState}
+            />
+          </Match>
+        </Switch>
       </div>
     </FCContainer>
   );
