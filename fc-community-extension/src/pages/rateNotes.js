@@ -1,5 +1,9 @@
 import { render } from 'solid-js/web';
-import { createFactchainProvider, makeTransactionCall, checkIfMetamaskInstalled } from '../utils/web3';
+import {
+  createFactchainProvider,
+  makeTransactionCall,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { logger } from '../utils/logging';
 import { FCHero, FCLoaderClean } from './components';
 import FCNote from './components/FCNote';
@@ -118,7 +122,10 @@ function FCRateNote({ note, rateNote }) {
               </div>
             )}
             {!isMetamaskInstalled() && (
-              <FCMetamaskConnectButton isMetamaskInstalled={false} connectWallet={() => {}} />
+              <FCMetamaskConnectButton
+                isMetamaskInstalled={false}
+                connectWallet={() => {}}
+              />
             )}
             <button
               className="btn p-4 w-full text-lg font-semibold"

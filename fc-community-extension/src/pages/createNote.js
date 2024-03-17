@@ -1,6 +1,10 @@
 import { render } from 'solid-js/web';
 import { createResource, createSignal, Switch, Match } from 'solid-js';
-import { createFactchainProvider, makeTransactionCall, checkIfMetamaskInstalled } from '../utils/web3';
+import {
+  createFactchainProvider,
+  makeTransactionCall,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { logger } from '../utils/logging';
 import { makeTransactionUrl } from '../utils/constants';
 import { FCHero, FCLoaderClean } from './components';
@@ -97,7 +101,10 @@ export function FCCreateNote({ postUrl, createNote }) {
                 </div>
               )}
               {!isMetamaskInstalled() && (
-                <FCMetamaskConnectButton isMetamaskInstalled={false} connectWallet={() => {}} />
+                <FCMetamaskConnectButton
+                  isMetamaskInstalled={false}
+                  connectWallet={() => {}}
+                />
               )}
               <button
                 className="btn p-4 w-full text-lg font-semibold"

@@ -1,29 +1,55 @@
 import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
 import { makeOpenseaUrl, makeTransactionUrl } from '../utils/constants';
-import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
+import {
+  createFactchainProvider,
+  makeTransactionCall,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { FCHero, FCLoader } from './components';
 
 import './style.css';
+import { FCMetamaskConnectButton } from './components/FCConnectButton';
 
 export function FCMintFactchainNote({
   postUrl,
   creatorAddress,
-  getFactchainNftInfo,
   mintFactchainNote,
-  sftContractAddress,
 }) {
   const [factchainNftId, setFactchainNftId] = createSignal(null);
   const [nftSupply, setNftSupply] = createSignal(null);
   const [transaction, setTransaction] = createSignal(null);
   const [openseaUrl, setOpenseaUrl] = createSignal(null);
   const [error, setError] = createSignal(null);
-  createResource(async () => {
+
+  const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
+
+  const getFactchainNftInfo = async (postUrl, creatorAddress) => {
+    const provider = await createFactchainProvider();
+    const nftContract = await provider.getNftContract();
+    console.log(`nftContract (${nftContract.target})`, nftContract);
+    const sftContract = await provider.getSftContract();
+
+    console.log(`sftContract (${sftContract.target})`, sftContract);
+    console.log('Getting factchain note info', postUrl, creatorAddress);
+    const id = await nftContract.noteIds(postUrl, creatorAddress);
+    const supply = await sftContract.supply(id);
+    return { id, supply, sftContractAddress: sftContract.target };
+  };
+
+  createResource(isMetamaskInstalled, async (isMetamaskInstalled) => {
+    if (!isMetamaskInstalled) {
+      return;
+    }
+
     try {
       setError(null);
       setTransaction(null);
 
-      const { id, supply } = await getFactchainNftInfo(postUrl, creatorAddress);
+      const { id, supply, sftContractAddress } = await getFactchainNftInfo(
+        postUrl,
+        creatorAddress
+      );
       console.log('Retrieved factchainNftId', id);
       setFactchainNftId(id);
       setNftSupply(supply);
@@ -109,6 +135,15 @@ export function FCMintFactchainNote({
             </div>
             <FCLoader />
           </Match>
+          <Match when={!isMetamaskInstalled()}>
+            <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+              Metamask is required to collect the note.
+            </div>
+            <FCMetamaskConnectButton
+              isMetamaskInstalled={false}
+              connectWallet={() => {}}
+            />
+          </Match>
           <Match when={true}>
             <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               Checking if the note can be minted...
@@ -129,18 +164,6 @@ const creatorAddress = await chrome.runtime.sendMessage({
   type: 'fc-get-from-cache',
   target: 'creatorAddress',
 });
-const provider = await createFactchainProvider();
-const nftContract = await provider.getNftContract();
-console.log(`nftContract (${nftContract.target})`, nftContract);
-const sftContract = await provider.getSftContract();
-console.log(`sftContract (${sftContract.target})`, sftContract);
-
-const getFactchainNftInfo = async (postUrl, creatorAddress) => {
-  console.log('Getting factchain note info', postUrl, creatorAddress);
-  const id = await nftContract.noteIds(postUrl, creatorAddress);
-  const supply = await sftContract.supply(id);
-  return { id, supply };
-};
 
 const mintFactchainNote = async (factchainNoteId) => {
   const value = 1n;
@@ -158,9 +181,7 @@ render(
     <FCMintFactchainNote
       postUrl={postUrl}
       creatorAddress={creatorAddress}
-      getFactchainNftInfo={getFactchainNftInfo}
       mintFactchainNote={mintFactchainNote}
-      sftContractAddress={sftContract.target}
     />
   ),
   document.getElementById('app')

@@ -45,9 +45,7 @@ export function FCRabbyConnectButton(props) {
       disabled={true}
       isInstalled={false}
       connectWallet={props.connectWallet}
-      installWallet={() =>
-        window.open('https://rabby.io/', '_blank')
-      }
+      installWallet={() => window.open('https://rabby.io/', '_blank')}
     />
   );
 }

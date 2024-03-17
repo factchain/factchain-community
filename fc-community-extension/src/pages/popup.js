@@ -7,7 +7,10 @@ import {
 import { FCHero, FCLoader, FCContainer, FCHeader } from './components';
 import FCNote from './components/FCNote';
 import FCEmptyState from './components/FCEmptyState';
-import { FCMetamaskConnectButton, FCRabbyConnectButton } from './components/FCConnectButton';
+import {
+  FCMetamaskConnectButton,
+  FCRabbyConnectButton,
+} from './components/FCConnectButton';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
 import { elipseText } from '../utils/constants';
