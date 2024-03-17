@@ -7,6 +7,7 @@ import {
 import { FCHero, FCLoader, FCContainer, FCHeader } from './components';
 import FCNote from './components/FCNote';
 import FCEmptyState from './components/FCEmptyState';
+import { FCMetamaskConnectButton, FCRabbyConnectButton } from './components/FCConnectButton';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
 import { elipseText } from '../utils/constants';
@@ -31,32 +32,6 @@ const FCNetworks = () => (
     </div>
   </div>
 );
-
-function FCConnectButton(props) {
-  // { walletName, disabled, isInstalled, connectWallet, installWallet }) {
-  return (
-    <button
-      className="w-full p-4 font-semibold text-base btn"
-      onclick={() =>
-        props.isInstalled ? props.connectWallet() : props.installWallet()
-      }
-      disabled={props.disabled}
-    >
-      <div className="flex place-content-evenly">
-        <img
-          src={`/logos/${props.walletName}.png`}
-          alt={`${props.walletName} Logo`}
-          className="w-[25px] h-[25px]"
-        />
-        {props.isInstalled ? (
-          <span>Connect with {props.walletName}</span>
-        ) : (
-          <span>Install {props.walletName}</span>
-        )}
-      </div>
-    </button>
-  );
-}
 
 function FCProfile(props) {
   function StatCard(props) {
@@ -105,22 +80,11 @@ function FCProfile(props) {
             </button>
           </Match>
           <Match when={!props.loggedIn}>
-            <FCConnectButton
-              walletName="Metamask"
-              disabled={false}
+            <FCMetamaskConnectButton
               isInstalled={props.isMetamaskInstalled}
               connectWallet={props.changeConnectionState}
-              installWallet={() =>
-                window.open('https://metamask.io/download.html', '_blank')
-              }
             />
-            <FCConnectButton
-              walletName="Rabby"
-              disabled={true}
-              isInstalled={false}
-              connectWallet={props.changeConnectionState}
-              installWallet={() => window.open('https://rabby.io/', '_blank')}
-            />
+            <FCRabbyConnectButton connectWallet={() => {}} />
           </Match>
         </Switch>
       </div>
