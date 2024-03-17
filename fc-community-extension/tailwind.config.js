@@ -3,6 +3,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        fcBackground: '#222831', 
         fcGrey: '#393e46',
         fcAccent: '#00adb5',
       },

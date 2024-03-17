@@ -1,10 +1,15 @@
 import { render } from 'solid-js/web';
-import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
+import {
+  createFactchainProvider,
+  makeTransactionCall,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { logger } from '../utils/logging';
 import { FCHero, FCLoaderClean } from './components';
 import FCNote from './components/FCNote';
-import { createSignal } from 'solid-js';
+import { createSignal, createResource } from 'solid-js';
 import { makeTransactionUrl } from '../utils/constants';
+import { FCMetamaskConnectButton } from './components/FCConnectButton';
 
 import './style.css';
 
@@ -13,6 +18,8 @@ function FCRateNote({ note, rateNote }) {
   const [submitting, setSubmitting] = createSignal(false);
   const [rating, setRating] = createSignal(3);
   const [error, setError] = createSignal(null);
+
+  const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
 
   const submit = async () => {
     const rating = document.getElementById('rating').value;
@@ -114,9 +121,16 @@ function FCRateNote({ note, rateNote }) {
                 Error: {JSON.stringify(error())}
               </div>
             )}
+            {!isMetamaskInstalled() && (
+              <FCMetamaskConnectButton
+                isMetamaskInstalled={false}
+                connectWallet={() => {}}
+              />
+            )}
             <button
               className="btn p-4 w-full text-lg font-semibold"
               onclick={submit}
+              disabled={!isMetamaskInstalled()}
             >
               Submit rating
             </button>

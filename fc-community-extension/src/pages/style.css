@@ -15,6 +15,11 @@ body {
   hover:text-fcGrey hover:bg-fcAccent;
 }
 
+.btn:disabled {
+  @apply border border-fcGrey rounded-md text-fcGrey
+  hover:text-fcGrey hover:bg-fcBackground;
+}
+
 /* button { */
 /*   font-family: 'Space Mono'; */
 /*   background-color: #222831; */

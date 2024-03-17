@@ -2,20 +2,38 @@ import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
 import { getXNoteId, createXNoteId, awaitOpenSeaUrl } from '../utils/backend';
 import { makeOpenseaUrl, makeTransactionUrl } from '../utils/constants';
-import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
+import {
+  createFactchainProvider,
+  makeTransactionCall,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { FCHero, FCLoader } from './components';
 
 import './style.css';
+import { FCMetamaskConnectButton } from './components/FCConnectButton';
 
-export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
+export function FCMintXNote({ noteUrl, content, mintXNote }) {
   const [xNoteId, setXNoteId] = createSignal(null);
   const [transaction, setTransaction] = createSignal(null);
   const [openseaUrl, setOpenseaUrl] = createSignal(null);
   const [error, setError] = createSignal(null);
-  createResource(async () => {
+
+  const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
+
+  createResource(isMetamaskInstalled, async (isMetamaskInstalled) => {
+    if (!isMetamaskInstalled) {
+      return;
+    }
+
     try {
       setError(null);
       setTransaction(null);
+
+      const provider = await createFactchainProvider();
+      const contract = await provider.getXContract();
+      console.log(`contract`, contract);
+      console.log(`contract address ${contract.target}`);
+
       let res = await getXNoteId(noteUrl);
       if (!res) {
         res = await createXNoteId(noteUrl, content);
@@ -23,14 +41,14 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
       console.log('Retrieved xNoteId', res);
       setXNoteId(res);
 
-      const { transaction, error } = await mintXNote(res);
+      const { transaction, error } = await mintXNote(res, contract);
       console.log('mintResult', transaction, error);
       setTransaction(transaction);
       if (error) {
         throw new Error(`Transaction failed: ${JSON.stringify(error)}`);
       }
 
-      const url = makeOpenseaUrl(contractAddress, xNoteId().id);
+      const url = makeOpenseaUrl(contract.target, xNoteId().id);
       const openseaRes = await awaitOpenSeaUrl(url);
       console.log('awaitOpenSeaUrl result: ', openseaRes);
       setOpenseaUrl(url);
@@ -91,6 +109,15 @@ export function FCMintXNote({ noteUrl, content, mintXNote, contractAddress }) {
             </div>
             <FCLoader />
           </Match>
+          <Match when={!isMetamaskInstalled()}>
+            <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+              Metamask is required to collect the note.
+            </div>
+            <FCMetamaskConnectButton
+              isMetamaskInstalled={false}
+              connectWallet={() => {}}
+            />
+          </Match>
           <Match when={true}>
             <div style="margin-bottom: 10px; font-size: 150%; text-align: center; position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
               Creating a new collection for this note...
@@ -111,12 +138,8 @@ const content = await chrome.runtime.sendMessage({
   type: 'fc-get-from-cache',
   target: 'content',
 });
-const provider = await createFactchainProvider();
-const contract = await provider.getXContract();
-console.log(`contract`, contract);
-console.log(`contract address ${contract.target}`);
 
-const mintXNote = async (xNoteId) => {
+const mintXNote = async (xNoteId, contract) => {
   const value = 1n;
   console.log('Minting X Note');
   const mintPrice = await contract.mintPrice();
@@ -135,12 +158,7 @@ const mintXNote = async (xNoteId) => {
 
 render(
   () => (
-    <FCMintXNote
-      noteUrl={noteUrl}
-      content={content}
-      mintXNote={mintXNote}
-      contractAddress={contract.target}
-    />
+    <FCMintXNote noteUrl={noteUrl} content={content} mintXNote={mintXNote} />
   ),
   document.getElementById('app')
 );

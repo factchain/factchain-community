@@ -1,9 +1,16 @@
 import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
-import { createFactchainProvider } from '../utils/web3';
+import {
+  createFactchainProvider,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { FCHero, FCLoader, FCContainer, FCHeader } from './components';
 import FCNote from './components/FCNote';
 import FCEmptyState from './components/FCEmptyState';
+import {
+  FCMetamaskConnectButton,
+  FCRabbyConnectButton,
+} from './components/FCConnectButton';
 import { getNotes } from '../utils/backend';
 import { ethers } from 'ethers';
 import { elipseText } from '../utils/constants';
@@ -66,12 +73,23 @@ function FCProfile(props) {
           </div>
           {props.loggedIn && <FCNetworks />}
         </div>
-        <button
-          className="w-full p-4 font-semibold text-base btn"
-          onclick={props.changeConnectionState}
-        >
-          {props.loggedIn ? 'Log out' : 'Connect a wallet'}
-        </button>
+        <Switch>
+          <Match when={props.loggedIn}>
+            <button
+              className="w-full p-4 font-semibold text-base btn"
+              onclick={props.changeConnectionState}
+            >
+              Log out
+            </button>
+          </Match>
+          <Match when={!props.loggedIn}>
+            <FCMetamaskConnectButton
+              isInstalled={props.isMetamaskInstalled}
+              connectWallet={props.changeConnectionState}
+            />
+            <FCRabbyConnectButton connectWallet={() => {}} />
+          </Match>
+        </Switch>
       </div>
     </FCContainer>
   );
@@ -158,28 +176,49 @@ function FCFooter(props) {
   );
 }
 
-function FCPopup({ provider }) {
+function FCPopup() {
   const [selectedTab, setSelectedTab] = createSignal('Profile');
   const [address, setAddress] = createSignal('');
   const loggedIn = () => !!address();
 
+  const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
+  const [provider] = createResource(
+    isMetamaskInstalled,
+    async (isMetamaskInstalled) => {
+      console.log(
+        `getting provider isMetamaskInstalled: ${isMetamaskInstalled}`
+      );
+      if (isMetamaskInstalled) {
+        const p = await createFactchainProvider();
+        p.getAddress().then(setAddress);
+        return p;
+      } else {
+        return null;
+      }
+    }
+  );
+
   const changeConnectionState = async () => {
+    if (!provider()) {
+      return;
+    }
     setSelectedTab('Profile');
     if (loggedIn()) {
-      await provider.disconnect();
+      await provider().disconnect();
       await chrome.runtime.sendMessage({
         type: 'fc-set-address',
         address: '',
       });
       setAddress('');
     } else {
-      await provider.requestAddress().then(setAddress);
+      await provider().requestAddress().then(setAddress);
     }
   };
-  const getUserStats = async (address) => {
+
+  const [userStats] = createResource(address, async (address) => {
     console.log(`address: ${address}`);
     if (address) {
-      const contract = await provider.getMainContract();
+      const contract = await provider().getMainContract();
       const stats = await contract.userStats(address);
       console.log(`User stats: ${stats}`);
       const earnings = `${Math.max(Number(stats[2] - stats[3]), 0)}`;
@@ -196,15 +235,13 @@ function FCPopup({ provider }) {
         earnings: '?',
       };
     }
-  };
-  const [userStats] = createResource(address, getUserStats);
+  });
   const numberNotes = () =>
     userStats.ready || !userStats() ? '?' : userStats().notes;
   const numberRatings = () =>
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '?' : userStats().earnings;
-  provider.getAddress().then(setAddress);
 
   return (
     <div className="h-[600px] w-[375px] flex flex-col">
@@ -212,7 +249,7 @@ function FCPopup({ provider }) {
         <Match when={selectedTab() === 'Profile'}>
           <FCHero />
           <FCProfile
-            provider={provider}
+            isMetamaskInstalled={isMetamaskInstalled()}
             loggedIn={loggedIn()}
             address={address()}
             changeConnectionState={changeConnectionState}
@@ -245,6 +282,4 @@ function FCPopup({ provider }) {
   );
 }
 
-const provider = await createFactchainProvider();
-
-render(() => <FCPopup provider={provider} />, document.getElementById('app'));
+render(() => <FCPopup />, document.getElementById('app'));

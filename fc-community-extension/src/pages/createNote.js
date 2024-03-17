@@ -1,16 +1,23 @@
 import { render } from 'solid-js/web';
-import { createSignal, Switch, Match } from 'solid-js';
-import { createFactchainProvider, makeTransactionCall } from '../utils/web3';
+import { createResource, createSignal, Switch, Match } from 'solid-js';
+import {
+  createFactchainProvider,
+  makeTransactionCall,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { logger } from '../utils/logging';
-import { cutText, makeTransactionUrl } from '../utils/constants';
+import { makeTransactionUrl } from '../utils/constants';
 import { FCHero, FCLoaderClean } from './components';
 
 import './style.css';
+import { FCMetamaskConnectButton } from './components/FCConnectButton';
 
 export function FCCreateNote({ postUrl, createNote }) {
   const [transaction, setTransaction] = createSignal(null);
   const [submitting, setSubmitting] = createSignal(false);
   const [error, setError] = createSignal(null);
+
+  const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
 
   const submit = async () => {
     setSubmitting(true);
@@ -93,9 +100,16 @@ export function FCCreateNote({ postUrl, createNote }) {
                   Error: {JSON.stringify(error())}
                 </div>
               )}
+              {!isMetamaskInstalled() && (
+                <FCMetamaskConnectButton
+                  isMetamaskInstalled={false}
+                  connectWallet={() => {}}
+                />
+              )}
               <button
                 className="btn p-4 w-full text-lg font-semibold"
                 onclick={submit}
+                disabled={!isMetamaskInstalled()}
               >
                 {'Submit note'}
               </button>

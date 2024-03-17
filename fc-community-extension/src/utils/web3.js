@@ -38,6 +38,26 @@ export const makeTransactionCall = async (contract, transactionCall) => {
   return { transaction, error };
 };
 
+export const checkIfMetamaskInstalled = async () => {
+  try {
+    const currentMetaMaskId = METAMASK_ID;
+    const metamaskPort = chrome.runtime.connect(currentMetaMaskId);
+    const pluginStream = new PortStream(metamaskPort);
+    initializeProvider({
+      connectionStream: pluginStream,
+    });
+    await window.ethereum.request({
+      method: 'wallet_getPermissions',
+      params: [],
+    });
+    metamaskPort.disconnect(currentMetaMaskId);
+    console.log('Metamask installed');
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const createFactchainProvider = async () => {
   try {
     let currentMetaMaskId = METAMASK_ID;
