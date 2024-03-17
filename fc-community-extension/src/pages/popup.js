@@ -1,6 +1,9 @@
 import { render } from 'solid-js/web';
 import { createSignal, Switch, Match, createResource } from 'solid-js';
-import { createFactchainProvider } from '../utils/web3';
+import {
+  createFactchainProvider,
+  checkIfMetamaskInstalled,
+} from '../utils/web3';
 import { FCHero, FCLoader, FCContainer, FCHeader } from './components';
 import FCNote from './components/FCNote';
 import FCEmptyState from './components/FCEmptyState';
@@ -29,20 +32,27 @@ const FCNetworks = () => (
   </div>
 );
 
-function FCConnectButton({ walletName, disabled, connectWallet }) {
+function FCConnectButton(props) {
+  // { walletName, disabled, isInstalled, connectWallet, installWallet }) {
   return (
     <button
       className="w-full p-4 font-semibold text-base btn"
-      onclick={connectWallet}
-      disabled={disabled}
+      onclick={() =>
+        props.isInstalled ? props.connectWallet() : props.installWallet()
+      }
+      disabled={props.disabled}
     >
       <div className="flex place-content-evenly">
         <img
-          src={`/logos/${walletName}.png`}
-          alt={`${walletName} Logo`}
+          src={`/logos/${props.walletName}.png`}
+          alt={`${props.walletName} Logo`}
           className="w-[25px] h-[25px]"
         />
-        <span>Connect with {walletName}</span>
+        {props.isInstalled ? (
+          <span>Connect with {props.walletName}</span>
+        ) : (
+          <span>Install {props.walletName}</span>
+        )}
       </div>
     </button>
   );
@@ -98,12 +108,18 @@ function FCProfile(props) {
             <FCConnectButton
               walletName="Metamask"
               disabled={false}
+              isInstalled={props.isMetamaskInstalled}
               connectWallet={props.changeConnectionState}
+              installWallet={() =>
+                window.open('https://metamask.io/download.html', '_blank')
+              }
             />
             <FCConnectButton
               walletName="Rabby"
               disabled={true}
+              isInstalled={false}
               connectWallet={props.changeConnectionState}
+              installWallet={() => window.open('https://rabby.io/', '_blank')}
             />
           </Match>
         </Switch>
@@ -198,15 +214,22 @@ function FCPopup() {
   const [address, setAddress] = createSignal('');
   const loggedIn = () => !!address();
 
-  const [provider] = createResource(async () => {
-    try {
-      const p = await createFactchainProvider();
-      p.getAddress().then(setAddress);
-      return p;
-    } catch (e) {
-      return null;
+  const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
+  const [provider] = createResource(
+    isMetamaskInstalled,
+    async (isMetamaskInstalled) => {
+      console.log(
+        `getting provider isMetamaskInstalled: ${isMetamaskInstalled}`
+      );
+      if (isMetamaskInstalled) {
+        const p = await createFactchainProvider();
+        p.getAddress().then(setAddress);
+        return p;
+      } else {
+        return null;
+      }
     }
-  });
+  );
 
   const changeConnectionState = async () => {
     if (!provider()) {
@@ -259,6 +282,7 @@ function FCPopup() {
         <Match when={selectedTab() === 'Profile'}>
           <FCHero />
           <FCProfile
+            isMetamaskInstalled={isMetamaskInstalled()}
             loggedIn={loggedIn()}
             address={address()}
             changeConnectionState={changeConnectionState}
