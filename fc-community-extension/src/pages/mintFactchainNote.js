@@ -34,7 +34,7 @@ export function FCMintFactchainNote({
     console.log('Getting factchain note info', postUrl, creatorAddress);
     const id = await nftContract.noteIds(postUrl, creatorAddress);
     const supply = await sftContract.supply(id);
-    return { id, supply, sftContractAddress: sftContract.target };
+    return { id, supply, sftContract, sftContractAddress: sftContract.target };
   };
 
   createResource(isMetamaskInstalled, async (isMetamaskInstalled) => {
@@ -46,10 +46,8 @@ export function FCMintFactchainNote({
       setError(null);
       setTransaction(null);
 
-      const { id, supply, sftContractAddress } = await getFactchainNftInfo(
-        postUrl,
-        creatorAddress
-      );
+      const { id, supply, sftContract, sftContractAddress } =
+        await getFactchainNftInfo(postUrl, creatorAddress);
       console.log('Retrieved factchainNftId', id);
       setFactchainNftId(id);
       setNftSupply(supply);
@@ -65,7 +63,7 @@ export function FCMintFactchainNote({
       }
 
       console.log('Minting factchain note', id);
-      const { transaction, error } = await mintFactchainNote(id);
+      const { transaction, error } = await mintFactchainNote(sftContract, id);
       console.log('mintResult', transaction, error);
       setTransaction(transaction);
       if (error) {
@@ -165,7 +163,7 @@ const creatorAddress = await chrome.runtime.sendMessage({
   target: 'creatorAddress',
 });
 
-const mintFactchainNote = async (factchainNoteId) => {
+const mintFactchainNote = async (sftContract, factchainNoteId) => {
   const value = 1n;
   console.log('Minting Factchain Note');
   const mintPrice = await sftContract.mintPrice();
