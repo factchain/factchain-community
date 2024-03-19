@@ -11,7 +11,7 @@ import {
   FCMetamaskConnectButton,
   FCRabbyConnectButton,
 } from './components/FCConnectButton';
-import { getNotes } from '../utils/backend';
+import { getNotesForAllSocials } from '../utils/backend';
 import { ethers } from 'ethers';
 import { elipseText } from '../utils/constants';
 
@@ -102,7 +102,9 @@ function FCProfile(props) {
 }
 
 function FCNotes(props) {
-  const [notes] = createResource(() => getNotes(props.queryparams));
+  const [notes] = createResource(() =>
+    getNotesForAllSocials(props.queryparams)
+  );
   return (
     <FCContainer>
       <Switch>

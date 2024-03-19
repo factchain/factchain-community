@@ -1,6 +1,6 @@
 const BACKEND_URL = 'https://api.factchain.tech';
 
-export const getNotes = async (queryparams) => {
+export const getNotes = async (queryparams, network) => {
   let fullUrl = `${BACKEND_URL}/notes`;
   if (queryparams) {
     const urlParams = new URLSearchParams(queryparams);
@@ -13,6 +13,7 @@ export const getNotes = async (queryparams) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        network: network,
       },
     });
     const data = await response.json();
@@ -22,6 +23,37 @@ export const getNotes = async (queryparams) => {
     console.error('Error fetching notes:', error);
     throw error;
   }
+};
+
+export const getWarpcastNotes = async (queryparams) => {
+  const notes = await getNotes(queryparams, 'BASE_MAINNET');
+  // Warpcasts users manually enter the post URL on the frame
+  // TODO: validate input inside the frame
+  // TODO: filter invalid notes in the backend
+  const validNotes = notes
+    .map((note) => {
+      try {
+        new URL(note.postUrl);
+        return note;
+      } catch (error) {
+        console.error(`Invalid post URL: ${note.postUrl}`);
+        return null;
+      }
+    })
+    .filter((url) => url !== null);
+  return validNotes;
+};
+
+export const getXnotes = async (queryparams) => {
+  return await getNotes(queryparams, 'ETHEREUM_SEPOLIA');
+};
+
+export const getNotesForAllSocials = async (queryparams) => {
+  const xNotes = await getXnotes(queryparams);
+  const warpcastNotes = await getWarpcastNotes(queryparams);
+  // TODO: updated backend to return creation timestamp
+  // and use it to order notes here
+  return xNotes.concat(warpcastNotes);
 };
 
 export const getXNoteId = async (noteUrl) => {

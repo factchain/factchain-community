@@ -34,7 +34,12 @@ const mainHandler = async (message, sendResponse) => {
       left: 0,
     });
   } else if (message.type === 'fc-get-notes') {
-    const notes = await getNotes({ postUrl: message.postUrl });
+    const XSupportedNetwork = 'ETHEREUM_SEPOLIA';
+    // Factchain extension only support X on desktop
+    const notes = await getNotes(
+      { postUrl: message.postUrl },
+      XSupportedNetwork
+    );
     console.log('Retrieved notes', notes);
     sendResponse(notes);
   } else if (message.type === 'fc-rate-note') {
