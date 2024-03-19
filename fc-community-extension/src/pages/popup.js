@@ -17,24 +17,30 @@ import { elipseText } from '../utils/constants';
 
 import './style.css';
 
-const FCNetworks = () => (
-  <div className="grid grid-cols-[80px_80px_80px] gap-4 justify-center">
-    <img title="X" className="w-[80px] h-[80px]" src="/logos/x.png" />
-    <img
-      title="Warpcast"
-      className="w-[80px] h-[80px]"
-      src="/logos/warpcast.png"
-    />
-    <img
-      title="Youtube"
-      className="w-[80px] h-[80px]"
-      src="/logos/youtube.png"
-    />
-    <div className="-mt-2 col-span-2 col-start-2 text-fcAccent text-center text-sm">
-      {'Coming soon!'}
+const FCNetworks = () => {
+  return (
+    <div className="grid grid-cols-[80px_80px_80px] gap-4 justify-center">
+      <a href="https://x.com/factchaintech" target="_blank">
+        <img title="X" className="w-[80px] h-[80px]" src="/logos/x.png" />
+      </a>
+      <a href="https://warpcast.com/factchain/0x791ff20e" target="_blank">
+        <img
+          title="Warpcast"
+          className="w-[80px] h-[80px]"
+          src="/logos/warpcast.png"
+        />
+      </a>
+      <img
+        title="Youtube"
+        className="w-[80px] h-[80px]"
+        src="/logos/youtube.png"
+      />
+      <div className="-mt-2 col-span-2 col-start-2 text-fcAccent text-right text-sm">
+        {'Up Next!'}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 function FCProfile(props) {
   function StatCard(props) {
