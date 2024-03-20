@@ -102,9 +102,10 @@ function FCProfile(props) {
 }
 
 function FCNotes(props) {
-  const [notes] = createResource(() =>
+  const [socialNotesMap] = createResource(() =>
     getNotesForAllSocials(props.queryparams)
   );
+
   return (
     <FCContainer>
       <Switch>
@@ -116,30 +117,42 @@ function FCNotes(props) {
             <div>to view Factchain notes</div>
           </div>
         </Match>
-        <Match when={notes() !== undefined}>
+        <Match when={socialNotesMap !== undefined}>
           <Switch>
-            <Match when={notes().length > 0}>
-              <div className="space-y-4">
-                <For each={notes()}>
-                  {(note) => (
-                    <FCNote
-                      key={note.postUrl}
-                      postUrl={note.postUrl}
-                      creator={note.creatorAddress}
-                      content={note.content}
-                      finalRating={note.finalRating}
-                    />
-                  )}
-                </For>
+            <Match when={socialNotesMap.size > 0}>
+              <div class="space-y-4">
+                {Array.from(socialNotesMap.entries()).map(
+                  ([socialName, notes]) => (
+                    <For each={notes}>
+                      {(note) => (
+                        <FCNote
+                          key={note.postUrl}
+                          postUrl={note.postUrl}
+                          creator={note.creatorAddress}
+                          content={note.content}
+                          finalRating={note.finalRating}
+                          socialName={socialName}
+                        />
+                      )}
+                    </For>
+                  )
+                )}
               </div>
             </Match>
-            <Match when={notes().length === 0}>
+            <Match when={socialNotesMap.size === 0}>
               <FCEmptyState text={props.emptyText} />
             </Match>
           </Switch>
         </Match>
         <Match when={true}>
-          <div style="position: relative; top:50%; left: 50%; transform: translate(-50%, -50%);">
+          <div
+            style={{
+              position: 'relative',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }}
+          >
             <FCLoader />
           </div>
         </Match>

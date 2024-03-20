@@ -2,15 +2,14 @@ import { elipseText } from '../../utils/constants';
 
 const FCNote = (props) => {
   // assuming `postUrl` looks like: https://x.com/foo/status/<id>
-  const parsedUrl = new URL(props.postUrl);
   const postId = props.postUrl.split('/').slice(-1)[0];
   let socialLogo;
 
-  switch (parsedUrl.hostname) {
-    case 'twitter.com' || 'x.com':
+  switch (props.socialName) {
+    case 'x':
       socialLogo = '/logos/x.png';
       break;
-    case 'warpcast.com':
+    case 'warpcast':
       socialLogo = '/logos/warpcast.png';
       break;
     default:

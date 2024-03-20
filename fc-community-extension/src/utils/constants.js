@@ -26,6 +26,11 @@ export const makeTransactionUrl = (transactionHash) =>
 export const makeOpenseaUrl = (contractAddress, tokenId) =>
   `https://testnets.opensea.io/assets/sepolia/${contractAddress}/${tokenId}`;
 
+export const socialsSupportedNetworks = new Map([
+  ['x', { networkName: 'ETHEREUM_SEPOLIA', chainID: 11155111 }],
+  ['warpcast', { networkName: 'BASE_MAINNET', chainID: 8453 }],
+]);
+
 export const FC_MAIN_CONTRACT_ABI = [
   {
     type: 'constructor',

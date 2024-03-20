@@ -1,6 +1,9 @@
 const BACKEND_URL = 'https://api.factchain.tech';
 
+import { socialsSupportedNetworks } from './constants';
+
 export const getNotes = async (queryparams, network) => {
+  console.log(network);
   let fullUrl = `${BACKEND_URL}/notes`;
   if (queryparams) {
     const urlParams = new URLSearchParams(queryparams);
@@ -17,43 +20,55 @@ export const getNotes = async (queryparams, network) => {
       },
     });
     const data = await response.json();
-    // Reverse the notes to have them in ascending age (most recent first).
-    return data.notes.reverse();
+    const validNotes = data.notes
+      .map((note) => {
+        try {
+          new URL(note.postUrl);
+          return note;
+        } catch (error) {
+          console.error(`Invalid post URL: ${note.postUrl}`);
+          return null;
+        }
+      })
+      .filter((note) => note !== null);
+    // sort notes by ascending age (most recent first).
+    const sortedNotes = validNotes.sort(
+      (a, b) => parseInt(b.createdAt) - parseInt(a.createdAt)
+    );
+    return sortedNotes;
   } catch (error) {
     console.error('Error fetching notes:', error);
     throw error;
   }
 };
 
-export const getWarpcastNotes = async (queryparams) => {
-  const notes = await getNotes(queryparams, 'BASE_MAINNET');
-  // Warpcasts users manually enter the post URL on the frame
-  // TODO: validate input inside the frame
-  // TODO: filter invalid notes in the backend
-  const validNotes = notes
-    .map((note) => {
-      try {
-        new URL(note.postUrl);
-        return note;
-      } catch (error) {
-        console.error(`Invalid post URL: ${note.postUrl}`);
-        return null;
-      }
-    })
-    .filter((url) => url !== null);
-  return validNotes;
-};
-
-export const getXnotes = async (queryparams) => {
-  return await getNotes(queryparams, 'ETHEREUM_SEPOLIA');
-};
-
 export const getNotesForAllSocials = async (queryparams) => {
-  const xNotes = await getXnotes(queryparams);
-  const warpcastNotes = await getWarpcastNotes(queryparams);
-  // TODO: updated backend to return creation timestamp
-  // and use it to order notes here
-  return xNotes.concat(warpcastNotes);
+  try {
+    const notesPromiseMap = new Map();
+    // Create promises for each network's notes and store them in the map
+    for (const [social, network] of socialsSupportedNetworks.entries()) {
+      notesPromiseMap.set(social, getNotes(queryparams, network.networkName));
+    }
+    // Await all promises concurrently
+    const socialNotesEntries = await Promise.allSettled([
+      ...notesPromiseMap.values(),
+    ]);
+
+    // Construct a Map of social names to notes
+    const socialNotesMap = new Map();
+    socialNotesEntries.forEach((result, index) => {
+      const social = [...notesPromiseMap.keys()][index];
+      socialNotesMap.set(
+        social,
+        result.status === 'fulfilled' ? result.value : null
+      );
+    });
+    console.log(socialNotesMap);
+    return socialNotesMap;
+  } catch (error) {
+    console.error('Error fetching notes for all socials:', error);
+    throw error;
+  }
 };
 
 export const getXNoteId = async (noteUrl) => {
