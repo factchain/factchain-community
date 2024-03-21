@@ -135,6 +135,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       from,
       today,
       currentBlockNumber,
+      this._network.AVERAGE_BLOCKTIME,
     );
     const notePromises = blockPeriods.flatMap(async (period) => {
       const events = await this.getEvents("NoteCreated", period[0], period[1]);
@@ -176,6 +177,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
       from,
       today,
       currentBlockNumber,
+      this._network.AVERAGE_BLOCKTIME,
     );
 
     const eventsPromises = blockPeriods.map(async (period) => {
