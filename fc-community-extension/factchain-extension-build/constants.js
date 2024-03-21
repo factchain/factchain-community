@@ -1,0 +1,1 @@
+(()=>{"use strict";new Map([["x",{networkName:"ETHEREUM_SEPOLIA",chainID:11155111}],["warpcast",{networkName:"BASE_MAINNET",chainID:8453}]])})();
