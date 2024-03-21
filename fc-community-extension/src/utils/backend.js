@@ -1,6 +1,9 @@
 const BACKEND_URL = 'https://api.factchain.tech';
 
-export const getNotes = async (queryparams) => {
+import { socialsSupportedNetworks } from './constants';
+
+export const getNotes = async (queryparams, network) => {
+  console.log(network);
   let fullUrl = `${BACKEND_URL}/notes`;
   if (queryparams) {
     const urlParams = new URLSearchParams(queryparams);
@@ -13,13 +16,48 @@ export const getNotes = async (queryparams) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        network: network,
       },
     });
     const data = await response.json();
-    // Reverse the notes to have them in ascending age (most recent first).
-    return data.notes.reverse();
+    const validNotes = data.notes
+      .map((note) => {
+        try {
+          new URL(note.postUrl);
+          return note;
+        } catch (error) {
+          console.error(`Invalid post URL: ${note.postUrl}`);
+          return null;
+        }
+      })
+      .filter((note) => note !== null);
+    return validNotes;
   } catch (error) {
     console.error('Error fetching notes:', error);
+    throw error;
+  }
+};
+
+export const getNotesForAllSocials = async (queryparams) => {
+  try {
+    const notesPromiseMap = new Map();
+    // Create promises for each network's notes and store them in the map
+    for (const [social, network] of socialsSupportedNetworks.entries()) {
+      notesPromiseMap.set(social, getNotes(queryparams, network.networkName));
+    }
+    // Await all promises concurrently
+    const validNotesbySocials = await Promise.all([
+      ...notesPromiseMap.values(),
+    ]);
+    // Merge arrays of notes into one array
+    const validNotes = [].concat(...validNotesbySocials);
+    // sort notes by ascending age (most recent first).
+    const sortedNotes = validNotes.sort(
+      (a, b) => parseInt(b.createdAt) - parseInt(a.createdAt)
+    );
+    return sortedNotes;
+  } catch (error) {
+    console.error('Error fetching notes for all socials:', error);
     throw error;
   }
 };

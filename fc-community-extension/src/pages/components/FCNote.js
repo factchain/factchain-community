@@ -2,7 +2,13 @@ import { elipseText } from '../../utils/constants';
 
 const FCNote = (props) => {
   // assuming `postUrl` looks like: https://x.com/foo/status/<id>
-  const postId = props.postUrl.split('/').slice(-1)[0];
+  const splittedUrl = props.postUrl.split('/');
+  const postId = splittedUrl.slice(-1)[0];
+  const host = splittedUrl[2];
+
+  // extension only support these two socials
+  const social = host.startsWith('warpcast') ? 'warpcast' : 'x';
+
   return (
     <a
       href={props.postUrl}
@@ -12,7 +18,7 @@ const FCNote = (props) => {
     >
       <div className="flex items-center gap-2">
         <img
-          src="/logos/x.png"
+          src={`/logos/${social}.png`}
           className="rounded-full w-[24px] h-[24px] object-cover shadow"
         />
         <div className="truncate">
