@@ -21,7 +21,12 @@ describe("timePeriodToBlockPeriods", () => {
 
     const expectedBlockRanges: Array<[number, number]> = [[4483029, 4483929]];
 
-    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
+    const result = timePeriodToBlockPeriods(
+      fromDate,
+      toDate,
+      currentBlock,
+      12000,
+    );
     expect(result).toEqual(expectedBlockRanges);
   });
 
@@ -32,7 +37,12 @@ describe("timePeriodToBlockPeriods", () => {
       [4483629, 4483929],
     ];
 
-    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
+    const result = timePeriodToBlockPeriods(
+      fromDate,
+      toDate,
+      currentBlock,
+      12000,
+    );
     expect(result).toEqual(expectedShortBlockRanges);
   });
 
@@ -48,7 +58,12 @@ describe("timePeriodToBlockPeriods", () => {
       [4482029, 4483929], // 1893 ~= 6h
     ];
 
-    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
+    const result = timePeriodToBlockPeriods(
+      fromDate,
+      toDate,
+      currentBlock,
+      12000,
+    );
     expect(result).toEqual(expectedLongBlockRanges);
   });
 
@@ -61,7 +76,12 @@ describe("timePeriodToBlockPeriods", () => {
       [currentBlock, currentBlock + 1],
     ];
 
-    const result = timePeriodToBlockPeriods(fromDate, toDate, currentBlock);
+    const result = timePeriodToBlockPeriods(
+      fromDate,
+      toDate,
+      currentBlock,
+      12000,
+    );
     expect(result).toEqual(singleBlockRange);
   });
 
