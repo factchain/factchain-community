@@ -5,7 +5,7 @@ import { NoteService } from "../dist/factchain-core/noteService.js";
 import { config } from "../dist/factchain-core/env.js";
 import { getNetworkConfig } from "../dist/factchain-core/networks/config.js"
 
-const LOOKBACK_DAYS = parseInt(process.argv[2]) || 2;
+const LOOKBACK_DAYS = parseInt(config.LOOKBACK_DAYS);
 const MINIMUM_RATING = parseInt(config.MINIMUM_RATING);
 
 const fc = new FactChainBackend(config, getNetworkConfig("ETHEREUM_SEPOLIA"));
