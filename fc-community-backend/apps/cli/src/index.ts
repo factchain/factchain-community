@@ -26,7 +26,7 @@ console.log(figlet.textSync("FactChain"));
 program.version("1.0.0").description("FactChain command line");
 
 program
-  .command("events <eventType>")
+  .command("get-events <eventType>")
   .description("get a list of events")
   .option("-f, --from <number>", "Start block", parseInt, 0)
   .option("-t, --to <number>", "End block", parseInt)

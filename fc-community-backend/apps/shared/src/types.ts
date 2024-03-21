@@ -39,6 +39,8 @@ export type Rating = {
 export type Note = {
   postUrl: string;
   creatorAddress: string;
+  // TODO: createdAt shouldn't be optional
+  createdAt?: number;
   content?: string;
   finalRating?: number;
   ratings?: Array<number>;
@@ -71,7 +73,11 @@ export type FactChainEvent =
   | "NoteFinalised";
 
 export interface NoteReader {
-  getNote: (postUrl: string, creator: string) => Promise<Note>;
+  getNote: (
+    postUrl: string,
+    creator: string,
+    timestamp?: number,
+  ) => Promise<Note>;
   getNotes: (
     predicate: (postUrl: string, creator: string) => boolean,
     lookBackDays: number,

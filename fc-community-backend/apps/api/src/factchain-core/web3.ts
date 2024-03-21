@@ -97,14 +97,23 @@ export class FactChainBackend implements NoteReader, NoteWriter {
     return eventLogs;
   };
 
-  getNote = async (postUrl: string, creator: string): Promise<Note> => {
+  getNote = async (
+    postUrl: string,
+    creator: string,
+    timestamp?: number,
+  ): Promise<Note> => {
+    // TODO: timestamp shouldn't be optional
     const result = await this._fcCommunity.communityNotes(postUrl, creator);
-    return {
+    const note: Note = {
       postUrl: result[0],
       content: result[1],
       creatorAddress: result[2],
       finalRating: parseInt(result[3]),
     };
+    if (timestamp !== undefined) {
+      note.createdAt = timestamp;
+    }
+    return note;
   };
 
   getNoteRaters = async (
@@ -133,8 +142,12 @@ export class FactChainBackend implements NoteReader, NoteWriter {
         predicate(e.args[0], e.args[1]),
       );
       return Promise.all(
-        relatedEvents.map((event) =>
-          this.getNote(event.args[0], event.args[1]),
+        relatedEvents.map(async (event) =>
+          this.getNote(
+            event.args[0],
+            event.args[1],
+            (await event.getBlock()).timestamp,
+          ),
         ),
       );
     });
