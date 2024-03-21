@@ -3,19 +3,6 @@ import { elipseText } from '../../utils/constants';
 const FCNote = (props) => {
   // assuming `postUrl` looks like: https://x.com/foo/status/<id>
   const postId = props.postUrl.split('/').slice(-1)[0];
-  let socialLogo;
-
-  switch (props.socialName) {
-    case 'x':
-      socialLogo = '/logos/x.png';
-      break;
-    case 'warpcast':
-      socialLogo = '/logos/warpcast.png';
-      break;
-    default:
-      socialLogo = '/logos/x.png';
-      break;
-  }
 
   return (
     <a
@@ -26,7 +13,7 @@ const FCNote = (props) => {
     >
       <div className="flex items-center gap-2">
         <img
-          src={socialLogo}
+          src={`/logos/${props.socialName}.png`}
           className="rounded-full w-[24px] h-[24px] object-cover shadow"
         />
         <div className="truncate">
