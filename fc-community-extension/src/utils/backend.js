@@ -31,11 +31,7 @@ export const getNotes = async (queryparams, network) => {
         }
       })
       .filter((note) => note !== null);
-    // sort notes by ascending age (most recent first).
-    const sortedNotes = validNotes.sort(
-      (a, b) => parseInt(b.createdAt) - parseInt(a.createdAt)
-    );
-    return sortedNotes;
+    return validNotes;
   } catch (error) {
     console.error('Error fetching notes:', error);
     throw error;
@@ -50,21 +46,16 @@ export const getNotesForAllSocials = async (queryparams) => {
       notesPromiseMap.set(social, getNotes(queryparams, network.networkName));
     }
     // Await all promises concurrently
-    const socialNotesEntries = await Promise.allSettled([
+    const validNotesbySocials = await Promise.all([
       ...notesPromiseMap.values(),
     ]);
-
-    // Construct a Map of social names to notes
-    const socialNotesMap = new Map();
-    socialNotesEntries.forEach((result, index) => {
-      const social = [...notesPromiseMap.keys()][index];
-      socialNotesMap.set(
-        social,
-        result.status === 'fulfilled' ? result.value : null
-      );
-    });
-    console.log(socialNotesMap);
-    return socialNotesMap;
+    // Merge arrays of notes into one array
+    const validNotes = [].concat(...validNotesbySocials);
+    // sort notes by ascending age (most recent first).
+    const sortedNotes = validNotes.sort(
+      (a, b) => parseInt(b.createdAt) - parseInt(a.createdAt)
+    );
+    return sortedNotes;
   } catch (error) {
     console.error('Error fetching notes for all socials:', error);
     throw error;

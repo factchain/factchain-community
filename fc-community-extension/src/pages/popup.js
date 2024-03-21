@@ -102,7 +102,7 @@ function FCProfile(props) {
 }
 
 function FCNotes(props) {
-  const [socialNotesMap] = createResource(() =>
+  const [notes] = createResource(() =>
     getNotesForAllSocials(props.queryparams)
   );
 
@@ -117,29 +117,24 @@ function FCNotes(props) {
             <div>to view Factchain notes</div>
           </div>
         </Match>
-        <Match when={socialNotesMap() !== undefined}>
+        <Match when={notes() !== undefined}>
           <Switch>
-            <Match when={socialNotesMap().size > 0}>
+            <Match when={notes().length > 0}>
               <div class="space-y-4">
-                {Array.from(socialNotesMap().entries()).map(
-                  ([socialName, notes]) => (
-                    <For each={notes}>
-                      {(note) => (
-                        <FCNote
-                          key={note.postUrl}
-                          postUrl={note.postUrl}
-                          creator={note.creatorAddress}
-                          content={note.content}
-                          finalRating={note.finalRating}
-                          socialName={socialName}
-                        />
-                      )}
-                    </For>
-                  )
-                )}
+                <For each={notes()}>
+                  {(note) => (
+                    <FCNote
+                      key={note.postUrl}
+                      postUrl={note.postUrl}
+                      creator={note.creatorAddress}
+                      content={note.content}
+                      finalRating={note.finalRating}
+                    />
+                  )}
+                </For>
               </div>
             </Match>
-            <Match when={socialNotesMap.size === 0}>
+            <Match when={notes().length === 0}>
               <FCEmptyState text={props.emptyText} />
             </Match>
           </Switch>
