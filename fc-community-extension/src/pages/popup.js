@@ -117,11 +117,11 @@ function FCNotes(props) {
             <div>to view Factchain notes</div>
           </div>
         </Match>
-        <Match when={socialNotesMap !== undefined}>
+        <Match when={socialNotesMap() !== undefined}>
           <Switch>
-            <Match when={socialNotesMap.size > 0}>
+            <Match when={socialNotesMap().size > 0}>
               <div class="space-y-4">
-                {Array.from(socialNotesMap.entries()).map(
+                {Array.from(socialNotesMap().entries()).map(
                   ([socialName, notes]) => (
                     <For each={notes}>
                       {(note) => (
