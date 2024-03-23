@@ -31,6 +31,9 @@ export const supportedNetworks = {
     networkName: 'ETHEREUM_SEPOLIA',
     displayName: 'Ethereum (Sepolia)',
     chainId: '0xAA36A7',
+    rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+    explorerUrl: 'https://sepolia.etherscan.io',
+    currencySymbol: 'sETH',
     contracts: {
       main: '0x3b5946b3bd79c2B211E49c3149872f1d66223AE7',
       x: '0xaC51f5E2664aa966c678Dc935E0d853d3495A48C',
@@ -42,6 +45,9 @@ export const supportedNetworks = {
     networkName: 'BASE_MAINNET',
     displayName: 'Base (Mainnet)',
     chainId: '0x2105',
+    rpcUrl: 'https://mainnet.base.org',
+    explorerUrl: 'https://basescan.org',
+    currencySymbol: 'ETH',
     contracts: {
       main: '0xde31FB31adeB0a97E34aCf7EF4e21Ad585F667f7',
       sft: '0x77840A1815f4F62a4cCCA3aBA3566fB8ff0b10D0',

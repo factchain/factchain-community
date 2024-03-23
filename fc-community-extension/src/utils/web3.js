@@ -59,6 +59,61 @@ export const checkIfMetamaskInstalled = async () => {
   }
 };
 
+export const connectToNetwork = async (selectedNetwork) => {
+  if (!selectedNetwork) {
+    // First set the selectedNetwork to a default value
+    // it might get updated later.
+    selectedNetwork = supportedNetworks.ETHEREUM_SEPOLIA;
+
+    // Get the current connected chainId and try to find the
+    // corresponding network.
+    const chainId = await window.ethereum.request({
+      method: 'eth_chainId',
+      params: [],
+    });
+    for (let networkName in supportedNetworks) {
+      if (supportedNetworks[networkName].chainId === chainId) {
+        selectedNetwork = supportedNetworks[networkName];
+        break;
+      }
+    }
+  }
+
+  // Finally switch to the selected network, this might be a noop
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [
+        {
+          chainId: selectedNetwork.chainId,
+        },
+      ],
+    });
+  } catch (e) {
+    await window.ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [
+        {
+          chainId: selectedNetwork.chainId,
+          chainName: selectedNetwork.displayName,
+          rpcUrls: [selectedNetwork.rpcUrl],
+          nativeCurrency: {
+            name: selectedNetwork.currencySymbol,
+            symbol: selectedNetwork.currencySymbol,
+            decimals: 18,
+          },
+          blockExplorerUrls: [selectedNetwork.explorerUrl],
+        },
+      ],
+    });
+  }
+  await chrome.runtime.sendMessage({
+    type: 'fc-set-network',
+    network: selectedNetwork,
+  });
+  return selectedNetwork;
+};
+
 export const createFactchainProvider = async (selectedNetwork) => {
   try {
     let currentMetaMaskId = METAMASK_ID;
@@ -72,37 +127,7 @@ export const createFactchainProvider = async (selectedNetwork) => {
       logger.error(`Failed to connect to metamask`, error);
     });
 
-    if (!selectedNetwork) {
-      // First set the selectedNetwork to a default value
-      // it might get updated later.
-      selectedNetwork = supportedNetworks.ETHEREUM_SEPOLIA;
-
-      // Get the current connected chainId and try to find the
-      // corresponding network.
-      const chainId = await window.ethereum.request({
-        method: 'eth_chainId',
-        params: [],
-      });
-      for (let networkName in supportedNetworks) {
-        if (supportedNetworks[networkName].chainId === chainId) {
-          selectedNetwork = supportedNetworks[networkName];
-          break;
-        }
-      }
-    }
-    // Finally switch to the selected network, this might be a noop
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [
-        {
-          chainId: selectedNetwork.chainId,
-        },
-      ],
-    });
-    await chrome.runtime.sendMessage({
-      type: 'fc-set-network',
-      network: selectedNetwork,
-    });
+    selectedNetwork = await connectToNetwork(selectedNetwork);
 
     const getAccounts = async (requestAccess) => {
       logger.log(`Get accounts, requestAccess=${requestAccess}`);
