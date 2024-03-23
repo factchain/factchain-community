@@ -1049,6 +1049,10 @@ a.link:visited {
   background: transparent;
 }
 
+.hover\:cursor-pointer:hover {
+  cursor: pointer;
+}
+
 .hover\:bg-fcGrey\/90:hover {
   background-color: rgba(57, 62, 70, 0.9);
 }
