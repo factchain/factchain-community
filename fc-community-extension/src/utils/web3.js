@@ -71,11 +71,14 @@ export const createFactchainProvider = async () => {
       logger.error(`Failed to connect to metamask`, error);
     });
 
+    const selectedNetwork = await chrome.runtime.sendMessage({
+      type: 'fc-get-network',
+    });
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [
         {
-          chainId: '0xAA36A7',
+          chainId: selectedNetwork.chainId,
         },
       ],
     });
@@ -96,19 +99,11 @@ export const createFactchainProvider = async () => {
       // mapping contractName to fixed proxy contract
       // doesn't break the upgradeability
       // because proxy should never be upgraded to another addess
-      switch (contractName) {
-        case 'main':
-          return '0x3b5946b3bd79c2B211E49c3149872f1d66223AE7';
-        case 'x':
-          return '0xaC51f5E2664aa966c678Dc935E0d853d3495A48C';
-        case 'sft':
-          return '0xF9408EB2C2219E28aEFB32035c49d491880650A2';
-        case 'nft':
-          return '0x5818764B4272f4eCff170216abE99D36c0c41622';
-        default:
-          // should never happen
-          // caller isn't expected to catch this error
-          throw new Error(`Unknown Contract ${contractName}`);
+      const contractAddress = selectedNetwork.contracts[contractName];
+      if (contractAddress) {
+        return contractAddress;
+      } else {
+        throw new Error(`Unknown Contract ${contractName}`);
       }
     };
 
@@ -129,6 +124,7 @@ export const createFactchainProvider = async () => {
     };
 
     return {
+      selectedNetwork,
       getAddresses: async () => await getAccounts(false),
       getAddress: async () => (await getAccounts(false))[0],
       requestAddress: async () => (await getAccounts(true))[0],

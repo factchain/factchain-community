@@ -2,8 +2,8 @@ const BACKEND_URL = 'https://api.factchain.tech';
 
 import { socialsSupportedNetworks } from './constants';
 
-export const getNotes = async (queryparams, network) => {
-  console.log(network);
+export const getNotes = async (queryparams, networkName) => {
+  console.log(networkName);
   let fullUrl = `${BACKEND_URL}/notes`;
   if (queryparams) {
     const urlParams = new URLSearchParams(queryparams);
@@ -16,7 +16,7 @@ export const getNotes = async (queryparams, network) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        network: network,
+        network: networkName,
       },
     });
     const data = await response.json();

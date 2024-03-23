@@ -1,4 +1,5 @@
 import { elipseText } from '../../utils/constants';
+import { socialsSupportedNetworks } from '../../utils/constants';
 
 const FCNote = (props) => {
   // assuming `postUrl` looks like: https://x.com/foo/status/<id>
@@ -9,12 +10,26 @@ const FCNote = (props) => {
   // extension only support these two socials
   const social = host.startsWith('warpcast') ? 'warpcast' : 'x';
 
+  const noteClicked = () => {
+    window.open(props.postUrl, '_blank');
+    if (social !== 'x') {
+      chrome.runtime.sendMessage({
+        type: props.finalRating ? 'fc-mint-factchain-note' : 'fc-rate-note',
+        note: {
+          postUrl: props.postUrl,
+          creatorAddress: props.creator,
+          content: props.content,
+        },
+        socialName: social,
+      });
+    }
+  };
+
   return (
-    <a
+    <div
+      onClick={noteClicked}
       href={props.postUrl}
-      target="_blank"
-      rel="noreferrer noopener"
-      className="bg-fcGrey/70 rounded-md p-2 text-xs space-y-2 shadow block hover:bg-fcGrey/90"
+      className="bg-fcGrey/70 rounded-md p-2 text-xs space-y-2 shadow block hover:bg-fcGrey/90 hover:cursor-pointer"
     >
       <div className="flex items-center gap-2">
         <img
@@ -49,7 +64,7 @@ const FCNote = (props) => {
           </div>
         )}
       </div>
-    </a>
+    </div>
   );
 };
 
