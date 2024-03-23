@@ -1,5 +1,10 @@
 import { logger } from './utils/logging';
-import { parseUrl, NOTE_URL_REGEX, POST_URL_REGEX } from './utils/constants';
+import {
+  parseUrl,
+  NOTE_URL_REGEX,
+  POST_URL_REGEX,
+  socialsSupportedNetworks,
+} from './utils/constants';
 import {
   makeFactchainNoteHtml,
   makeMintXNoteOnDetailsPageHtml,
@@ -66,6 +71,7 @@ const addNoteCreationButton = (dropdown, postUrl) => {
     chrome.runtime.sendMessage({
       type: 'fc-create-note',
       postUrl,
+      socialName: 'x',
     });
   });
 };
@@ -122,6 +128,7 @@ const addNote = async (mainArticle, note, userAddress) => {
         chrome.runtime.sendMessage({
           type: 'fc-rate-note',
           note,
+          socialName: 'x',
         });
       });
   }
@@ -133,6 +140,7 @@ const addNote = async (mainArticle, note, userAddress) => {
         chrome.runtime.sendMessage({
           type: 'fc-mint-factchain-note',
           note,
+          socialName: 'x',
         });
       });
   }
@@ -143,6 +151,7 @@ export const alterMainArticle = async (mainArticle) => {
   const notes = await chrome.runtime.sendMessage({
     type: 'fc-get-notes',
     postUrl,
+    socialName: 'x',
   });
   logger.log('received notes', notes);
   if (notes.length > 0) {

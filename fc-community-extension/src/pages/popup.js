@@ -65,6 +65,9 @@ function FCProfile(props) {
             <div className="flex-grow">
               <div className="font-semibold text-xl">Account</div>
               <div className="opacity-70">
+                {props.loggedIn ? props.networkName : 'Unknown network'}
+              </div>
+              <div className="opacity-70">
                 {props.loggedIn ? elipseText(props.address, 20) : '0x?'}
               </div>
             </div>
@@ -258,6 +261,8 @@ function FCPopup() {
     userStats.loading || !userStats() ? '?' : userStats().ratings;
   const earnings = () =>
     userStats.loading || !userStats() ? '?' : userStats().earnings;
+  const networkName = () =>
+    provider() ? provider().selectedNetwork.displayName : '?';
 
   return (
     <div className="h-[600px] w-[375px] flex flex-col">
@@ -272,6 +277,7 @@ function FCPopup() {
             numberNotes={numberNotes()}
             numberRatings={numberRatings()}
             earnings={earnings()}
+            networkName={networkName()}
           />
         </Match>
         <Match when={selectedTab() === 'Notes'}>

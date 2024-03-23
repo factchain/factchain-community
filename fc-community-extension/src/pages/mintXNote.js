@@ -29,7 +29,10 @@ export function FCMintXNote({ noteUrl, content, mintXNote }) {
       setError(null);
       setTransaction(null);
 
-      const provider = await createFactchainProvider();
+      const selectedNetwork = await chrome.runtime.sendMessage({
+        type: 'fc-get-network',
+      });
+      const provider = await createFactchainProvider(selectedNetwork);
       const contract = await provider.getXContract();
       console.log(`contract`, contract);
       console.log(`contract address ${contract.target}`);

@@ -8,6 +8,7 @@ import {
   FC_X_CONTRACT_ABI,
   FC_NFT_CONTRACT_ABI,
   FC_SFT_CONTRACT_ABI,
+  supportedNetworks,
 } from './constants';
 import abiDecoder from 'abi-decoder';
 
@@ -58,7 +59,62 @@ export const checkIfMetamaskInstalled = async () => {
   }
 };
 
-export const createFactchainProvider = async () => {
+export const connectToNetwork = async (selectedNetwork) => {
+  if (!selectedNetwork) {
+    // First set the selectedNetwork to a default value
+    // it might get updated later.
+    selectedNetwork = supportedNetworks.ETHEREUM_SEPOLIA;
+
+    // Get the current connected chainId and try to find the
+    // corresponding network.
+    const chainId = await window.ethereum.request({
+      method: 'eth_chainId',
+      params: [],
+    });
+    for (let networkName in supportedNetworks) {
+      if (supportedNetworks[networkName].chainId === chainId) {
+        selectedNetwork = supportedNetworks[networkName];
+        break;
+      }
+    }
+  }
+
+  // Finally switch to the selected network, this might be a noop
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [
+        {
+          chainId: selectedNetwork.chainId,
+        },
+      ],
+    });
+  } catch (e) {
+    await window.ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [
+        {
+          chainId: selectedNetwork.chainId,
+          chainName: selectedNetwork.displayName,
+          rpcUrls: [selectedNetwork.rpcUrl],
+          nativeCurrency: {
+            name: selectedNetwork.currencySymbol,
+            symbol: selectedNetwork.currencySymbol,
+            decimals: 18,
+          },
+          blockExplorerUrls: [selectedNetwork.explorerUrl],
+        },
+      ],
+    });
+  }
+  await chrome.runtime.sendMessage({
+    type: 'fc-set-network',
+    network: selectedNetwork,
+  });
+  return selectedNetwork;
+};
+
+export const createFactchainProvider = async (selectedNetwork) => {
   try {
     let currentMetaMaskId = METAMASK_ID;
     const metamaskPort = chrome.runtime.connect(currentMetaMaskId);
@@ -71,14 +127,7 @@ export const createFactchainProvider = async () => {
       logger.error(`Failed to connect to metamask`, error);
     });
 
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [
-        {
-          chainId: '0xAA36A7',
-        },
-      ],
-    });
+    selectedNetwork = await connectToNetwork(selectedNetwork);
 
     const getAccounts = async (requestAccess) => {
       logger.log(`Get accounts, requestAccess=${requestAccess}`);
@@ -96,19 +145,11 @@ export const createFactchainProvider = async () => {
       // mapping contractName to fixed proxy contract
       // doesn't break the upgradeability
       // because proxy should never be upgraded to another addess
-      switch (contractName) {
-        case 'main':
-          return '0x3b5946b3bd79c2B211E49c3149872f1d66223AE7';
-        case 'x':
-          return '0xaC51f5E2664aa966c678Dc935E0d853d3495A48C';
-        case 'sft':
-          return '0xF9408EB2C2219E28aEFB32035c49d491880650A2';
-        case 'nft':
-          return '0x5818764B4272f4eCff170216abE99D36c0c41622';
-        default:
-          // should never happen
-          // caller isn't expected to catch this error
-          throw new Error(`Unknown Contract ${contractName}`);
+      const contractAddress = selectedNetwork.contracts[contractName];
+      if (contractAddress) {
+        return contractAddress;
+      } else {
+        throw new Error(`Unknown Contract ${contractName}`);
       }
     };
 
@@ -129,6 +170,7 @@ export const createFactchainProvider = async () => {
     };
 
     return {
+      selectedNetwork,
       getAddresses: async () => await getAccounts(false),
       getAddress: async () => (await getAccounts(false))[0],
       requestAddress: async () => (await getAccounts(true))[0],

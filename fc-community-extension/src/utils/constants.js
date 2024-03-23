@@ -26,9 +26,38 @@ export const makeTransactionUrl = (transactionHash) =>
 export const makeOpenseaUrl = (contractAddress, tokenId) =>
   `https://testnets.opensea.io/assets/sepolia/${contractAddress}/${tokenId}`;
 
+export const supportedNetworks = {
+  ETHEREUM_SEPOLIA: {
+    networkName: 'ETHEREUM_SEPOLIA',
+    displayName: 'Ethereum (Sepolia)',
+    chainId: '0xAA36A7',
+    rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
+    explorerUrl: 'https://sepolia.etherscan.io',
+    currencySymbol: 'sETH',
+    contracts: {
+      main: '0x3b5946b3bd79c2B211E49c3149872f1d66223AE7',
+      x: '0xaC51f5E2664aa966c678Dc935E0d853d3495A48C',
+      sft: '0xF9408EB2C2219E28aEFB32035c49d491880650A2',
+      nft: '0x5818764B4272f4eCff170216abE99D36c0c41622',
+    },
+  },
+  BASE_MAINNET: {
+    networkName: 'BASE_MAINNET',
+    displayName: 'Base (Mainnet)',
+    chainId: '0x2105',
+    rpcUrl: 'https://mainnet.base.org',
+    explorerUrl: 'https://basescan.org',
+    currencySymbol: 'ETH',
+    contracts: {
+      main: '0xde31FB31adeB0a97E34aCf7EF4e21Ad585F667f7',
+      sft: '0x77840A1815f4F62a4cCCA3aBA3566fB8ff0b10D0',
+      nft: '0x8885DC14732AE2ADd64d8C6581E722F0A88aA3Da',
+    },
+  },
+};
 export const socialsSupportedNetworks = new Map([
-  ['x', { networkName: 'ETHEREUM_SEPOLIA', chainID: 11155111 }],
-  ['warpcast', { networkName: 'BASE_MAINNET', chainID: 8453 }],
+  ['x', supportedNetworks.ETHEREUM_SEPOLIA],
+  ['warpcast', supportedNetworks.BASE_MAINNET],
 ]);
 
 export const FC_MAIN_CONTRACT_ABI = [

@@ -127,8 +127,12 @@ const postUrl = await chrome.runtime.sendMessage({
 });
 logger.log('Post URL', postUrl);
 
+const selectedNetwork = await chrome.runtime.sendMessage({
+  type: 'fc-get-network',
+});
+
 const createNote = async (content) => {
-  const provider = await createFactchainProvider();
+  const provider = await createFactchainProvider(selectedNetwork);
   const address = await provider.requestAddress();
   logger.log('Creator address', address);
   const contract = await provider.getMainContract();
