@@ -20,6 +20,7 @@ let cache = {
 
 const setNetworkName = async (networkName) => {
   await chrome.storage.local.set({ networkName });
+  console.log(`Network name set to ${networkName} in storage`);
 };
 
 const mainHandler = async (message, sendResponse) => {
@@ -31,7 +32,7 @@ const mainHandler = async (message, sendResponse) => {
     const networkName = socialsSupportedNetworks.get(
       message.socialName
     ).networkName;
-    setNetworkName(networkName);
+    await setNetworkName(networkName);
 
     chrome.windows.create({
       url: 'createNote.html',
@@ -55,7 +56,7 @@ const mainHandler = async (message, sendResponse) => {
     const networkName = socialsSupportedNetworks.get(
       message.socialName
     ).networkName;
-    setNetworkName(networkName);
+    await setNetworkName(networkName);
 
     chrome.windows.create({
       url: 'rateNotes.html',
@@ -73,7 +74,7 @@ const mainHandler = async (message, sendResponse) => {
     cache.noteUrl = message.noteUrl;
     cache.content = message.content;
     const networkName = socialsSupportedNetworks.get('x').networkName;
-    setNetworkName(networkName);
+    await setNetworkName(networkName);
 
     chrome.windows.create({
       url: 'mintXNote.html',
@@ -91,7 +92,7 @@ const mainHandler = async (message, sendResponse) => {
     const networkName = socialsSupportedNetworks.get(
       message.socialName
     ).networkName;
-    setNetworkName(networkName);
+    await setNetworkName(networkName);
 
     chrome.windows.create({
       url: 'mintFactchainNote.html',
@@ -121,6 +122,9 @@ const mainHandler = async (message, sendResponse) => {
       supportedNetworks[networkName] || supportedNetworks['ETHEREUM_SEPOLIA'];
     console.log('Retrieved network from storage', network);
     sendResponse(network);
+  } else if (message.type === 'fc-set-network') {
+    await setNetworkName(message.network.networkName);
+    sendResponse(true);
   }
   /// For now we deactivate notifications
   ///

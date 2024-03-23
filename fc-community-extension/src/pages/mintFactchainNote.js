@@ -25,7 +25,10 @@ export function FCMintFactchainNote({
   const [isMetamaskInstalled] = createResource(checkIfMetamaskInstalled);
 
   const getFactchainNftInfo = async (postUrl, creatorAddress) => {
-    const provider = await createFactchainProvider();
+    const selectedNetwork = await chrome.runtime.sendMessage({
+      type: 'fc-get-network',
+    });
+    const provider = await createFactchainProvider(selectedNetwork);
     const nftContract = await provider.getNftContract();
     console.log(`nftContract (${nftContract.target})`, nftContract);
     const sftContract = await provider.getSftContract();

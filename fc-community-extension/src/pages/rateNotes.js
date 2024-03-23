@@ -146,9 +146,12 @@ const note = await chrome.runtime.sendMessage({
   target: 'note',
 });
 logger.log('Note to rate', note);
+const selectedNetwork = await chrome.runtime.sendMessage({
+  type: 'fc-get-network',
+});
 
 const rateNote = async (note, rating) => {
-  const provider = await createFactchainProvider();
+  const provider = await createFactchainProvider(selectedNetwork);
   const address = await provider.requestAddress();
   logger.log(
     `Address ${address} rating note ${note.postUrl}-${note.creatorAddress} as ${rating}/5`

@@ -1,5 +1,4 @@
 import { elipseText } from '../../utils/constants';
-import { socialsSupportedNetworks } from '../../utils/constants';
 
 const FCNote = (props) => {
   // assuming `postUrl` looks like: https://x.com/foo/status/<id>
