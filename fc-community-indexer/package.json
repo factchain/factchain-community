@@ -2,7 +2,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc && node --env-file=.env dist/main.js",
-    "start": "node main.ts",
+    "start": "node dist/main.js",
     "prettier": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\"",
     "prettier:check": "prettier -l --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\""
   },
