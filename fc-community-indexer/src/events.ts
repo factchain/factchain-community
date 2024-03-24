@@ -1695,17 +1695,17 @@ export const supportedNetworks = [
 ];
 
 export const getNetworkToBlocks = async (): Promise<NetworkBlock[]> => {
-  const networkFromBlocks: NetworkBlock[] = await Promise.all(
+  const networkToBlocks: NetworkBlock[] = await Promise.all(
     supportedNetworks.map(async (network) => {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
       const blockNumber = await provider.getBlockNumber();
       return {
         networkName: network.name,
-        fromBlock: blockNumber,
+        lastBlock: blockNumber,
       };
     }),
   );
-  return networkFromBlocks;
+  return networkToBlocks;
 };
 
 export const getEventsForNetwork = async (

@@ -30,19 +30,14 @@ const readLastBlockNumber = async (networkName: string) => {
 };
 
 export const readNetworkBlocks = async (): Promise<NetworkBlock[]> => {
-  const client = getClient();
-  try {
-    return Promise.all(
-      supportedNetworks.map(async (network) => {
-        return {
-          networkName: network.name,
-          fromBlock: await readLastBlockNumber(network.name),
-        };
-      }),
-    );
-  } finally {
-    await client.close();
-  }
+  return Promise.all(
+    supportedNetworks.map(async (network) => {
+      return {
+        networkName: network.name,
+        lastBlock: await readLastBlockNumber(network.name),
+      };
+    }),
+  );
 };
 
 export const writeEvents = async (events: any[]) => {

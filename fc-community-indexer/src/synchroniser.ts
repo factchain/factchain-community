@@ -12,12 +12,12 @@ async function run() {
       networkFromBlocks.map(async (networkFromBlock) =>
         getEventsForNetwork(
           networkFromBlock.networkName,
-          networkFromBlock.fromBlock,
+          networkFromBlock.lastBlock + 1,
           // Find the toBlock
           networkToBlocks.find(
             (networkToBlock) =>
               networkToBlock.networkName === networkFromBlock.networkName,
-          )!.fromBlock,
+          )!.lastBlock,
         ),
       ),
     )

@@ -1,6 +1,6 @@
 export type NetworkBlock = {
   networkName: string;
-  fromBlock: number;
+  lastBlock: number;
 };
 
 export type FactchainEventArg = {
