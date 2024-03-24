@@ -1,4 +1,5 @@
 import { EventLog, Log, ethers } from "ethers";
+import { FactchainEvent, FactchainEventArg, NetworkBlock } from "./types";
 
 class FactchainContract {
   address: `0x${string}`;
@@ -25,7 +26,7 @@ class FactchainContract {
       }, new Map<string, string[]>());
   }
 
-  parseEvent(event: EventLog) {
+  parseEvent(event: EventLog): FactchainEventArg[] {
     const eventArgsNames = this.events.get(event.eventName);
     if (eventArgsNames) {
       return eventArgsNames.map((argName, index) => {
@@ -1693,10 +1694,24 @@ export const supportedNetworks = [
   },
 ];
 
+export const getNetworkFromBlocks = async (): Promise<NetworkBlock[]> => {
+  const networkFromBlocks: NetworkBlock[] = await Promise.all(
+    supportedNetworks.map(async (network) => {
+      const provider = new ethers.JsonRpcProvider(network.rpcUrl);
+      const blockNumber = await provider.getBlockNumber();
+      return {
+        networkName: network.name,
+        fromBlock: blockNumber,
+      };
+    }),
+  );
+  return networkFromBlocks;
+};
+
 export const getEventsForNetwork = async (
   networkName: string,
   fromBlock: number,
-) => {
+): Promise<FactchainEvent[]> => {
   const network = supportedNetworks.find(
     (network) => network.name === networkName,
   );
@@ -1726,7 +1741,7 @@ const getEvents = async (
   provider: ethers.JsonRpcProvider,
   fromBlock: number,
   toBlock: number,
-) => {
+): Promise<FactchainEvent[]> => {
   console.log(
     `Getting ${network.name} events from block ${fromBlock} to block ${toBlock}`,
   );
@@ -1748,7 +1763,7 @@ const getEvents = async (
       );
       const events = await contract.queryFilter("*", fromBlock, toBlock);
       // iterate over all events in the contract
-      const contractEvents = await Promise.all(
+      const contractEvents: Array<FactchainEvent | null> = await Promise.all(
         events.map(async (event: Log | EventLog) => {
           if (event instanceof EventLog) {
             if (!blockTimestamps[event.blockHash]) {
@@ -1760,7 +1775,7 @@ const getEvents = async (
               networkName: network.name,
               contractAddress: event.address,
               eventName: event.eventName,
-              blockTimestamp: blockTimestamps[event.blockHash],
+              blockTimestamp: parseInt(blockTimestamps[event.blockHash]),
               blockNumber: event.blockNumber,
               eventArgs: factchainContract.parseEvent(event),
             };

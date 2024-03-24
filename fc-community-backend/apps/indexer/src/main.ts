@@ -1,17 +1,9 @@
-import { getLastBlock, writeEvents } from "./mongo";
-import { getEventsForNetwork, supportedNetworks } from "./events";
+import { readNetworkBlocks, writeEvents, writeNetworkBlocks } from "./mongo";
+import { getEventsForNetwork, getNetworkFromBlocks } from "./events";
+import { NetworkBlock } from "./types";
 
 async function run() {
-  const networkFromBlocks = await Promise.all(
-    supportedNetworks.map(async (network) => {
-      const lastBlock = await getLastBlock(network.name);
-      return {
-        networkName: network.name,
-        fromBlock: lastBlock,
-      };
-    }),
-  );
-
+  const networkFromBlocks: NetworkBlock[] = await readNetworkBlocks();
   const events = (
     await Promise.all(
       networkFromBlocks.map(async (networkFromBlock) =>
@@ -24,5 +16,7 @@ async function run() {
   ).flat();
 
   await writeEvents(events);
+  const newNetworkFromBlocks: NetworkBlock[] = await getNetworkFromBlocks();
+  await writeNetworkBlocks(newNetworkFromBlocks);
 }
 run().catch(console.dir);
