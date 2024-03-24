@@ -1,11 +1,11 @@
-name: Backend Deployment
+name: Indexer Deployment
 on:
   push:
     branches: [ main ]
-    paths: [ fc-community-backend/apps/api/** ]
+    paths: [ fc-community-indexer/** ]
   workflow_dispatch:
 jobs:
-  deploy-backend:
+  deploy-indexer:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -16,9 +16,5 @@ jobs:
           team: ${{ vars.HEROKU_TEAM_NAME }}
           heroku_email: ${{ vars.HEROKU_EMAIL }}
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ vars.HEROKU_BACKEND_APP_NAME }}
-          appdir: fc-community-backend/apps/api
-          healthcheck: ${{ vars.HEROKU_URL }}
-          checkstring: "OK"
-          delay: 5
-          rollbackonhealthcheckfailed: true
+          heroku_app_name: ${{ vars.HEROKU_INDEXER_APP_NAME }}
+          appdir: fc-community-indexer

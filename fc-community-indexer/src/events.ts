@@ -46,7 +46,7 @@ class FactchainContract {
 export const supportedNetworks = [
   {
     name: "Ethereum Sepolia",
-    rpcUrl: process.env.ETHEREUM_SEPOLIA_RPC_URL,
+    rpcUrl: process.env.ETHEREUM_SEPOLIA_INFRA_RPC_URL,
     contracts: [
       new FactchainContract(
         "0x3b5946b3bd79c2B211E49c3149872f1d66223AE7",
@@ -870,7 +870,7 @@ export const supportedNetworks = [
   },
   {
     name: "Base Mainnet",
-    rpcUrl: process.env.BASE_MAINNET_RPC_URL,
+    rpcUrl: process.env.BASE_MAINNET_INFRA_RPC_URL,
     contracts: [
       new FactchainContract(
         "0xde31FB31adeB0a97E34aCf7EF4e21Ad585F667f7",
