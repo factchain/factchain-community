@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && node --env-file=.env dist/main.js",
+    "start": "node --env-file=.env dist/main.js",
+    "prettier": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\"",
+    "prettier:check": "prettier -l --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\""
+  },
+  "dependencies": {
+    "ethers": "^6.11.1",
+    "mongodb": "^6.5.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30"
+  }
+}
