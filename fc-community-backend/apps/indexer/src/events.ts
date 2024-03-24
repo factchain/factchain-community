@@ -1694,7 +1694,7 @@ export const supportedNetworks = [
   },
 ];
 
-export const getNetworkFromBlocks = async (): Promise<NetworkBlock[]> => {
+export const getNetworkToBlocks = async (): Promise<NetworkBlock[]> => {
   const networkFromBlocks: NetworkBlock[] = await Promise.all(
     supportedNetworks.map(async (network) => {
       const provider = new ethers.JsonRpcProvider(network.rpcUrl);
@@ -1711,6 +1711,7 @@ export const getNetworkFromBlocks = async (): Promise<NetworkBlock[]> => {
 export const getEventsForNetwork = async (
   networkName: string,
   fromBlock: number,
+  toBlock: number,
 ): Promise<FactchainEvent[]> => {
   const network = supportedNetworks.find(
     (network) => network.name === networkName,
@@ -1720,11 +1721,9 @@ export const getEventsForNetwork = async (
   }
   const provider = new ethers.JsonRpcProvider(network.rpcUrl);
 
-  // keep track of block timestamps to avoid querying the same block multiple times
+  console.log(`Getting events for network ${networkName} from block ${fromBlock} to block ${toBlock}`);
   const maxBlockSpan = 10000;
   let currentBlock = fromBlock;
-  const toBlock = await provider.getBlockNumber();
-  console.log(`Current block: ${toBlock}`);
   const events: any[] = [];
   while (currentBlock < toBlock) {
     const nextBlock = Math.min(currentBlock + maxBlockSpan, toBlock);
