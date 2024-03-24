@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && node --env-file=.env dist/main.js",
+    "start": "node --env-file=.env dist/main.js"
+  },
+  "dependencies": {
+    "ethers": "^6.11.1",
+    "mongodb": "^6.5.0",
+    "typescript": "^5.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30"
+  }
+}
