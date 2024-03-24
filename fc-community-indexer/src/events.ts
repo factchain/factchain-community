@@ -1721,7 +1721,9 @@ export const getEventsForNetwork = async (
   }
   const provider = new ethers.JsonRpcProvider(network.rpcUrl);
 
-  console.log(`Getting events for network ${networkName} from block ${fromBlock} to block ${toBlock}`);
+  console.log(
+    `Getting events for network ${networkName} from block ${fromBlock} to block ${toBlock}`,
+  );
   const maxBlockSpan = 10000;
   let currentBlock = fromBlock;
   const events: any[] = [];
@@ -1787,4 +1789,49 @@ const getEvents = async (
     }),
   );
   return allLogs.flat();
+};
+
+export const listenToEvents = (
+  handler: (factchainEvent: FactchainEvent) => void,
+) => {
+  supportedNetworks.map((network) => {
+    listenToEventsForNetwork(network, handler);
+  });
+};
+
+const listenToEventsForNetwork = (
+  network: any,
+  handler: (factchainEvent: FactchainEvent) => void,
+) => {
+  const provider = new ethers.WebSocketProvider(
+    network.rpcUrl.replace("https", "wss"),
+  );
+  network.contracts.map((factchainContract: FactchainContract) => {
+    const contract = new ethers.Contract(
+      factchainContract.address,
+      factchainContract.abi,
+      provider,
+    );
+
+    console.log(
+      `Listening to events for contract ${factchainContract.address} on network ${network.name}`,
+    );
+    contract.on("*", (newEvent) => {
+      try {
+        const event = newEvent.log;
+        console.log("New event received", event);
+        const factchainEvent = {
+          networkName: network.name,
+          contractAddress: event.address,
+          eventName: event.eventName,
+          blockTimestamp: Date.now(),
+          blockNumber: event.blockNumber,
+          eventArgs: factchainContract.parseEvent(event),
+        };
+        handler(factchainEvent);
+      } catch (e) {
+        console.error("Error processing event", e);
+      }
+    });
+  });
 };

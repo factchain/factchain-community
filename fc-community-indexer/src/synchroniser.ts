@@ -1,4 +1,4 @@
-import { readNetworkBlocks, writeEvents, writeNetworkBlocks } from "./mongo";
+import { readNetworkBlocks, writeEvents } from "./mongo";
 import { getEventsForNetwork, getNetworkToBlocks } from "./events";
 import { NetworkBlock } from "./types";
 
@@ -16,14 +16,13 @@ async function run() {
           // Find the toBlock
           networkToBlocks.find(
             (networkToBlock) =>
-              networkToBlock.networkName === networkFromBlock.networkName
-          )!.fromBlock
+              networkToBlock.networkName === networkFromBlock.networkName,
+          )!.fromBlock,
         ),
       ),
     )
   ).flat();
 
   await writeEvents(events);
-  await writeNetworkBlocks(networkToBlocks);
 }
 run().catch(console.dir);

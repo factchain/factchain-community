@@ -32,21 +32,11 @@ const readLastBlockNumber = async (networkName: string) => {
 export const readNetworkBlocks = async (): Promise<NetworkBlock[]> => {
   const client = getClient();
   try {
-    await client.connect();
-    const collection = client.db("fc-community").collection("blocks");
-    const documents = await collection.find().toArray();
-
     return Promise.all(
       supportedNetworks.map(async (network) => {
-        const document = documents.find(
-          (doc) => doc.networkName === network.name,
-        );
         return {
           networkName: network.name,
-          // Default the fromBlock to the last event's block if no document is found for the network
-          fromBlock: document
-            ? document.fromBlock
-            : await readLastBlockNumber(network.name),
+          fromBlock: await readLastBlockNumber(network.name),
         };
       }),
     );
@@ -70,17 +60,13 @@ export const writeEvents = async (events: any[]) => {
   }
 };
 
-export const writeNetworkBlocks = async (networkBlocks: NetworkBlock[]) => {
-  console.log("Writing new network blocks", networkBlocks);
-  if (networkBlocks.length <= 0) {
-    return;
-  }
+export const writeEvent = async (event: any) => {
+  console.log("Writing new event", event);
   const client = getClient();
   try {
     await client.connect();
-    const collection = client.db("fc-community").collection("blocks");
-    await collection.deleteMany({});
-    await collection.insertMany(networkBlocks);
+    const collection = client.db("fc-community").collection("events");
+    await collection.insertOne(event);
   } finally {
     await client.close();
   }

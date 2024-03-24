@@ -1,8 +1,10 @@
 {
   "scripts": {
     "build": "tsc",
-    "dev": "tsc && node --env-file=.env dist/main.js",
-    "start": "node dist/main.js",
+    "sync-dev": "tsc && node --env-file=.env dist/synchroniser.js",
+    "sync": "node dist/synchroniser.js",
+    "dev": "tsc && node --env-file=.env dist/listener.js",
+    "start": "node dist/listener.js",
     "prettier": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\"",
     "prettier:check": "prettier -l --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\""
   },
