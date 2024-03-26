@@ -4,7 +4,7 @@ import {
   XCommunityNote,
   NoteReader,
   Rating,
-  FactChainEvent,
+  FactchainEventName,
   NoteWriter,
 } from "./types";
 import {
@@ -25,7 +25,7 @@ import { FC_NFT_JSON_ABI } from "./contractsABIs/nft";
 import { Config, XSignedNoteIDResponse } from "./types";
 import { NetworkConfig } from "./networks/config";
 
-export class FactChainBackend implements NoteReader, NoteWriter {
+export class BlockchainConnector implements NoteReader, NoteWriter {
   private _config: Config;
   private _network: NetworkConfig;
   private _provider: ethers.AbstractProvider;
@@ -82,7 +82,7 @@ export class FactChainBackend implements NoteReader, NoteWriter {
   };
 
   getEvents = async (
-    eventType: FactChainEvent,
+    eventType: FactchainEventName,
     fromBlock: number,
     toBlock: number,
   ): Promise<Array<EventLog>> => {

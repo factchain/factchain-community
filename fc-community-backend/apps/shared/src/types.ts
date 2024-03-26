@@ -19,6 +19,11 @@ export type Config = {
   // Index signature to allow any string key
   BACKEND_PKEY: string;
   [key: string]: string;
+  // Database vars
+  MONGO_USER: string;
+  MONGO_PASSWORD: string;
+  MONGO_CLUSTER: string;
+  MONGO_APP_NAME: string;
 };
 
 export type Network = {
@@ -27,6 +32,30 @@ export type Network = {
   NFT_CONTRACT_ADDRESS: string;
   SFT_CONTRACT_ADDRESS: string;
   X_CONTRACT_ADDRESS: string;
+};
+
+export type FactchainEventArg = {
+  name: string;
+  value: string;
+};
+
+export type FactchainEventName =
+  | "ReserveFunded"
+  | "NoteCreated"
+  | "NoteRated"
+  | "RaterRewarded"
+  | "RaterSlashed"
+  | "CreatorRewarded"
+  | "CreatorSlashed"
+  | "NoteFinalised";
+
+export type FactchainEvent = {
+  networkName: string;
+  contractAddress: string;
+  eventName: FactchainEventName;
+  blockTimestamp: number;
+  blockNumber: number;
+  eventArgs: FactchainEventArg[];
 };
 
 export type Rating = {
@@ -61,16 +90,6 @@ export type XSignedNoteIDResponse = {
 export type NotesResponse = {
   notes: Array<Note>;
 };
-
-export type FactChainEvent =
-  | "ReserveFunded"
-  | "NoteCreated"
-  | "NoteRated"
-  | "RaterRewarded"
-  | "RaterSlashed"
-  | "CreatorRewarded"
-  | "CreatorSlashed"
-  | "NoteFinalised";
 
 export interface NoteReader {
   getNote: (
