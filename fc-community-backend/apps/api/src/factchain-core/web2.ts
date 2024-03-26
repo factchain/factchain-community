@@ -12,7 +12,6 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 import { ethers } from "ethers";
 import { NetworkConfig } from "./networks/config";
 import { FC_COMMUNITY_JSON_ABI } from "./contractsABIs/main";
-import { timePeriodToBlockPeriods } from "./utils";
 
 export class DBConnector implements NoteReader {
   private _config: Config;
@@ -54,14 +53,15 @@ export class DBConnector implements NoteReader {
     const db = this._mongoClient.db("fc-community");
     const collection = db.collection("events");
     const cursor = collection.find({
-      networkName: this._network.INFRA_RPC_URL.includes("sepolia") ? "Ethereum Sepolia" : "Base Mainnet" ,
+      networkName: this._network.INFRA_RPC_URL.includes("sepolia")
+        ? "Ethereum Sepolia"
+        : "Base Mainnet",
       eventName: eventName,
       blockNumber: {
         $gte: fromBlock,
         $lte: toBlock,
       },
     });
-
     const documents = await cursor.toArray();
     const events: FactchainEvent[] = documents.map((document) => ({
       _id: document._id,
@@ -100,33 +100,37 @@ export class DBConnector implements NoteReader {
     lookBackDays: number,
   ): Promise<Array<Note>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
-    const today = new Date();
-    const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
-    const blockPeriods = timePeriodToBlockPeriods(
-      from,
-      today,
-      currentBlockNumber,
-      this._network.AVERAGE_BLOCKTIME,
+    const currentDate = new Date();
+    const fromDate = new Date(
+      currentDate.getTime() - lookBackDays * 24 * 60 * 60 * 1000,
     );
-    const notePromises = blockPeriods.flatMap(async (period) => {
-      const events = await this.getEvents("NoteCreated", period[0], period[1]);
-      const relatedEvents = events.filter((e) =>
-        predicate(e.eventArgs[0].value, e.eventArgs[1].value),
+    const fromBlock =
+      currentBlockNumber -
+      Math.floor(
+        (currentDate.getTime() - fromDate.getTime()) /
+          this._network.AVERAGE_BLOCKTIME,
       );
-      return Promise.all(
-        relatedEvents.map(async (event) =>
-          this.getNote(
-            event.eventArgs[0].value,
-            event.eventArgs[1].value,
-            event.blockTimestamp,
-          ),
+    const events = await this.getEvents(
+      "NoteCreated",
+      fromBlock,
+      currentBlockNumber,
+    );
+    const relatedEvents = events.filter((e) =>
+      predicate(e.eventArgs[0].value, e.eventArgs[1].value),
+    );
+    const notes = await Promise.all(
+      relatedEvents.map(async (event) =>
+        this.getNote(
+          event.eventArgs[0].value,
+          event.eventArgs[1].value,
+          event.blockTimestamp,
         ),
-      );
-    });
-    const notes = await Promise.all(notePromises);
-    return notes.flat();
+      ),
+    );
+    return notes;
   };
 
+  // TODO: directly retrieve Rating from mongodb
   getRating = async (
     postUrl: string,
     creator: string,
@@ -142,28 +146,27 @@ export class DBConnector implements NoteReader {
 
   getRatings = async (lookBackDays: number): Promise<Array<Rating>> => {
     const currentBlockNumber = await this._provider.getBlockNumber();
-    const today = new Date();
-    const from = new Date(today.getTime() - lookBackDays * 24 * 60 * 60 * 1000);
-    const blockPeriods = timePeriodToBlockPeriods(
-      from,
-      today,
-      currentBlockNumber,
-      this._network.AVERAGE_BLOCKTIME,
+    const currentDate = new Date();
+    const fromDate = new Date(
+      currentDate.getTime() - lookBackDays * 24 * 60 * 60 * 1000,
     );
-
-    const eventsPromises = blockPeriods.map(async (period) => {
-      const events = await this.getEvents("NoteRated", period[0], period[1]);
-
-      return events.map((event) => ({
-        postUrl: event.eventArgs[0].value,
-        noteCreatorAddress: event.eventArgs[1].value,
-        raterAddress: event.eventArgs[2].value,
-        value: parseInt(event.eventArgs[3].value),
-      }));
-    });
-
-    const ratingsArrays = await Promise.all(eventsPromises);
-    const ratings = ratingsArrays.flat();
+    const fromBlock =
+      currentBlockNumber -
+      Math.floor(
+        (currentDate.getTime() - fromDate.getTime()) /
+          this._network.AVERAGE_BLOCKTIME,
+      );
+    const events = await this.getEvents(
+      "NoteRated",
+      fromBlock,
+      currentBlockNumber,
+    );
+    const ratings = events.map((event) => ({
+      postUrl: event.eventArgs[0].value,
+      noteCreatorAddress: event.eventArgs[1].value,
+      raterAddress: event.eventArgs[2].value,
+      value: parseInt(event.eventArgs[3].value),
+    }));
     return ratings;
   };
 

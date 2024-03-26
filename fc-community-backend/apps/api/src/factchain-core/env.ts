@@ -1,7 +1,7 @@
 import { Config } from "./types";
 
 const DEFAULT_CONFIG: Config = {
-  LOOKBACK_DAYS: "20",
+  LOOKBACK_DAYS: "365",
   USEFUL_NOTE_THRESHOLD: "3",
   MINIMUM_RATING: "1",
   REPLICATE_API_TOKEN: "",
