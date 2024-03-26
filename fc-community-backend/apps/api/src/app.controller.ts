@@ -4,7 +4,6 @@ import {
   Post,
   Query,
   Body,
-  BadRequestException,
 } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
@@ -46,15 +45,6 @@ export class AppController {
   ): Promise<NotesResponse> {
     const network = getNetworkConfig(headers["network"]);
     let notes = [];
-
-    // if (from) {
-    //   // max 21 days of lookbackdays to be kind on quicknode!
-    //   if (!(from > 0 && from <= 21)) {
-    //     throw new BadRequestException(
-    //       `invalid from: ${from} should be between 1 and 21 included`,
-    //     );
-    //   }
-    // }
 
     // Double Query Params
     if (postUrl && awaitingRatingBy) {
