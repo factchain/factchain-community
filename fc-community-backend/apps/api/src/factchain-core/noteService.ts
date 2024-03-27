@@ -7,7 +7,7 @@ export class NoteService {
   writer: NoteWriter;
   config: Config;
 
-  constructor(r: NoteReader, w: NoteWriter) {
+  constructor(r: NoteReader, w?: NoteWriter) {
     this.reader = r;
     this.writer = w;
     this.config = config;

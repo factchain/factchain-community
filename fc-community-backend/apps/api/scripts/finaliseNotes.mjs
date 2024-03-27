@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-import { FactChainBackend } from "../dist/factchain-core/web3.js";
+import { BlockchainConnector } from "../dist/factchain-core/web3.js";
 import { NoteService } from "../dist/factchain-core/noteService.js";
 import { config } from "../dist/factchain-core/env.js";
 import { getNetworkConfig } from "../dist/factchain-core/networks/config.js"
 
-const LOOKBACK_DAYS = parseInt(config.LOOKBACK_DAYS);
+const LOOKBACK_DAYS = 20;
 const MINIMUM_RATING = parseInt(config.MINIMUM_RATING);
 
-const fc = new FactChainBackend(config, getNetworkConfig("ETHEREUM_SEPOLIA"));
+const fc = new BlockchainConnector(config, getNetworkConfig("ETHEREUM_SEPOLIA"));
 const ns = new NoteService(fc, fc);
 
 const nonces = await fc.getNonces();

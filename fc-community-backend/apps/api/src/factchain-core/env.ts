@@ -1,7 +1,7 @@
 import { Config } from "./types";
 
 const DEFAULT_CONFIG: Config = {
-  LOOKBACK_DAYS: "5",
+  LOOKBACK_DAYS: "365",
   USEFUL_NOTE_THRESHOLD: "3",
   MINIMUM_RATING: "1",
   REPLICATE_API_TOKEN: "",
@@ -15,6 +15,10 @@ const DEFAULT_CONFIG: Config = {
   BACKEND_PKEY: "",
   NFT_MINTER_PKEY: "",
   NOTE_FINALISER_PKEY: "",
+  MONGO_USER: "",
+  MONGO_PASSWORD: "",
+  MONGO_CLUSTER: "",
+  MONGO_APP_NAME: "",
 };
 
 export const config: Config = Object.keys(DEFAULT_CONFIG).reduce((o, key) => {

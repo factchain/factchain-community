@@ -14,7 +14,7 @@ import {
   getNoteRaters,
 } from "./commands";
 
-import { FactChainEvent } from "./factchain-core/types";
+import { FactchainEventName } from "./factchain-core/types";
 
 const { Command } = require("commander");
 const figlet = require("figlet");
@@ -31,7 +31,7 @@ program
   .option("-f, --from <number>", "Start block", parseInt, 0)
   .option("-t, --to <number>", "End block", parseInt)
   .option("-n, --network <string>", "network name")
-  .action(async (eventType: FactChainEvent, options: any) => {
+  .action(async (eventType: FactchainEventName, options: any) => {
     await getEvents(eventType, options.from, options.to, options.network);
   });
 

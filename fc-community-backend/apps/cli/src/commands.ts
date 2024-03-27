@@ -1,7 +1,8 @@
 import { EventLog, ContractTransactionResponse } from "ethers";
-import { FactChainBackend } from "./factchain-core/web3";
+import { BlockchainConnector } from "./factchain-core/web3";
+import { DBConnector } from "./factchain-core/web2";
 import {
-  FactChainEvent,
+  FactchainEventName,
   Note,
   Rating,
   XSignedNoteIDResponse,
@@ -15,7 +16,7 @@ import {
 } from "./factchain-core/networks/config";
 
 export const getEvents = async (
-  eventType: FactChainEvent,
+  eventType: FactchainEventName,
   fromBlock: number,
   toBlock: number,
   network: keyof NetworkConfigs,
@@ -23,8 +24,8 @@ export const getEvents = async (
   console.log(
     `getEvents command called with type=${eventType} and option fromBlock=${fromBlock}, toBlock=${toBlock}`,
   );
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const eventLogs = await fc.getEvents(eventType, fromBlock, toBlock);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const eventLogs = await bc.getEvents(eventType, fromBlock, toBlock);
   console.log(eventLogs);
   return eventLogs;
 };
@@ -34,8 +35,8 @@ export const getNote = async (
   creator: string,
   network: keyof NetworkConfigs,
 ): Promise<Note> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const ns = new NoteService(fc, fc);
+  const reader = new DBConnector(config, getNetworkConfig(network));
+  const ns = new NoteService(reader);
   const note = await ns.getNote(postUrl, creator);
   console.log(note);
   return note;
@@ -46,8 +47,8 @@ export const getNotes = async (
   from: number,
   network: keyof NetworkConfigs,
 ): Promise<Note[]> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const ns = new NoteService(fc, fc);
+  const reader = new DBConnector(config, getNetworkConfig(network));
+  const ns = new NoteService(reader);
   const notes = await ns.getNotes((_postUrl, _) => _postUrl === postUrl, from);
   console.log(notes);
   return notes;
@@ -58,8 +59,8 @@ export const createNote = async (
   text: string,
   network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const transactionResponse = await fc.createNote(postUrl, text);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const transactionResponse = await bc.createNote(postUrl, text);
   console.log(transactionResponse);
   return transactionResponse;
 };
@@ -70,8 +71,8 @@ export const rateNote = async (
   rating: number,
   network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const transactionResponse = await fc.rateNote(postUrl, creator, rating);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const transactionResponse = await bc.rateNote(postUrl, creator, rating);
   console.log(transactionResponse);
   return transactionResponse;
 };
@@ -81,8 +82,8 @@ export const getEligibleNotes = async (
   minimumRatingsPerNote: number,
   network: keyof NetworkConfigs,
 ): Promise<Array<Note>> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const ns = new NoteService(fc, fc);
+  const reader = new DBConnector(config, getNetworkConfig(network));
+  const ns = new NoteService(reader);
   const eligibleNotes = await ns.getNotesToFinalise(
     from,
     minimumRatingsPerNote,
@@ -98,8 +99,8 @@ export const mintNote = async (
   finalRating: number,
   network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  return await fc.mintNote721({
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  return await bc.mintNote721({
     postUrl,
     creatorAddress: creator,
     content: text,
@@ -112,8 +113,8 @@ export const createXCommunityNoteNFTMetadata = async (
   noteUrl: string,
   network: keyof NetworkConfigs,
 ): Promise<XSignedNoteIDResponse> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const ns = new NoteService(fc, fc);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const ns = new NoteService(bc, bc);
   const res = await ns.createXNoteMetadata(noteUrl, text);
   console.log(res);
   return res;
@@ -125,8 +126,8 @@ export const getRating = async (
   rater: string,
   network: keyof NetworkConfigs,
 ): Promise<Rating> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const rating = await fc.getRating(postUrl, creator, rater);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const rating = await bc.getRating(postUrl, creator, rater);
   console.log(rating);
   return rating;
 };
@@ -136,8 +137,8 @@ export const getNoteRaters = async (
   creator: string,
   network: keyof NetworkConfigs,
 ): Promise<String[]> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const raters = await fc.getNoteRaters(postUrl, creator);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const raters = await bc.getNoteRaters(postUrl, creator);
   console.log(raters);
   return raters;
 };
@@ -146,8 +147,8 @@ export const setNFTContractInSFT = async (
   NFTContractAddress: string,
   network: keyof NetworkConfigs,
 ): Promise<ContractTransactionResponse> => {
-  const fc = new FactChainBackend(config, getNetworkConfig(network));
-  const response = await fc.setNFTContractInSFT(NFTContractAddress);
+  const bc = new BlockchainConnector(config, getNetworkConfig(network));
+  const response = await bc.setNFTContractInSFT(NFTContractAddress);
   console.log(response);
   return response;
 };
