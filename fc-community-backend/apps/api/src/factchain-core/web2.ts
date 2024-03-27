@@ -17,7 +17,6 @@ export class DBConnector implements NoteReader {
   private _config: Config;
   private _network: NetworkConfig;
   private _fcCommunity: ethers.Contract;
-  private _mongoClient: MongoClient;
   private _mainWallet: ethers.Signer;
   private _provider: ethers.AbstractProvider;
 
@@ -29,15 +28,6 @@ export class DBConnector implements NoteReader {
       config.NOTE_FINALISER_PKEY,
       this._provider,
     );
-    const uri = `mongodb+srv://${this._config.MONGO_USER}:${this._config.MONGO_PASSWORD}@${this._config.MONGO_CLUSTER}/?w=majority&appName=${this._config.MONGO_APP_NAME}`;
-    // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-    this._mongoClient = new MongoClient(uri, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
-    });
     this._fcCommunity = new ethers.Contract(
       this._network.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,
@@ -45,33 +35,51 @@ export class DBConnector implements NoteReader {
     );
   }
 
+  getClient = () => {
+    const uri = `mongodb+srv://${this._config.MONGO_USER}:${this._config.MONGO_PASSWORD}@${this._config.MONGO_CLUSTER}/?w=majority&appName=${this._config.MONGO_APP_NAME}`;
+    // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+    const client = new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      },
+    });
+    return client;
+  };
+
   getEvents = async (
     eventName: FactchainEventName,
     from: number,
     to: number,
   ): Promise<FactchainEvent[]> => {
-    const db = this._mongoClient.db("fc-community");
-    const collection = db.collection("events");
-    const cursor = collection.find({
-      networkName: this._network.INFRA_RPC_URL.includes("sepolia")
-        ? "Ethereum Sepolia"
-        : "Base Mainnet",
-      eventName: eventName,
-      blockTimestamp: {
-        $gte: from,
-        $lte: to,
-      },
-    });
-    const documents = await cursor.toArray();
-    const events: FactchainEvent[] = documents.map((document) => ({
-      networkName: document.networkName,
-      contractAddress: document.contractAddress,
-      eventName: document.eventName,
-      blockTimestamp: document.blockTimestamp,
-      blockNumber: document.blockNumber,
-      eventArgs: document.eventArgs,
-    }));
-    return events;
+    const client = this.getClient();
+    try {
+      const db = client.db("fc-community");
+      const collection = db.collection("events");
+      const cursor = collection.find({
+        networkName: this._network.INFRA_RPC_URL.includes("sepolia")
+          ? "Ethereum Sepolia"
+          : "Base Mainnet",
+        eventName: eventName,
+        blockTimestamp: {
+          $gte: from,
+          $lte: to,
+        },
+      });
+      const documents = await cursor.toArray();
+      const events: FactchainEvent[] = documents.map((document) => ({
+        networkName: document.networkName,
+        contractAddress: document.contractAddress,
+        eventName: document.eventName,
+        blockTimestamp: document.blockTimestamp,
+        blockNumber: document.blockNumber,
+        eventArgs: document.eventArgs,
+      }));
+      return events;
+    } finally {
+      await client.close();
+    }
   };
 
   // TODO: directly retrieve Note from mongodb
