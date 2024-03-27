@@ -47,8 +47,8 @@ export class DBConnector implements NoteReader {
 
   getEvents = async (
     eventName: FactchainEventName,
-    fromBlock: number,
-    toBlock: number,
+    from: number,
+    to: number,
   ): Promise<FactchainEvent[]> => {
     const db = this._mongoClient.db("fc-community");
     const collection = db.collection("events");
@@ -57,14 +57,13 @@ export class DBConnector implements NoteReader {
         ? "Ethereum Sepolia"
         : "Base Mainnet",
       eventName: eventName,
-      blockNumber: {
-        $gte: fromBlock,
-        $lte: toBlock,
+      blockTimestamp: {
+        $gte: from,
+        $lte: to,
       },
     });
     const documents = await cursor.toArray();
     const events: FactchainEvent[] = documents.map((document) => ({
-      _id: document._id,
       networkName: document.networkName,
       contractAddress: document.contractAddress,
       eventName: document.eventName,
@@ -99,21 +98,14 @@ export class DBConnector implements NoteReader {
     predicate: (postUrl: string, creator: string) => boolean,
     lookBackDays: number,
   ): Promise<Array<Note>> => {
-    const currentBlockNumber = await this._provider.getBlockNumber();
     const currentDate = new Date();
     const fromDate = new Date(
       currentDate.getTime() - lookBackDays * 24 * 60 * 60 * 1000,
     );
-    const fromBlock =
-      currentBlockNumber -
-      Math.floor(
-        (currentDate.getTime() - fromDate.getTime()) /
-          this._network.AVERAGE_BLOCKTIME,
-      );
     const events = await this.getEvents(
       "NoteCreated",
-      fromBlock,
-      currentBlockNumber,
+      fromDate.getTime() / 1000,
+      currentDate.getTime() / 1000,
     );
     const relatedEvents = events.filter((e) =>
       predicate(e.eventArgs[0].value, e.eventArgs[1].value),
@@ -130,7 +122,7 @@ export class DBConnector implements NoteReader {
     return notes;
   };
 
-   // TODO: directly retrieve Rating from mongodb
+  // TODO: directly retrieve Rating from mongodb
   getRating = async (
     postUrl: string,
     creator: string,
@@ -145,21 +137,14 @@ export class DBConnector implements NoteReader {
   };
 
   getRatings = async (lookBackDays: number): Promise<Array<Rating>> => {
-    const currentBlockNumber = await this._provider.getBlockNumber();
     const currentDate = new Date();
     const fromDate = new Date(
       currentDate.getTime() - lookBackDays * 24 * 60 * 60 * 1000,
     );
-    const fromBlock =
-      currentBlockNumber -
-      Math.floor(
-        (currentDate.getTime() - fromDate.getTime()) /
-          this._network.AVERAGE_BLOCKTIME,
-      );
     const events = await this.getEvents(
       "NoteRated",
-      fromBlock,
-      currentBlockNumber,
+      fromDate.getTime() / 1000,
+      currentDate.getTime() / 1000,
     );
     const ratings = events.map((event) => ({
       postUrl: event.eventArgs[0].value,

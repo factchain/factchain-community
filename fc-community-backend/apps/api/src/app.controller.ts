@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Query,
-  Body,
-} from "@nestjs/common";
+import { Controller, Get, Post, Query, Body } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { NotesResponse, XSignedNoteIDResponse } from "./factchain-core/types";
 
