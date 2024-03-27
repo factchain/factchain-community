@@ -1824,7 +1824,7 @@ const listenToEventsForNetwork = (
           networkName: network.name,
           contractAddress: event.address,
           eventName: event.eventName,
-          blockTimestamp: Date.now(),
+          blockTimestamp: Math.floor(Date.now() / 1000),
           blockNumber: event.blockNumber,
           eventArgs: factchainContract.parseEvent(event),
         };
