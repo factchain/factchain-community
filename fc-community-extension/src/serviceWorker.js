@@ -67,6 +67,7 @@ const mainHandler = async (message, sendResponse) => {
       top: 0,
       left: 0,
     });
+    sendResponse(true);
   } else if (message.type === 'fc-mint-x-note') {
     console.log(
       `Mint X note '${message.noteUrl}' with content '${message.content}'`
@@ -85,6 +86,7 @@ const mainHandler = async (message, sendResponse) => {
       top: 0,
       left: 0,
     });
+    sendResponse(true);
   } else if (message.type === 'fc-mint-factchain-note') {
     console.log('Mint Factchain note', message.note);
     cache.postUrl = message.note.postUrl;

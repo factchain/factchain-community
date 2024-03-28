@@ -9,10 +9,9 @@ const FCNote = (props) => {
   // extension only support these two socials
   const social = host.startsWith('warpcast') ? 'warpcast' : 'x';
 
-  const noteClicked = () => {
-    window.open(props.postUrl, '_blank');
+  const noteClicked = async () => {
     if (social !== 'x') {
-      chrome.runtime.sendMessage({
+      await chrome.runtime.sendMessage({
         type: props.finalRating ? 'fc-mint-factchain-note' : 'fc-rate-note',
         note: {
           postUrl: props.postUrl,
@@ -22,6 +21,7 @@ const FCNote = (props) => {
         socialName: social,
       });
     }
+    window.open(props.postUrl, '_blank');
   };
 
   return (
