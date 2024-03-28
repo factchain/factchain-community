@@ -1,6 +1,6 @@
 {
   "name": "fc-community-extension",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Factchain",
   "private": true,
   "scripts": {
