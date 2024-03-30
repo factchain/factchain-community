@@ -105,9 +105,13 @@ function FCProfile(props) {
 }
 
 function FCNotes(props) {
-  const [notes] = createResource(() =>
-    getNotesForAllSocials(props.queryparams)
-  );
+  const [notes] = createResource(props.loggedIn, (loggedIn) => {
+    if (loggedIn) {
+      return getNotesForAllSocials(props.queryparams);
+    } else {
+      return null;
+    }
+  });
 
   return (
     <FCContainer>
@@ -120,7 +124,7 @@ function FCNotes(props) {
             <div>to view Factchain notes</div>
           </div>
         </Match>
-        <Match when={notes() !== undefined}>
+        <Match when={notes()}>
           <Switch>
             <Match when={notes().length > 0}>
               <div class="space-y-4">

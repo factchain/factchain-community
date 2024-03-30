@@ -72,6 +72,7 @@ export const getXNoteId = async (noteUrl) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        network: 'ETHEREUM_SEPOLIA',
       },
     });
     if (response.status === 404) {
@@ -98,6 +99,7 @@ export const createXNoteId = async (noteUrl, content) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        network: 'ETHEREUM_SEPOLIA',
       },
       body: JSON.stringify({ noteUrl, content }),
     });

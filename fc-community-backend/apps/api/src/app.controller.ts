@@ -12,6 +12,11 @@ import {
   Headers,
 } from "@nestjs/common";
 import { getNetworkConfig } from "./factchain-core/networks/config";
+
+function validateInputAddress(address: string): boolean {
+  return (/^(0x){1}[0-9a-fA-F]{40}$/i.test(address));
+}
+
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -38,6 +43,14 @@ export class AppController {
     @Headers() headers: Record<string, any>,
   ): Promise<NotesResponse> {
     const network = getNetworkConfig(headers["network"]);
+
+    if (creatorAddress && !validateInputAddress(creatorAddress)) {
+      throw new Error("Invalid creatorAddress");
+    }
+    if (awaitingRatingBy && !validateInputAddress(awaitingRatingBy)) {
+      throw new Error("Invalid awaitingRatingBy");
+    }
+
     let notes = [];
 
     // Double Query Params
@@ -90,7 +103,7 @@ export class AppController {
     @Query("noteUrl") noteUrl: string,
     @Headers() headers: Record<string, any>,
   ): Promise<XSignedNoteIDResponse> {
-    const network = getNetworkConfig(headers["Network"]);
+    const network = getNetworkConfig(headers["network"]);
     console.log(`Get factchain ID for X note URL ${noteUrl}`);
     const res = await this.appService.getXNoteID(network, noteUrl);
     return res;
@@ -104,7 +117,7 @@ export class AppController {
     @Body("content") content: string,
     @Headers() headers: Record<string, any>,
   ): Promise<XSignedNoteIDResponse> {
-    const network = getNetworkConfig(headers["Network"]);
+    const network = getNetworkConfig(headers["network"]);
     const res = await this.appService.createXNoteMetadata(
       network,
       noteUrl,
