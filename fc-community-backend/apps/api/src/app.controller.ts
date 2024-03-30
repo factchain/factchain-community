@@ -12,6 +12,11 @@ import {
   Headers,
 } from "@nestjs/common";
 import { getNetworkConfig } from "./factchain-core/networks/config";
+
+function validateInputAddress(address: string): boolean {
+  return (/^(0x){1}[0-9a-fA-F]{40}$/i.test(address));
+}
+
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -38,6 +43,14 @@ export class AppController {
     @Headers() headers: Record<string, any>,
   ): Promise<NotesResponse> {
     const network = getNetworkConfig(headers["network"]);
+
+    if (creatorAddress && !validateInputAddress(creatorAddress)) {
+      throw new Error("Invalid creatorAddress");
+    }
+    if (awaitingRatingBy && !validateInputAddress(awaitingRatingBy)) {
+      throw new Error("Invalid awaitingRatingBy");
+    }
+
     let notes = [];
 
     // Double Query Params
