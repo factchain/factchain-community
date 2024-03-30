@@ -103,7 +103,7 @@ export class AppController {
     @Query("noteUrl") noteUrl: string,
     @Headers() headers: Record<string, any>,
   ): Promise<XSignedNoteIDResponse> {
-    const network = getNetworkConfig(headers["Network"]);
+    const network = getNetworkConfig(headers["network"]);
     console.log(`Get factchain ID for X note URL ${noteUrl}`);
     const res = await this.appService.getXNoteID(network, noteUrl);
     return res;
@@ -117,7 +117,7 @@ export class AppController {
     @Body("content") content: string,
     @Headers() headers: Record<string, any>,
   ): Promise<XSignedNoteIDResponse> {
-    const network = getNetworkConfig(headers["Network"]);
+    const network = getNetworkConfig(headers["network"]);
     const res = await this.appService.createXNoteMetadata(
       network,
       noteUrl,

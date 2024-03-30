@@ -107,7 +107,7 @@ function FCProfile(props) {
 function FCNotes(props) {
   const [notes] = createResource(props.loggedIn, (loggedIn) => {
     if (loggedIn) {
-      return getNotesForAllSocials(props.queryparams)
+      return getNotesForAllSocials(props.queryparams);
     } else {
       return null;
     }
