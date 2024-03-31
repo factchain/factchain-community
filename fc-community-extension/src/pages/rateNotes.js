@@ -13,6 +13,16 @@ import { FCMetamaskConnectButton } from './components/FCConnectButton';
 
 import './style.css';
 
+const note = await chrome.runtime.sendMessage({
+  type: 'fc-get-from-cache',
+  target: 'note',
+});
+logger.log('Note to rate', note);
+
+const selectedNetwork = await chrome.runtime.sendMessage({
+  type: 'fc-get-network',
+});
+
 function FCRateNote({ note, rateNote }) {
   const [transaction, setTransaction] = createSignal(null);
   const [submitting, setSubmitting] = createSignal(false);
@@ -95,10 +105,13 @@ function FCRateNote({ note, rateNote }) {
                 View transaction on{' '}
                 <a
                   className="link"
-                  href={makeTransactionUrl(transactionHash())}
+                  href={makeTransactionUrl(
+                    selectedNetwork.explorerUrl,
+                    transactionHash()
+                  )}
                   target="_blank"
                 >
-                  etherscan
+                  {selectedNetwork.explorerDisplayName}
                 </a>
                 .
               </div>
@@ -140,15 +153,6 @@ function FCRateNote({ note, rateNote }) {
     </div>
   );
 }
-
-const note = await chrome.runtime.sendMessage({
-  type: 'fc-get-from-cache',
-  target: 'note',
-});
-logger.log('Note to rate', note);
-const selectedNetwork = await chrome.runtime.sendMessage({
-  type: 'fc-get-network',
-});
 
 const rateNote = async (note, rating) => {
   const provider = await createFactchainProvider(selectedNetwork);
