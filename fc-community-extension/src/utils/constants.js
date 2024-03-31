@@ -21,8 +21,10 @@ export const elipseText = (text, maxLength) => {
         text.length - Math.floor(maxLength / 2)
       )}`;
 };
-export const makeTransactionUrl = (transactionHash) =>
-  `https://sepolia.etherscan.io/tx/${transactionHash}`;
+
+export const makeTransactionUrl = (explorerUrl, transactionHash) =>
+  `${explorerUrl}/tx/${transactionHash}`;
+
 export const makeOpenseaUrl = (contractAddress, tokenId) =>
   `https://testnets.opensea.io/assets/sepolia/${contractAddress}/${tokenId}`;
 
@@ -33,6 +35,7 @@ export const supportedNetworks = {
     chainId: '0xAA36A7',
     rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     explorerUrl: 'https://sepolia.etherscan.io',
+    explorerDisplayName: 'etherscan',
     currencySymbol: 'sETH',
     contracts: {
       main: '0x3b5946b3bd79c2B211E49c3149872f1d66223AE7',
@@ -47,6 +50,7 @@ export const supportedNetworks = {
     chainId: '0x2105',
     rpcUrl: 'https://mainnet.base.org',
     explorerUrl: 'https://basescan.org',
+    explorerDisplayName: 'basescan',
     currencySymbol: 'ETH',
     contracts: {
       main: '0xde31FB31adeB0a97E34aCf7EF4e21Ad585F667f7',
