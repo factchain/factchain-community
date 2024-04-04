@@ -1,6 +1,7 @@
 import { config } from "../env";
 
 export interface NetworkConfig {
+  NETWORK_NAME: string;
   INFRA_RPC_URL: string;
   AVERAGE_BLOCKTIME: number;
   MAIN_CONTRACT_ADDRESS: string;
@@ -16,6 +17,7 @@ export interface NetworkConfigs {
 
 const networks: NetworkConfigs = {
   BASE_MAINNET: {
+    NETWORK_NAME: "BASE_MAINNET",
     INFRA_RPC_URL: "<OVERRIDE ME>",
     AVERAGE_BLOCKTIME: 2000,
     MAIN_CONTRACT_ADDRESS: "0xde31FB31adeB0a97E34aCf7EF4e21Ad585F667f7",
@@ -23,6 +25,7 @@ const networks: NetworkConfigs = {
     SFT_CONTRACT_ADDRESS: "0x77840A1815f4F62a4cCCA3aBA3566fB8ff0b10D0",
   },
   ETHEREUM_SEPOLIA: {
+    NETWORK_NAME: "ETHEREUM_SEPOLIA",
     INFRA_RPC_URL: "<OVERRIDE ME>",
     AVERAGE_BLOCKTIME: 12000,
     MAIN_CONTRACT_ADDRESS: "0x3b5946b3bd79c2B211E49c3149872f1d66223AE7",

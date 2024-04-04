@@ -40,10 +40,13 @@ export class BlockchainConnector implements NoteReader, NoteWriter {
     this._network = network;
     this._provider = new ethers.JsonRpcProvider(this._network.INFRA_RPC_URL);
     this._mainWallet = new ethers.Wallet(
-      config.NOTE_FINALISER_PKEY,
+      config[`${network.NETWORK_NAME}_NOTE_FINALISER_PKEY`],
       this._provider,
     );
-    this._nftWallet = new ethers.Wallet(config.NFT_MINTER_PKEY, this._provider);
+    this._nftWallet = new ethers.Wallet(
+      config[`${network.NETWORK_NAME}_NFT_MINTER_PKEY`],
+      this._provider,
+    );
     this._fcCommunity = new ethers.Contract(
       this._network.MAIN_CONTRACT_ADDRESS,
       FC_COMMUNITY_JSON_ABI,
