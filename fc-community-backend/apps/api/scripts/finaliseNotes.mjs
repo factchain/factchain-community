@@ -5,10 +5,12 @@ import { NoteService } from "../dist/factchain-core/noteService.js";
 import { config } from "../dist/factchain-core/env.js";
 import { getNetworkConfig } from "../dist/factchain-core/networks/config.js"
 
+
 const LOOKBACK_DAYS = 20;
 const MINIMUM_RATING = parseInt(config.MINIMUM_RATING);
+const NETWORK = process.argv[2];
 
-const fc = new BlockchainConnector(config, getNetworkConfig("ETHEREUM_SEPOLIA"));
+const fc = new BlockchainConnector(config, getNetworkConfig(NETWORK || "ETHEREUM_SEPOLIA"));
 const ns = new NoteService(fc, fc);
 
 const nonces = await fc.getNonces();

@@ -5,8 +5,10 @@ export type Config = {
   USEFUL_NOTE_THRESHOLD: string;
   MINIMUM_RATING: string;
   // chain vars
-  NFT_MINTER_PKEY: string;
-  NOTE_FINALISER_PKEY: string;
+  ETHEREUM_SEPOLIA_NFT_MINTER_PKEY: string;
+  ETHEREUM_SEPOLIA_NOTE_FINALISER_PKEY: string;
+  BASE_MAINNET_NFT_MINTER_PKEY: string;
+  BASE_MAINNET_NOTE_FINALISER_PKEY: string;
   // AI image generation
   REPLICATE_API_TOKEN: string;
   // ipfs vars

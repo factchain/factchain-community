@@ -25,7 +25,7 @@ export class DBConnector implements NoteReader {
     this._network = network;
     this._provider = new ethers.JsonRpcProvider(this._network.INFRA_RPC_URL);
     this._mainWallet = new ethers.Wallet(
-      config.NOTE_FINALISER_PKEY,
+      config[`${network.NETWORK_NAME}_NOTE_FINALISER_PKEY`],
       this._provider,
     );
     this._fcCommunity = new ethers.Contract(
