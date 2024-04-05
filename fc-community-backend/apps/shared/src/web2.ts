@@ -54,14 +54,13 @@ export class DBConnector implements NoteReader {
     from: number,
     to: number,
   ): Promise<FactchainEvent[]> => {
+    console.log(`Getting events of type ${eventName} from ${from} to ${to} for network ${this._network.NETWORK_NAME}`);
     const client = this.getClient();
     try {
       const db = client.db("fc-community");
       const collection = db.collection("events");
       const cursor = collection.find({
-        networkName: this._network.INFRA_RPC_URL.includes("sepolia")
-          ? "Ethereum Sepolia"
-          : "Base Mainnet",
+        networkName: this._network.NETWORK_NAME,
         eventName: eventName,
         blockTimestamp: {
           $gte: from,
@@ -69,6 +68,7 @@ export class DBConnector implements NoteReader {
         },
       });
       const documents = await cursor.toArray();
+      console.log(`Retrieved ${documents.length()} events of type ${eventName} for network ${this._network.NETWORK_NAME}`);
       const events: FactchainEvent[] = documents.map((document) => ({
         networkName: document.networkName,
         contractAddress: document.contractAddress,

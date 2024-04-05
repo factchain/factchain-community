@@ -82,11 +82,13 @@ export class NoteService {
   ): Promise<Note[]> => {
     const lookBackDays =
       paramLookBackDays || parseInt(this.config.LOOKBACK_DAYS);
+    console.log(`Getting notes awaiting rating by ${byAddress} over the last ${lookBackDays} days`);
     const notes = await this.reader.getNotes(predicate, lookBackDays);
     // factchainer can't rate their own note
     const othersNotes = notes.filter(
       (note) => note.creatorAddress.toLowerCase() != byAddress.toLowerCase(),
     );
+    console.log(`Getting ratings for ${othersNotes.length} notes`);
     // factchainer can rate the same note only once
     // and can't rate finalised notes
     const awaitingRatingBy = await Promise.all(
