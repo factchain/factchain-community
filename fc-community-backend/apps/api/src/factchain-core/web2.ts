@@ -68,7 +68,7 @@ export class DBConnector implements NoteReader {
         },
       });
       const documents = await cursor.toArray();
-      console.log(`Retrieved ${documents.length()} events of type ${eventName} for network ${this._network.NETWORK_NAME}`);
+      console.log(`Retrieved ${documents.length} events of type ${eventName} for network ${this._network.NETWORK_NAME}`);
       const events: FactchainEvent[] = documents.map((document) => ({
         networkName: document.networkName,
         contractAddress: document.contractAddress,
