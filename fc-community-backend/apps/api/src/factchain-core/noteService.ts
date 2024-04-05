@@ -82,10 +82,8 @@ export class NoteService {
   ): Promise<Note[]> => {
     const lookBackDays =
       paramLookBackDays || parseInt(this.config.LOOKBACK_DAYS);
-    console.log(`Getting notes awaiting rating by ${byAddress} over the last ${lookBackDays} days`);
-    const notes = await this.reader.getNotes(predicate, lookBackDays);
-    console.log(`Getting ratings over the last ${lookBackDays} days`);
-    const ratings = await this.reader.getRatings(lookBackDays);
+    console.log(`Getting notes and ratings over the last ${lookBackDays} days`);
+    const [notes, ratings] = await Promise.all([this.reader.getNotes(predicate, lookBackDays), this.reader.getRatings(lookBackDays)])
     const ratingsBy = ratings.filter(
       (rating) => rating.raterAddress.toLowerCase() === byAddress.toLowerCase(),
     );

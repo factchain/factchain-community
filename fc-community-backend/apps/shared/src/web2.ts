@@ -90,7 +90,7 @@ export class DBConnector implements NoteReader {
     timestamp?: number,
   ): Promise<Note> => {
     // TODO: timestamp shouldn't be optional
-    console.log(`Getting note for postUrl=${postUrl} and creator=${creator} for network ${this._network.NETWORK_NAME}`);
+    console.debug(`Getting note for postUrl=${postUrl} and creator=${creator} for network ${this._network.NETWORK_NAME}`);
     const result = await this._fcCommunity.communityNotes(postUrl, creator);
     const note: Note = {
       postUrl: result[0],
@@ -98,7 +98,7 @@ export class DBConnector implements NoteReader {
       creatorAddress: result[2],
       finalRating: parseInt(result[3]),
     };
-    console.log(`Successfully retrieved note for postUrl=${postUrl} and creator=${creator} for network ${this._network.NETWORK_NAME}`);
+    console.debug(`Successfully retrieved note for postUrl=${postUrl} and creator=${creator} for network ${this._network.NETWORK_NAME}`);
     if (timestamp !== undefined) {
       note.createdAt = timestamp;
     }
