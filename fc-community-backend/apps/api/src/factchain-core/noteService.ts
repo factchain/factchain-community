@@ -84,27 +84,22 @@ export class NoteService {
       paramLookBackDays || parseInt(this.config.LOOKBACK_DAYS);
     console.log(`Getting notes awaiting rating by ${byAddress} over the last ${lookBackDays} days`);
     const notes = await this.reader.getNotes(predicate, lookBackDays);
+    console.log(`Getting ratings over the last ${lookBackDays} days`);
+    const ratings = await this.reader.getRatings(lookBackDays);
+    const ratingsBy = ratings.filter(
+      (rating) => rating.raterAddress.toLowerCase() === byAddress.toLowerCase(),
+    );
     // factchainer can't rate their own note
-    const othersNotes = notes.filter(
-      (note) => note.creatorAddress.toLowerCase() != byAddress.toLowerCase(),
-    );
-    console.log(`Getting ratings for ${othersNotes.length} notes`);
-    // factchainer can rate the same note only once
-    // and can't rate finalised notes
-    const awaitingRatingBy = await Promise.all(
-      othersNotes.map(async (note) => {
-        const rating = await this.reader.getRating(
-          note.postUrl,
-          note.creatorAddress,
-          byAddress,
+    const awaitingRatingBy = notes.filter(
+      (note) => {
+        return (
+          !note.finalRating
+          && (note.creatorAddress.toLowerCase() != byAddress.toLowerCase())
+          && (!ratingsBy.find((rating) => (rating.postUrl === note.postUrl) && (rating.noteCreatorAddress === note.creatorAddress)))
         );
-        if (!rating.value && !note.finalRating) {
-          return note;
-        }
-        return null;
-      }),
+      }
     );
-    return awaitingRatingBy.filter((note) => note !== null) as Note[];
+    return awaitingRatingBy;
   };
 
   getNote = async (noteUrl: string, creator: string) => {
