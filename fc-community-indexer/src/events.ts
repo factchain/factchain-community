@@ -1791,47 +1791,58 @@ const getEvents = async (
   return allLogs.flat();
 };
 
-export const listenToEvents = (
+export const listenToEvents = async (
   handler: (factchainEvent: FactchainEvent) => void,
-) => {
-  supportedNetworks.map((network) => {
-    listenToEventsForNetwork(network, handler);
-  });
+): Promise<ethers.Contract[]> => {
+  return (await Promise.all(
+    supportedNetworks.map(async (network): Promise<ethers.Contract[]> => {
+      return await listenToEventsForNetwork(network, handler);
+    })
+  )).flat();
 };
 
-const listenToEventsForNetwork = (
+// TODO:
+// - check number of listeners in health check, 500 if not okay
+// - maybe call process.exit(0) ?
+
+
+const listenToEventsForNetwork = async (
   network: any,
   handler: (factchainEvent: FactchainEvent) => void,
-) => {
+): Promise<ethers.Contract[]> => {
   const provider = new ethers.WebSocketProvider(
     network.rpcUrl.replace("https", "wss"),
   );
-  network.contracts.map((factchainContract: FactchainContract) => {
-    const contract = new ethers.Contract(
-      factchainContract.address,
-      factchainContract.abi,
-      provider,
-    );
+  const listeningContracts: ethers.Contract[] = await Promise.all(
+    network.contracts.map(async (factchainContract: FactchainContract) => {
+      const contract = new ethers.Contract(
+        factchainContract.address,
+        factchainContract.abi,
+        provider,
+      );
 
-    console.log(
-      `Listening to events for contract ${factchainContract.address} on network ${network.name}`,
-    );
-    contract.on("*", (newEvent) => {
-      try {
-        const event = newEvent.log;
-        console.log("New event received", event);
-        const factchainEvent = {
-          networkName: network.name,
-          contractAddress: event.address,
-          eventName: event.eventName,
-          blockTimestamp: Math.floor(Date.now() / 1000),
-          blockNumber: event.blockNumber,
-          eventArgs: factchainContract.parseEvent(event),
-        };
-        handler(factchainEvent);
-      } catch (e) {
-        console.error("Error processing event", e);
-      }
-    });
-  });
+      console.log(
+        `Listening to events for contract ${factchainContract.address} on network ${network.name}`,
+      );
+      await contract.on("*", (newEvent) => {
+        try {
+          const event = newEvent.log;
+          console.log("New event received", event);
+          const factchainEvent = {
+            networkName: network.name,
+            contractAddress: event.address,
+            eventName: event.eventName,
+            blockTimestamp: Math.floor(Date.now() / 1000),
+            blockNumber: event.blockNumber,
+            eventArgs: factchainContract.parseEvent(event),
+          };
+          handler(factchainEvent);
+        } catch (e) {
+          console.error("Error processing event", e);
+        }
+      });
+      return contract
+    })
+  );
+  return listeningContracts;
 };

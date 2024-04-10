@@ -17,5 +17,8 @@ BASE_MAINNET_RPC_URL=<quicknode_url>
 
 ```bash
 yarn install
+# Running pull synchroniser
+yarn run sync-dev
+# Running listener
 yarn run dev
 ```
