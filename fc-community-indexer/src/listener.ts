@@ -17,7 +17,7 @@ app.get("/", async (req, res) => {
   const contractsHaveListeners = await Promise.all(
     listeningContracts.map(async (contract) => {
       const listenerCount = await contract.listenerCount();
-      console.log(`Listening to ${contract.address} events, with ${listenerCount} listeners`);
+      console.log(`Listening to ${contract.target} events, with ${listenerCount} listeners`);
       return listenerCount > 0;
     })
   );
